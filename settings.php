@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/assign/submission/external_server/locallib.php');
 
+use assignsubmission_external_server\helper;
+
 // Default settings header.
 $settings->add(new admin_setting_heading('default_settings_header',
     get_string('defaultsettings', 'assignsubmission_external_server'),
@@ -65,7 +67,7 @@ $html = html_writer::link(
 );
 
 // Get the existing servers.
-$servers = null;
+$servers = $DB->get_records('assignsubmission_external_server_servers', [], 'name ASC');
 
 // Server list.
 if (!$servers) {
@@ -73,6 +75,36 @@ if (!$servers) {
         get_string('noservers', 'assignsubmission_external_server'),
         'alert alert-info'
     );
+} else {
+
+    // Create table.
+    $table = new html_table();
+    $table->head = [
+        get_string('server:name', 'assignsubmission_external_server'),
+        get_string('server:contact_name', 'assignsubmission_external_server'),
+        get_string('actions')
+    ];
+    $table->attributes['class'] = 'generaltable';
+    $table->id = 'external-server-list';
+    $table->data = [];
+
+    // Add each server to the table.
+    foreach ($servers as $server) {
+        if (!$server->visible) {
+            $rowclass = 'text-muted';
+        } else {
+            $rowclass = '';
+        }
+
+        $row = [];
+        $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
+        $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
+        $row[] = helper::edit_icons($server);
+        $table->data[] = $row;
+    }
+
+    // Add the table to the HTML.
+    $html .= html_writer::table($table);
 }
 
 // Servers header including the list.
@@ -80,5 +112,3 @@ $settings->add(new admin_setting_heading('servers_header',
     get_string('servers', 'assignsubmission_external_server'),
     $html
 ));
-
-

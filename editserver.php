@@ -23,136 +23,128 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once('../../../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
+
+use assignsubmission_external_server\editserver_form;
+use assignsubmission_external_server\external_server;
+
+// Security.
 require_login();
-require_capability('moodle/site:config', context_system::instance());
-
-$context = null;
-$PAGE->set_context($context);
-
-$id = optional_param('id', 0, PARAM_INT);
-$PAGE->set_url('/mod/extserver/editserver.php', ['id' => $id]);
-
-if (!empty($id)) {
-    admin_externalpage_setup('modextserver'.$id);
-} else {
-    admin_externalpage_setup('modextserver_add');
+$context = \context_system::instance();
+require_capability('moodle/site:config', $context);
+if (!confirm_sesskey()) {
+    throw new moodle_exception('invalidsesskey', 'error');
 }
 
-$strtitle = get_string('modulename', 'extserver');
-
+// Parameters for server and action taken.
+$id      = optional_param('id', 0, PARAM_INT);
 $show    = optional_param('show', '', PARAM_INT);
 $hide    = optional_param('hide', '', PARAM_INT);
 $delete  = optional_param('delete', '', PARAM_INT);
 $confirm = optional_param('confirm', '', PARAM_BOOL);
 
-// If data submitted, then process and store.
+// Set up the page.
+$PAGE->set_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id]);
+$PAGE->set_context($context);
+$PAGE->set_pagelayout('admin');
+$title = get_string('pluginname', 'assignsubmission_external_server');
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
+$redirecturl = new moodle_url('/admin/settings.php', ['section' => 'assignsubmission_external_server']);
 
-if (!empty($hide) && confirm_sesskey()) {
-
-    if (!$server = $DB->get_record('extserver_servers', ['id' => $hide])) {
+// Get specific server if id is set.
+if ($id) {
+    if (!$server = $DB->get_record('assignsubmission_external_server_servers', ['id' => $id])) {
         throw new moodle_exception('unknownserver', 'extserver');
     }
-
-    $DB->set_field('extserver_servers', 'visible', '0', ['id' => $server->id]);
-    redirect($CFG->wwwroot . '/admin/settings.php?section=modsettingextserver');
+    $heading = get_string('editserver', 'assignsubmission_external_server', format_string($server->name));
+} else {
+    $heading = get_string('addserver', 'assignsubmission_external_server');
+    $server = new stdClass();
 }
 
-if (!empty($show) && confirm_sesskey()) {
-    if (!$server = $DB->get_record('extserver_servers', ['id' => $show])) {
-        throw new moodle_exception('unknownserver', 'extserver');
-    }
+// Hide a server.
+if (!empty($hide)) {
+    $DB->set_field('assignsubmission_external_server_servers', 'visible', '0', ['id' => $server->id]);
+    redirect($redirecturl);
+// Show a server.
+} elseif (!empty($show)) {
+    $DB->set_field('assignsubmission_external_server_servers', 'visible', '1', ['id' => $server->id]);
+    redirect($redirecturl);
+// Delete a server.
+} elseif (!empty($delete)) {
 
-    $DB->set_field('extserver_servers', 'visible', '1', ['id' => $server->id]);
-    redirect($CFG->wwwroot . '/admin/settings.php?section=modsettingextserver');
-}
+    if (!$entry = $DB->get_record('assignsubmission_external_server_servers', ['id' => $delete])) {
+        throw new moodle_exception('unknownserver', 'assignsubmission_external_server');
 
-if (!empty($delete) && confirm_sesskey()) {
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading($strtitle);
-
-    $entry = $DB->get_record('extserver_servers', ['id' => $delete]);
-
-    if (!$entry) {
-        throw new moodle_exception('unknownserver', 'extserver');
-
+    // Delete confirmation modal.
     } else if (!$confirm) {
 
-        echo $OUTPUT->confirm(get_string('confirmdeleting', 'extserver', format_string($entry->service_name)),
-                'editserver.php?delete=' . $delete . '&confirm=1', '../../admin/settings.php?section=modsettingextserver');
-        echo $OUTPUT->footer();
-        exit;
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('deleteexternalserver', 'assignsubmission_external_server', format_string($server->name)));
 
+        $confirmurl = new moodle_url('/mod/assign/submission/external_server/editserver.php', [
+            'delete' => $delete,
+            'confirm' => 1,
+            'sesskey' => sesskey()
+        ]);
+        echo $OUTPUT->confirm(get_string('confirmdeleting', 'assignsubmission_external_server',
+            format_string($entry->name)), $confirmurl, $redirecturl);
+        die();
+
+    // Delete the server.
     } else {
 
-        if ($DB->count_records('extserver', ['extservid' => $delete]) > 0) {
-            // Deleteing not allowed, server already in use.
-            throw new moodle_exception('deletedisabled', 'extserver');
+        echo $OUTPUT->header();
+
+        // Deleting not allowed, server already in use.
+        if ($DB->count_records('assignsubmission_external_server', ['extservid' => $delete]) > 0) {
+            throw new moodle_exception('delete:disabled', 'extserver');
         }
 
         // Delete server.
-        $ret = $DB->delete_records('extserver_servers', ['id' => $delete]);
-
-        if ($ret) {
-            echo $OUTPUT->notification(get_string('successdeleting', 'extserver', format_string($entry->service_name)),
-                    'notifysuccess');
+        if ($DB->delete_records('assignsubmission_external_server_servers', ['id' => $delete])) {
+            echo $OUTPUT->notification(get_string('delete:success', 'assignsubmission_external_server', format_string($entry->name)),
+                'notifysuccess');
         } else {
-            echo $OUTPUT->notification(get_string('errordeleteing', 'extserver', format_string($entry->service_name)));
+            echo $OUTPUT->notification(get_string('delete:error', 'assignsubmission_external_server', format_string($entry->name)));
         }
-        echo $OUTPUT->continue_button('../../admin/settings.php?section=modsettingextserver');
-        echo $OUTPUT->footer();
-        exit;
+        echo $OUTPUT->continue_button($redirecturl);
+        die();
     }
 }
 
-$server = new stdClass();
+// Create form.
+$mform = new editserver_form('editserver.php', $server);
 
-if ($id && isset($_GET['id'])) {
-    // Edit existing connection.
-    if (!$server = $DB->get_record('extserver_servers', ['id' => $id])) {
-        throw new moodle_exception('unknownserver', 'extserver');
-    }
-}
-
-// Preperation for editor.
-if (!isset($server->server_info)) {
-    $server->server_info = '';
-}
-$server->server_infoformat = '1';
-
-$editorcontext = context_system::instance();
-$editoroptions = [
-    'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes,
-    'trusttext' => true, 'context' => $editorcontext,
-];
-
-$server = file_prepare_standard_editor($server, 'server_info', $editoroptions, $editorcontext, 'coursecat', 'server_info', 0);
-
-$mform = new editserver_form('editserver.php', compact('server', 'editoroptions'));
-
+// Cancelled.
 if ($mform->is_cancelled()) {
-    // Canceled.
-    redirect($CFG->wwwroot . '/admin/settings.php?section=modsettingextserver');
+    redirect($CFG->wwwroot . '/admin/settings.php?section=assignsubmission_external_server');
 
 } else if ($data = $mform->get_data()) {
+
     // Submitted and valid.
     $newserver = new stdClass();
-    $newserver->service_name = $data->servicename;
-    $newserver->server_url = $data->serverurl;
-    $newserver->serverform_url = $data->serverformurl;
-    $newserver->server_secret = $data->serversecret;
+    $newserver->name = $data->name;
+    $newserver->url = $data->url;
+    $newserver->form_url = $data->form_url;
+    $newserver->auth_type = $data->auth_type;
+    $newserver->auth_secret = $data->auth_secret;
     $newserver->hash = $data->hash;
     $newserver->sslverification = $data->sslverification;
     $newserver->groupinfo = $data->groupinfo;
-    $newserver->contact_name = $data->contactname;
-    $newserver->contact_email = $data->contactemail;
-    $newserver->contact_phone = $data->contactphone;
-    $newserver->contact_org = $data->contactorg;
-    $newserver->server_info = $data->server_info_editor['text'];
+    $newserver->contact_name = $data->contact_name;
+    $newserver->contact_email = $data->contact_email;
+    $newserver->contact_phone = $data->contact_phone;
+    $newserver->contact_org = $data->contact_org;
+    $newserver->info = $data->info;
 
+    // Update server.
     if ($id) {
         $newserver->timemodified = time();
         $newserver->id = $id;
-        $DB->update_record('extserver_servers', $newserver);
+        $DB->update_record('assignsubmission_external_server_servers', $newserver);
 
     } else {
         // Create a new server.
@@ -160,17 +152,14 @@ if ($mform->is_cancelled()) {
         $newserver->timecreated = time();
         $newserver->usercreated = $USER->id;
         $newserver->timemodified = '';
-
-        $newserver->id = $DB->insert_record('extserver_servers', $newserver);
+        $newserver->id = $DB->insert_record('assignsubmission_external_server_servers', $newserver);
     }
 
-    redirect($CFG->wwwroot . '/admin/settings.php?section=modsettingextserver');
+    redirect($redirecturl);
 }
 
+// Page output.
 echo $OUTPUT->header();
-echo $OUTPUT->heading($strtitle);
-
-echo $OUTPUT->box(get_string('configwarning', 'extserver'));
-
+echo $OUTPUT->heading($heading);
 $mform->display();
 echo $OUTPUT->footer();
