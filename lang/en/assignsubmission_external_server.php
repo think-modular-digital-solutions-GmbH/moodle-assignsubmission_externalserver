@@ -24,8 +24,8 @@
  */
 
 // Basics.
-$string['pluginname'] = 'External server';
-$string['privacy:metadata'] = 'The External server submission plugin does not store any personal data.';
+$string['pluginname'] = 'Submission to external server';
+$string['privacy:metadata'] = 'The Submission to external server plugin does not store any personal data.';
 
 // Strings.
 $string['defaultsettings'] = 'Default settings';
@@ -92,7 +92,29 @@ $string['server:groupinfo_must_be_sent'] = 'required';
 
 // Servertest.
 $string['checkconnection'] = 'Check Connection';
+$string['testing'] = 'Testing external server "{$a->name}" on {$a->site}';
 $string['createassignment'] = 'Create Assignment';
 $string['studentview'] = 'Student View';
 $string['teacherview'] = 'Teacher View';
 $string['loadgrades'] = 'Load Grades';
+$string['sslerror'] = 'The connection has been shut down before any output was made.
+Maybe there is a problem with the SSL certificate.
+Please install the trusted CA\'s certificates on your server!';
+$string['unknownerror'] = 'HTTP error code {$a}. Please check the server settings and try again.';
+
+// Assignment form.
+$string['enabled'] = 'Enabled';
+$string['enabled_help'] = 'Participants can send a submission to a preconfigured external server that sends back a response.';
+$string['externalserver'] = 'Server';
+$string['externalserver_help'] = 'Select the external server to use for this assignment. External servers can be configured in the site administration.';
+$string['selectserver'] = ' --- select external server ---';
+$string['submissionswarning'] = 'There are already {$a} submission(s) for this assignment. Some settings may not be changed anymore.';
+
+// Other new.
+$string['upattempts'] = 'Upload attempts';
+$string['unlimiteduploads'] = 'unlimited';
+$string['connectionstatus'] = 'Connection to external server';
+$string['quickupload'] = 'Quick upload';
+$string['quickupload_help'] = 'Upload a new file to the external server directly. Will still count as an upload attempt.';
+$string['upload'] = 'Upload';
+$string['needselectfile'] = 'Please provide a valid file to upload.';

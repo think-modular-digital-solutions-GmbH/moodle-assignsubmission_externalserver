@@ -26,6 +26,8 @@
 require_once('../../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
+defined('MOODLE_INTERNAL') || die;
+
 use assignsubmission_external_server\editserver_form;
 use assignsubmission_external_server\external_server;
 

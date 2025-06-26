@@ -1,0 +1,147 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * @package    assignsubmission_external_server
+ * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace assignsubmission_external_server;
+
+require_once($CFG->libdir . '/formslib.php');
+
+defined('MOODLE_INTERNAL') || die;
+
+use moodleform;
+use assignsubmission_external_server\external_server;
+use assign_submission_external_server;
+
+/**
+ * Quick submission edit form to save one click.
+ *
+ * @package    assignsubmission_external_server
+ * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class quick_edit_form extends moodleform {
+
+    /** @var assign_submission_external_server $extserver The assignment instance */
+    protected $extserver;
+
+    /** qvar stdClass $assignment The assignment */
+    protected $assignment;
+
+    /** @var stdClass $submission The submission */
+    protected $submission;
+
+    /**
+     * Constructor
+     *
+     * @param assign_submission_external_server $extserver The assignment instance
+     * @param stdClass stdClass $submission The submission
+     * @param array $customdata Custom data for the form
+     */
+    public function __construct(assign_submission_external_server $extserver, $assignment, $submission, $actionurl, $customdata = null) {
+        $this->extserver = $extserver;
+        $this->assignment = $assignment;
+        $this->submission = $submission;
+
+        // Call parent constructor with correct arguments
+        parent::__construct($actionurl, $customdata);
+    }
+
+    /**
+     * Defines the form
+     *
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws HTML_Quickform_error
+     */
+    public function definition() {
+        $mform = $this->_form;
+
+        // Show error.
+        $error = optional_param('error', null, PARAM_TEXT);
+        $debug = optional_param('debug', null, PARAM_TEXT);
+        if ($error) {
+            $mform->addElement('html', '<div class="alert alert-danger">' .
+                get_string($error, 'assignsubmission_external_server') . "<code>$debug</code></div>");
+        }
+
+        // Grading.
+        $context = context_module::instance($cm->id);
+        if (has_capability('mod/assign:grade', $context)) {
+
+            // Header.
+            $mform->addElement('header', 'quickgradingheader', get_string('gradeverb'));
+
+            $url = new moodle_url('/mod/assign/view.php',
+                ['id' => $cm->id, 'action' => 'grading']);
+            $html = html_writer::link($url, get_string('gradeitem:submissions', 'assign'));
+            $mform->addElement('static', 'quickgradinginfo', get_string('quickgrading', 'assignsubmission_external_server'),
+                $html);
+        }
+
+
+        // Header for Submission.
+        $mform->addElement('header', 'quickuploadheader', get_string('pluginname', 'assignsubmission_external_server'));
+
+        // Submission info.
+        $html = html_writer::div($this->submission_info(), 'float-right');
+        $mform->addElement('static', 'submissioninfo', get_string('submissioninfo', 'assignsubmission_external_server'),
+            $html);
+
+        // Upload Filepicker.
+        $fileoptions = $this->extserver->get_file_options();
+        $mform->addElement('filepicker',
+                            'files_filemanager',
+                            get_string('quickupload', 'assignsubmission_external_server'),
+                            null,
+                            $fileoptions
+        );
+        $mform->addHelpButton('files_filemanager', 'quickupload', 'assignsubmission_external_server');
+        $mform->addElement('submit', 'submitbutton', get_string('upload', 'assignsubmission_external_server'));
+    }
+
+    /**
+     * Returns info about a user's submission.
+     *
+     * @return string
+     */
+    private function submission_info() {
+
+        global $CFG, $USER;
+
+        $viewurl = new moodle_url('/mod/assign/view.php',
+            ['id' => $this->assignment->get_course_module()->id]);
+        $assignment = $this->assignment->get_instance();
+        $cm = $this->assignment->get_course_module();
+
+        if ($submission = $this->assignment->get_user_submission($USER->id, false)) {
+            if ($submission->timemodified <= $assignment->duedate || empty($this->assignment->duedate)) {
+                $class = 'text-success';
+            } else {
+                $class = 'text-danger';
+            }
+            $html = html_writer::span(userdate($submission->timemodified), $class);
+        }
+
+        return $html;
+    }
+}

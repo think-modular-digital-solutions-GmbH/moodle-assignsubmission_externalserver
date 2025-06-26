@@ -24,8 +24,8 @@
  */
 
 // Basics.
-$string['pluginname'] = 'Externer Server';
-$string['privacy:metadata'] = 'Das Externe Server Abgabe Plugin speichert keine persönlichen Daten.';
+$string['pluginname'] = 'Abgabe an externen Server';
+$string['privacy:metadata'] = 'Das Abgabe an externen Server Plugin speichert keine persönlichen Daten.';
 
 // Strings.
 $string['defaultsettings'] = 'Standardeinstellungen';
@@ -92,7 +92,29 @@ $string['server:groupinfo_must_be_sent'] = 'erforderlich';
 
 // Servertest.
 $string['checkconnection'] = 'Verbindung prüfen';
+$string['testing'] = 'Testen des externen Servers "{$a->name}" auf der Seite "{$a->site}"';
 $string['createassignment'] = 'Aufgabe erstellen';
 $string['studentview'] = 'Teilnehmer/innen Ansicht';
 $string['teacherview'] = 'Trainer/innen Ansicht';
 $string['loadgrades'] = 'Bewertungen laden';
+$string['sslerror'] = 'Die Verbindung wurde getrennt, bevor der Server eine Rückmeldung lieferte.
+Möglicherweise gibt es ein Problem mit dem SSL Zertifikat.
+Bitte installieren Sie das Trusted CA Zertifikat auf Ihrem Server!';
+$string['unknownerror'] = 'HTTP Fehlercode {$a}. Bitte überprüfen Sie die Servereinstellungen und die Verbindung zum externen Server.';
+
+// Assignment form.
+$string['enabled'] = 'Aktiviert';
+$string['enabled_help'] = 'Teilnehmer/innen können eine Abgabe an einen vorkonfigurierten externen Server senden, der eine Antwort zurücksendet.';
+$string['externalserver'] = 'Server';
+$string['externalserver_help'] = 'Wählen Sie den externen Server, an den die Abgabe gesendet werden soll. Externe Server müssen zuvor in den Einstellungen des Plugins konfiguriert werden.';
+$string['selectserver'] = ' --- Externen Server auswählen ---';
+$string['submissionswarning'] = 'Es gibt bereits {$a} Abgabe(n) für diese Aufgabe. Deshalb sind einige der Einstellungen deaktiviert.';
+
+// Other new.
+$string['upattempts'] = 'Uploadversuche';
+$string['unlimiteduploads'] = 'unbegrenzt';
+$string['connectionstatus'] = 'Verbindung zum externem Server';
+$string['quickupload'] = 'Quick Upload';
+$string['quickupload_help'] = 'Neue Datei direkt an den externen Server schicken, zählt als Uploadversuch.';
+$string['upload'] = 'Upload';
+$string['needselectfile'] = 'Es wurde keine Datei ausgewählt.';

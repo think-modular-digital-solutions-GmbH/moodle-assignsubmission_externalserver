@@ -51,7 +51,7 @@ $settings->add(new admin_setting_filetypes('assignsubmission_external_server/fil
 ));
 
 // Maximum uploads setting.
-$options = assign_submission_external_server::get_upload_options();
+$options = helper::get_upload_options();
 $settings->add(new admin_setting_configselect('assignsubmission_external_server/uploads',
     get_string('uploads', 'assignsubmission_external_server'),
     get_string('uploads_help', 'assignsubmission_external_server'),
@@ -61,7 +61,7 @@ $settings->add(new admin_setting_configselect('assignsubmission_external_server/
 
 // Add server button.
 $html = html_writer::link(
-            new moodle_url('/mod/assign/submission/external_server/editserver.php'),
+            new moodle_url('/mod/assign/submission/external_server/editserver.php', ['sesskey' => sesskey()]),
             get_string('addserver', 'assignsubmission_external_server'),
             ['class' => 'btn btn-primary mt-2']
 );
@@ -97,7 +97,7 @@ if (!$servers) {
         }
 
         $row = [];
-        $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
+        $row[] = '<span class="' . $rowclass . '">' . format_string($server->name) . '</span>';
         $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
         $row[] = helper::edit_icons($server);
         $table->data[] = $row;

@@ -25,10 +25,10 @@ namespace assignsubmission_external_server;
 
 require_once($CFG->libdir . '/formslib.php');
 
+defined('MOODLE_INTERNAL') || die;
+
 use moodleform;
 use assignsubmission_external_server\external_server;
-
-defined('MOODLE_INTERNAL') || die;
 
 /**
  * Add/edit server form for the external server submission plugin.

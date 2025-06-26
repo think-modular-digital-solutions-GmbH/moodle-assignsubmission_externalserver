@@ -27,7 +27,11 @@ namespace assignsubmission_external_server;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/extserver/lib.php');
+use html_writer;
+use moodle_url;
+use \core\notification;
+
+require_once($CFG->dirroot . '/mod/assign/submission/external_server/lib.php');
 require_once($CFG->libdir . '/pdflib.php');
 
 /**
@@ -99,10 +103,7 @@ class external_server {
      */
     public static function get_servers() {
         global $DB;
-
-        $servers = $DB->get_records('assignsubmission_external_server_servers', ['visible' => '1']);
-
-        return $servers;
+        return $DB->get_records('assignsubmission_external_server_servers', ['visible' => '1']);
     }
 
     /**
@@ -113,10 +114,7 @@ class external_server {
      */
     public static function get_all_servers() {
         global $DB;
-
-        $servers = $DB->get_records('assignsubmission_external_server_servers');
-
-        return $servers;
+        return $DB->get_records('assignsubmission_external_server_servers');
     }
 
     /**
@@ -293,7 +291,7 @@ class external_server {
 
         $ch = curl_init();
         // Set URL and other appropriate options.
-        curl_setopt($ch, CURLOPT_URL, $this->obj->server_url);
+        curl_setopt($ch, CURLOPT_URL, $this->obj->url);
 
         $postdata = [
             'timestamp' => time(),
@@ -308,8 +306,8 @@ class external_server {
             'lname' => $USER->lastname,
             'role' => 'teacher',
         ];
-        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->server_secret, $this->obj->hash);
-        $this->add_group_data($postdata, $this->obj->server_secret, $this->obj->hash);
+        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($postdata, $this->obj->auth_secret, $this->obj->hash);
 
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
@@ -351,7 +349,7 @@ class external_server {
 
         $ch = curl_init();
         // Set URL and other appropriate options.
-        curl_setopt($ch, CURLOPT_URL, $this->obj->server_url);
+        curl_setopt($ch, CURLOPT_URL, $this->obj->url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);
@@ -383,32 +381,31 @@ class external_server {
     public function load_grades($assignment, $userlist = false) {
         global $USER;
 
-        $url = $this->obj->server_url;
-
-        $vars = [
-        'timestamp' => time(),
-        'user' => $USER->username,
-        'skey' => $USER->sesskey,
-        'uidnr' => $USER->idnumber,
-        'action' => 'getgrades',
-        'cidnr' => $assignment->course,
-        'aid' => $assignment->timecreated,
-        'aname' => $assignment->name,
-        'fname' => $USER->firstname,
-        'lname' => $USER->lastname,
-        'role' => 'teacher',
+        $url = $this->obj->url;
+        $params = [
+            'timestamp' => time(),
+            'user' => $USER->username,
+            'skey' => $USER->sesskey,
+            'uidnr' => $USER->idnumber,
+            'action' => 'getgrades',
+            'cidnr' => $assignment->course,
+            'aid' => $assignment->timecreated,
+            'aname' => $assignment->name,
+            'fname' => $USER->firstname,
+            'lname' => $USER->lastname,
+            'role' => 'teacher',
         ];
         if ($userlist) {
-            $vars['unames'] = [];
+            $params['unames'] = [];
             foreach ($userlist as $cur) {
                 // We include the value in the array index because we don't want to overwrite our array elements!
-                $vars['unames'][] = $cur;
+                $params['unames'][] = $cur;
             }
         }
-        $vars['akey'] = $this->calc_akey($vars, $this->obj->server_secret, $this->obj->hash);
-        $this->add_group_data($vars, $this->obj->server_secret, $this->obj->hash);
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
-        $url = $this->build_getrequest($url, $vars);
+        $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 
         $ch = curl_init($url);
 
@@ -461,20 +458,22 @@ class external_server {
     /**
      * Uploads a file to the external server
      *
-     * @param string $filename The filename to use for the file
-     * @param string $tmpfile The temporary filename of the file
-     * @param stdClass $assignment The extserver instance
+     * @param stored_file $file The file to upload.
+     * @param stdClass $submission The submission object.
+     * @param stdClass $assignment The assignment object.
      * @return bool true if everything went right
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($filename, $tmpfile, $assignment) {
+    public function upload_file($file, $submission, $assignment) {
         global $USER;
 
-        $url = $this->obj->serverform_url;
+        // Get params.
+        $url = $this->obj->form_url;
+        $filename = $file->get_filename();
+        $tmpfile = $file->copy_content_to_temp();
 
-        $ch = curl_init($url);
-
+        // Create payload.
         $postdata = [
             'timestamp' => time(),
             'user' => $USER->username,
@@ -482,51 +481,43 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'submit',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timecreated,
+            'aid' => $assignment->timemodified,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
             'role' => 'student',
             'filename' => $filename,
+            'file' => curl_file_create($tmpfile, $file->get_mimetype(), $filename),
+            'filehash' => hash_file($this->obj->hash, $tmpfile),
         ];
+        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($postdata, $this->obj->auth_secret, $this->obj->hash);
 
+        // Set cURL options.
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-
-        if (class_exists('CurlFile')) {
-            // Since PHP 5.5!
-            $postdata['file'] = new CurlFile($tmpfile);
-            $postdata['file']->setPostFilename($filename);
-
-        } else {
-            $postdata['file'] = "@$tmpfile";
-        }
-
-        $postdata['filehash'] = hash_file($this->obj->hash, $tmpfile);
-        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->server_secret, $this->obj->hash);
-        $this->add_group_data($postdata, $this->obj->server_secret, $this->obj->hash);
-
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+        // Execute cURL request.
         $postresult = curl_exec($ch);
         $curlinfo = curl_getinfo($ch);
         $this->debuginfo = curl_multi_getcontent($ch);
+        $this->httpcode = $curlinfo['http_code'];
         curl_close($ch);
 
-        $this->httpcode = $curlinfo['http_code'];
+        // Evaluate the result.
+        \core\notification::add('Your persistent message', \core\notification::INFO, true);
+        \core\notification::add("Your message here", \core\output\notification::NOTIFY_ERROR);
 
         if ($postresult) {
-            // HTTP/1.0 200 OK.
-            if ($curlinfo['http_code'] == 200) {
+            if ($curlinfo['http_code'] == 200) { // HTTP/1.0 200 OK.
                 return true;
             }
         }
-        echo $this->debuginfo;
-
         return false;
     }
 
@@ -556,12 +547,12 @@ class external_server {
         global $USER;
 
         if ($this->obj != null) {
-            $url = $this->obj->server_url;
+            $url = $this->obj->url;
         } else {
             $url = '';
         }
 
-        $vars = [
+        $params = [
             'timestamp' => time(),
             'user' => $USER->username,
             'skey' => $USER->sesskey,
@@ -576,13 +567,13 @@ class external_server {
             'studusername' => $studusername,
         ];
         if ($this->obj != null) {
-            $vars['akey'] = $this->calc_akey($vars, $this->obj->server_secret, $this->obj->hash);
+            $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         } else {
-            $vars['akey'] = '';
+            $params['akey'] = '';
         }
-        $this->add_group_data($vars, $this->obj->server_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
-        $url = $this->build_getrequest($url, $vars);
+        $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         return $url;
     }
 
@@ -614,27 +605,25 @@ class external_server {
     public function url_studentview($assignment) {
         global $USER;
 
-        $url = $this->obj->server_url;
-
-        $vars = [
+        $url = $this->obj->url;
+        $params = [
             'timestamp' => time(),
             'user' => $USER->username,
             'skey' => $USER->sesskey,
             'uidnr' => $USER->idnumber,
             'action' => 'view',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timecreated,
+            'aid' => $assignment->timemodified,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
             'role' => 'student',
         ];
 
-        $vars['akey'] = $this->calc_akey($vars, $this->obj->server_secret, $this->obj->hash);
-        $this->add_group_data($vars, $this->obj->server_secret, $this->obj->hash);
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
-        $url = $this->build_getrequest($url, $vars);
-
+        $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         return $url;
     }
 
@@ -648,105 +637,81 @@ class external_server {
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
+        $html = $OUTPUT->box_start('assignsubmission-external-server-iframe-container');
+        $html .= '<iframe src="' . $url . '" class="assignsubmission-external-server-iframe border bg-light"></iframe>';
+        $html .= $OUTPUT->box_end();
 
-        echo $OUTPUT->box_start('external_frame');
-        echo '<iframe src="' . $url . '" class="externalframe"></iframe>';
-        echo $OUTPUT->box_end();
+        return $html;
     }
 
     /**
-     * generates a request for an external server
-     * @param string $url
-     * @param array $vars
-     * @return string
+     * Prints the server's response.
+     *
+     * @param string $title Headline for this server response
+     * @param string $content The server response's content
+     * @param bool $ok Whether or not the response is ok
      */
-    public function build_getrequest($url, $vars) {
-        $url .= '?';
+    public function print_response($title, $content, $ok) {
+        global $OUTPUT;
 
-        foreach ($vars as $idx => $value) {
-            if (is_array($value)) {
-                foreach ($value as $validx => $curval) {
-                    $url .= $idx.'['.$validx.']='.rawurlencode($curval).'&';
-                }
-            } else {
-                $url .= $idx.'='.rawurlencode($value).'&';
-            }
+        static $i = 1;
+        $id = 'collapse-section-' . $i++;
+        $chevron = '<i class="fa fa-chevron-right mr-1 rotate-icon"></i>';
+
+        if ($ok) {
+            $textclass = 'text-success';
+            $symbol = '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+        } else {
+            $textclass = 'text-error';
+            $symbol = '<i class="fa fa-exclamation-triangle text-danger"></i>';
         }
 
-        return $url;
-    }
-}
-
-
-/**
- * Helper function for getting the outcomes of user, if any.
- * This was mostly created for code maintenance, to reduce the dublicated
- * codelines here. Still a lot to do.
- *
- * @param bool $usesoutcomes tells whether or not the activity is set to use outcomes
- * @param class $gradinginfo info on the grading of the user
- * @param array $auser user info from the database
- * @param bool $quickgrade whether or not quickgrading is active
- * @param int $tabindex used for indexing the quickgrading fields so they can be tabbed in the right order
- * @return string $outcomes indicates the relevant outcome
- */
-function mod_extserver_get_outcomes($usesoutcomes, $gradinginfo, $auser, $quickgrade, &$tabindex) {
-    $outcomes = '';
-    if ($usesoutcomes) {
-        foreach ($gradinginfo->outcomes as $n => $outcome) {
-            $outcomes .= '<div class="outcome"><label>'.$outcome->name.'</label>';
-            $options = make_grades_menu(-$outcome->scaleid);
-
-            if ($outcome->grades[$auser->id]->locked || !$quickgrade) {
-                $options[0] = get_string('nooutcome', 'grades');
-                $outcomes .= ': <span id="outcome_'.$n.'_'.$auser->id.'">'.
-                        $options[$outcome->grades[$auser->id]->grade].'</span>';
-            } else {
-                $attributes = [];
-                $attributes['tabindex'] = $tabindex++;
-                $attributes['id'] = 'outcome_'.$n.'_'.$auser->id;
-                $outcomes .= ' '.html_writer::select($options, 'outcome_'.$n.'['.$auser->id.']',
-                        $outcome->grades[$auser->id]->grade,
-                        [0 => get_string('nooutcome', 'grades')], $attributes);
-            }
-            $outcomes .= '</div>';
+        if (!$ok && empty($content)) {
+            $httpcode = $this->get_httpcode();
+            $content = ($httpcode === 0)
+                ? get_string('sslerror', 'assignsubmission_external_server')
+                : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
         }
-    }
-    return $outcomes;
-}
 
-/**
- * Helper function for setting the grades and calling an event on success.
- * This was mostly created for code maintenance, to reduce the dublicated
- * codelines here. Still a lot to do.
- *
- * @param stdClass $grades the grades to be set on user basis
- * @param class $submission the submission being graded
- * @param array $curgrade grades for the current user
- * @param time $timemarked the time the grading was marked
- * @return void
- */
-function set_grading_successful(&$grades, &$submission, $curgrade, $timemarked) {
-    global $DB, $PAGE;
-    $grades[$curgrade['userid']]->userid = $curgrade['userid'];
-    $grades[$curgrade['userid']]->rawgrade = $curgrade['grade'];
-    $grades[$curgrade['userid']]->dategraded = $timemarked;
-    $mailinfo = get_user_preferences('extserver_mailinfo', 0);
-    if (!$mailinfo) {
-        $submission->mailed = 1; // Treat as already mailed.
-    } else {
-        $submission->mailed = 0; // Make sure mail goes out (again, even).
+        echo html_writer::start_div('collapse-section mb-3');
+
+        echo html_writer::tag('a',
+            $chevron . ' ' . $title . ' ' . $symbol,
+            [
+                'class' => "h4 d-block $textclass collapsed",
+                'data-toggle' => 'collapse',
+                'href' => '#' . $id,
+                'aria-expanded' => 'false',
+                'aria-controls' => $id,
+            ]
+        );
+
+        echo html_writer::start_div('collapse mt-2', ['id' => $id]);
+        echo html_writer::div("<pre>$content</pre>", 'extserver-result ml-4');
+        echo html_writer::end_div();
+        echo html_writer::end_div();
     }
 
-    // Don't update these.
-        unset($submission->data1);
-        unset($submission->data2);
-
-    $DB->update_record('extserver_submissions', $submission);
-    $event = \mod_extserver\event\submission_graded::create([
-            'objectid' => $PAGE->cm->instance,
-            'context' => $PAGE->context,
-    ]);
-    $event->add_record_snapshot('course', $PAGE->course);
-    $event->trigger();
+    /**
+     * Sends a request to the external server to test its response.
+     *
+     * @param string $url The URL to send the request to.
+     * @return array
+     */
+    public function test_api_call($url) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+        curl_exec($ch);
+        $info = curl_getinfo($ch);
+        $content = curl_multi_getcontent($ch);
+        curl_close($ch);
+        $status = ($info['http_code'] == 200) ? true : false;
+        return [
+            'status' => $status,
+            'content' => $content,
+        ];
+    }
 }
