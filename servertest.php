@@ -48,7 +48,7 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/external_server/servertest.php', ['id' => $id, 'sesskey' => sesskey()]));
 $PAGE->set_heading(get_string('testing', 'assignsubmission_external_server',
     ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
- $PAGE->requires->css(new moodle_url('/mod/assign/submission/external_server/styles.css'));
+$PAGE->requires->css(new moodle_url('/mod/assign/submission/external_server/styles.css'));
 
 // Start output.
 echo $OUTPUT->header();
@@ -60,8 +60,8 @@ $extserver->print_response(get_string('checkconnection', 'assignsubmission_exter
 
 // Create Assignment.
 $assignment = new stdClass();
+$assignment->id = 1;
 $assignment->name = 'ExternalServerTest';
-$assignment->timecreated = '1'; // AID.
 $assignment->course = '0';
 
 // Student View.
@@ -72,8 +72,28 @@ $extserver->print_response(get_string('studentview', 'assignsubmission_external_
 
 // Submit file.
 $tmpfilename = 'uploadtest.zip';
-$tmpfile = $CFG->dirroot . '/mod/assign/submission/external_server/fixtures/'  . $tmpfilename;
-$result = $extserver->upload_file($tmpfilename, $tmpfile, $assignment);
+$tmpfilepath = $CFG->dirroot . '/mod/assign/submission/external_server/fixtures/'  . $tmpfilename;
+$fs = get_file_storage();
+$fileinfo = [
+    'contextid' => context_system::instance()->id,
+    'component' => 'assignsubmission_extserver',
+    'filearea'  => 'submission_files',
+    'itemid'    => 0,
+    'filepath'  => '/',
+    'filename'  => $tmpfilename,
+];
+$file = $fs->get_file(
+    $fileinfo['contextid'],
+    $fileinfo['component'],
+    $fileinfo['filearea'],
+    $fileinfo['itemid'],
+    $fileinfo['filepath'],
+    $fileinfo['filename']
+);
+if (!$file) {
+    $file = $fs->create_file_from_pathname($fileinfo, $tmpfilepath);
+}
+$result = $extserver->upload_file($file, $assignment);
 $content = $extserver->get_debuginfo();
 $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 
@@ -103,5 +123,12 @@ if (!empty($content) && $content) {
     $content = '<code>' . htmlentities($pretty->saveXML(), ENT_COMPAT) . '</code>';
 }
 $extserver->print_response(get_string('loadgrades', 'assignsubmission_external_server'), $content, $result, $extserver);
+
+// Link back.
+echo html_writer::link(
+    new moodle_url('/admin/settings.php', ['section' => 'assignsubmission_external_server']),
+    get_string('back'),
+    ['class' => 'btn btn-primary']
+);
 
 echo $OUTPUT->footer();

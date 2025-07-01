@@ -83,7 +83,13 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // External server.
         $name = get_string('externalserver', 'assignsubmission_external_server');
-        $servers = $DB->get_records('assignsubmission_external_server_servers', ['visible' => 1], 'name ASC');
+        $submissioncount = $this->count_submissions();
+        if ($submissioncount > 0) {
+            $visible = []; // If there are already submissions, include all the servers, so that now-invisible still show as selected.
+        } else {
+            $visible = ['visible' => 1];
+        }
+        $servers = $DB->get_records('assignsubmission_external_server_servers', $visible,  'name ASC');
         foreach ($servers as $ser) {
             $options[$ser->id] = format_string($ser->name);
         }
@@ -94,8 +100,9 @@ class assign_submission_external_server extends assign_submission_plugin {
         }
         $mform->addElement('select', 'assignsubmission_external_server_server', $name, $options);
         $mform->addHelpButton('assignsubmission_external_server_server', 'externalserver', 'assignsubmission_external_server');
-        $mform->hideIf('assignsubmission_external_server_servers', 'assignsubmission_external_server_enabled', 'notchecked');
         $mform->setDefault('assignsubmission_external_server_server', $server);
+        $mform->hideIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'notchecked');
+        $mform->disabledIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'notchecked');
 
         // Maximum file size.
         $name = get_string('maxbytes', 'assignsubmission_external_server');
@@ -121,7 +128,6 @@ class assign_submission_external_server extends assign_submission_plugin {
         $mform->hideIf('assignsubmission_external_server_uploads', 'assignsubmission_external_server_enabled', 'notchecked');
 
         // Check if the assignment already has submissions.
-        $submissioncount = $this->count_submissions();
         if ($submissioncount > 0) {
             $mform->disabledIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'checked');
             $mform->disabledIf('assignsubmission_external_server_maxbytes', 'assignsubmission_external_server_enabled', 'checked');
@@ -129,8 +135,6 @@ class assign_submission_external_server extends assign_submission_plugin {
             $message = get_string('submissionswarning', 'assignsubmission_external_server', $submissioncount);
             $warning = $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING);
             $mform->addElement('html', $warning);
-        } else {
-            $mform->addRule('assignsubmission_external_server_server', get_string('required'), 'required', null, 'client');
         }
     }
 
@@ -183,18 +187,28 @@ class assign_submission_external_server extends assign_submission_plugin {
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
         global $OUTPUT;
 
-        $fileoptions = $this->get_file_options();
-        $submissionid = $submission ? $submission->id : 0;
+        // Check if there are uploads left.
+        $has_uploads = $this->has_uploadattempts($submission)['has_uploads'];
 
-        // Filepicker.
-        $data = file_prepare_standard_filemanager($data,
-                                                  'files',
-                                                  $fileoptions,
-                                                  $this->assignment->get_context(),
-                                                  'assignsubmission_external_server',
-                                                  ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
-                                                  $submissionid);
-        $mform->addElement('filepicker', 'files_filemanager', $this->get_name(), null, $fileoptions);
+        // Display filepicker.
+        if ($has_uploads) {
+            $fileoptions = $this->get_file_options();
+            $submissionid = $submission ? $submission->id : 0;
+            $data = file_prepare_standard_filemanager($data,
+                                                    'files',
+                                                    $fileoptions,
+                                                    $this->assignment->get_context(),
+                                                    'assignsubmission_external_server',
+                                                    ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                                                    $submissionid);
+            $mform->addElement('filepicker', 'files_filemanager', $this->get_name(), null, $fileoptions);
+
+        } else {
+
+            // No uploads left, display message.
+            $message = get_string('nouploadsleft', 'assignsubmission_external_server');
+            $mform->addElement('static', 'no_uploads', '', $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING));
+        }
 
         return true;
     }
@@ -315,8 +329,12 @@ class assign_submission_external_server extends assign_submission_plugin {
             // Increment the number of uploads.
             $filesubmission->uploads++;
 
-            // Update record.
+            // Update filesubmission.
             $DB->update_record('assignsubmission_external_server', $filesubmission);
+
+            // Update submission - this is needed for quick_edit_form to update it.
+            $submission->timemodified = time();
+            $DB->update_record('assign_submission', $submission);
 
             // Fire event.
             $params['objectid'] = $filesubmission->id;
@@ -328,7 +346,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             $file = reset($files);
             $externalserver = $this->get_external_server();
             if ($externalserver) {
-                $updatestatus = $externalserver->upload_file($file, $submission, $this->assignment->get_instance());
+                $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
                 if (!$updatestatus) {
                     return false;
                 }
@@ -345,6 +363,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                                                            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
+            $filesubmission->uploads = 1;
             $filesubmission->id = $DB->insert_record('assignsubmission_external_server', $filesubmission);
             $params['objectid'] = $filesubmission->id;
 
@@ -416,11 +435,46 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return string
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
-        $file = $this->assignment->render_area_files('assignsubmission_external_server',
+
+        // Uploaded file.
+        $html = $this->assignment->render_area_files('assignsubmission_external_server',
                                                       ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
-                                                      $submission->id);
-        $html = $this->print_uploadattempts($submission);
-        return $file . $html;
+                                                      $submission->id
+        );
+
+        // Get user and group IDs.
+        $userid = $submission->userid;
+        if ($userid == 0) {
+            $groupid = $submission->groupid;
+            $user = $this->get_group_submission_user($submission);
+        } else {
+            $user = core_user::get_user($userid);
+            $groupid = 0;
+        }
+
+        // Upload attempts.
+        $uploadattempts = $this->has_uploadattempts($submission);
+        $uploads = get_string('uploadattempts', 'assignsubmission_external_server') . ': ' . $uploadattempts['html'];
+        $html .= html_writer::div($uploads, 'uploadattempts');
+
+        $context = $this->assignment->get_context();
+        if (has_capability('mod/assign:grade', $context)) {
+
+            // Link to view the full submission.
+            $ext = $this->get_external_server();
+            $url = $ext->url_teacherview($this->assignment->get_instance(), $user->username);
+            $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',
+                'target' => '_blank']);
+
+            // Link to update grade/feedback.
+            $assignmentid = $submission->assignment;
+            $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
+            $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
+                ['cmid' => $cm->id, 'userid' => $submission->userid, 'groupid' => $groupid]);
+            $html .= html_writer::link($url, get_string('gradeverb'), ['class' => 'btn btn-primary']);
+        }
+
+        return $html;
     }
 
     /**
@@ -574,14 +628,19 @@ class assign_submission_external_server extends assign_submission_plugin {
      */
     public function count_submissions() {
         global $DB;
-        return $DB->count_records('assignsubmission_external_server',
-            ['assignment' => $this->assignment->get_instance()->id]);
+
+        if (!$this->assignment->get_context()) {
+            return 0;
+        } else {
+            return $DB->count_records('assignsubmission_external_server',
+                ['assignment' => $this->assignment->get_instance()->id]);
+        }
     }
 
     /**
      * Returns external server for this assignment.
      */
-    private function get_external_server() {
+    public function get_external_server() {
         global $DB;
 
         $serverid = $this->get_config('server');
@@ -589,12 +648,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             return null;
         }
 
-        $server = $DB->get_record('assignsubmission_external_server_servers', ['id' => $serverid]);
-        if (!$server) {
-            return null;
-        }
-
-        return new external_server($server->id);
+        return new external_server($serverid);
     }
 
     /**
@@ -605,197 +659,94 @@ class assign_submission_external_server extends assign_submission_plugin {
      */
     public function view_header() {
 
-        global $USER;
+        global $OUTPUT, $USER;
 
         $ext = $this->get_external_server();
-        $submission = $this->assignment->get_user_submission($USER->id, false);
+        $cmid = $this->assignment->get_course_module()->id;
+        $userid = $USER->id;
 
-        // Quick submission/grading edit form.
-        $url = new moodle_url('/mod/assign/view.php', [
-            'id' => $this->assignment->get_course_module()->id,
-            'action' => 'view',
-        ]);
-        $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
-        ob_start();
-        $mform->display();
-        $html .= ob_get_clean();
-
-        // Handle submission.
-        if ($data = $mform->get_data()) {
-            $this->save($submission, $data);
-            \core\notification::success('ASDFASDFASDF');
-            redirect($url);
+        // Get submission for group or user.
+        if ($this->assignment->get_instance()->teamsubmission) {
+            $submission = $this->assignment->get_group_submission($userid, 0, true);
+        } else {
+            $submission = $this->assignment->get_user_submission($userid, true);
         }
+
+        // String for external server name.
+        if ($ext) {
+            $extservername = $ext->obj->name;
+        } else {
+            $context = $this->assignment->get_context();
+            if (has_capability('mod/assign:grade', $context)) {
+                $message = get_string('noneselected', 'assignsubmission_external_server');
+            } else {
+                $message = get_string('noneselectedstudent', 'assignsubmission_external_server');
+            }
+            return $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING);
+        }
+
+        // Header.
+        $title = get_string('externalservertitle', 'assignsubmission_external_server', $extservername);
+        $html = html_writer::tag('h2', $title);
+
+        // Check uploadattempts.
+        $uploadattempts = $this->has_uploadattempts($submission);
+        if ($uploadattempts['has_uploads']) {
+
+            // Embed form.
+            ob_start();
+
+            // Quick submission/grading edit form.
+            $url = new moodle_url('/mod/assign/view.php', [
+                'id' => $cmid,
+                'action' => 'view',
+            ]);
+            $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
+            $mform->display();
+
+            // Handle submission.
+            if ($data = $mform->get_data()) {
+
+                // Grading.
+                if (isset($data->gradebutton)) {
+                    $url = new moodle_url('/mod/assign/submission/external_server/grade.php', [
+                        'status' => $data->status, 'cmid' => $cmid
+                    ]);
+                    redirect($url);
+
+                // Submission.
+                } else {
+
+                    // Update the submission record
+                    $submission->timemodified = time();
+                    $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
+
+                    // Save the core submission record (handles group mode properly)
+                    $this->assignment->save_submission($data, $notices);
+                }
+            }
+
+            // End embedding.
+            $html .= ob_get_clean();
+        }
+
+
 
         // Status table.
         $table = new html_table();
         $table->attributes['class'] = 'assignsubmission-external-server-table';
         $table->data = [
             [get_string('connectionstatus', 'assignsubmission_external_server') . ':', $this->print_server_status($ext)],
-            [get_string('upattempts', 'assignsubmission_external_server') . ':', $this->print_uploadattempts()],
+            [get_string('uploadattempts', 'assignsubmission_external_server') . ':', $uploadattempts['html']],
         ];
         $html .= html_writer::table($table);
 
         // iFrame.
-        $html .= $ext->view_externalframe($this->assignment->get_instance());
+        if ($ext) {
+            $html .= $ext->view_externalframe($this->assignment->get_instance());
+        }
 
         return $html;
-    }
-
-    /**
-     * Get grades and grade submissions automatically
-     *
-     * TODO: CONTINUE HERE!
-     *
-     * @param int $filter (all, not graded, selected)
-     * @return array
-     * @throws coding_exception
-     * @throws dml_exception
-     * @throws moodle_exception
-     * @throws required_capability_exception
-     */
-    public function extgrade_submissions($filter) {
-        global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
-        require_once($CFG->libdir.'/gradelib.php');
-        require_once($CFG->dirroot.'/mod/extserver/locallib.php');
-
-        $result = [];
-        $result['status'] = false;
-        $result['updated'] = '0';
-
-        if (!isset($this->assignment->courseid)) {
-            $this->assignment->courseid = $this->assignment->course;
-        }
-
-        $context = context_module::instance($this->cm->id);
-
-        require_capability('mod/extserver:grade', $context);
-
-        if (!has_capability('mod/extserver:grade', $context)) {
-            redirect('view.php?id='.$this->cm->id);
-        }
-
-        $params = ['itemname' => $this->assignment->name, 'idnumber' => $this->assignment->cmidnumber];
-
-        if ($this->assignment->grade > 0) {
-            $params['gradetype'] = GRADE_TYPE_VALUE;
-            $params['grademax']  = $this->assignment->grade;
-            $params['grademin']  = 0;
-        } else {
-            $result['status'] = GRADE_UPDATE_FAILED;
-            $result['message'] = get_string('extgrade_nonnumeric', 'extserver');
-            return $result;
-        }
-
-        // Get all ppl that are allowed to submit assignments.
-        list($esql, $params) = get_enrolled_sql($context, 'mod/extserver:submit');
-
-        if (($filter == self::FILTER_EXTGRADE_ALL) || ($filter == self::FILTER_EXTGRADE_SELECTED)) {
-            $sql = 'SELECT u.username, u.id FROM {user} u '.
-                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
-                    'WHERE u.deleted = 0 AND eu.id=u.id ';
-        } else {
-            $wherefilter = '';
-            if ($filter == self::FILTER_EXTGRADE_NOTGRADED) {
-                $wherefilter = ' AND (s.timemarked < s.timemodified OR s.grade = -1) ';
-            }
-
-            $sql = 'SELECT u.username, u.id FROM {user} u '.
-                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
-                    'LEFT JOIN {extserver_submissions} s ON (u.id = s.userid) ' .
-                    'WHERE u.deleted = 0 AND eu.id=u.id '.
-                    'AND s.assignment = '. $this->assignment->id .
-                    $wherefilter;
-        }
-
-        $users = $DB->get_records_sql($sql, $params);
-
-        if ($users == null) {
-            $result['status'] = GRADE_UPDATE_OK;
-            return $result;
-        } else {
-            $userlist = [];
-
-            foreach ($users as $currentuser) {
-                $enroled[$currentuser->id] = $currentuser->username;
-            }
-
-            if ($filter == self::FILTER_EXTGRADE_SELECTED) {
-                if (!empty($SESSION->extserver->extgrade->selected) && is_array($SESSION->extserver->extgrade->selected)) {
-                    list($selsql, $selparams) = $DB->get_in_or_equal($SESSION->extserver->extgrade->selected);
-                    $userlist = $DB->get_records_sql_menu("SELECT id, username FROM {user} WHERE id ".$selsql, $selparams);
-                }
-            } else {
-                // For each user enrolled in course (or not graded).
-                foreach ($users as $currentuser) {
-                    $userlist[$currentuser->id] = $currentuser->username;
-                }
-            }
-
-            // Load grades from external server.
-            $ext = new external_server($this->assignment->extservid);
-            $extgrades = $ext->load_grades($this->assignment, $userlist);
-
-            if (!$extgrades) {
-                $event = \mod_extserver\event\submission_grading_failed::create([
-                        'objectid' => $PAGE->cm->instance,
-                        'context' => $PAGE->context,
-                ]);
-                $event->add_record_snapshot('course', $PAGE->course);
-                $event->trigger();
-
-                $result['status'] = GRADE_UPDATE_FAILED;
-            } else {
-                // Get all IDs for the corresponding usernames!
-                if (empty($userlist)) {
-                    $result['status'] = GRADE_UPDATE_OK;
-                    return $result;
-                }
-                list($where, $params) = $DB->get_in_or_equal(array_keys($userlist));
-                $userids = $DB->get_records_sql_menu("SELECT username, id FROM {user} WHERE id ".$where, $params);
-
-                $updated = 0;
-                $users = false;
-                $currentuser = false;
-                $userlist = array_flip($userlist);
-                // Foreach user we got a respond.
-                $timemarked = time();
-                foreach ($extgrades as $curgrade) {
-                    if (array_key_exists($curgrade['username'], $userlist)) {
-                        $updated++;
-                        $curgrade['userid'] = $userids[$curgrade['username']];
-                        $submission = $this->get_submission($curgrade['userid'], true); // Get or make one.
-
-                        $submission->grade = $curgrade['grade'];
-                        $submission->submissioncomment = $curgrade['comment'];
-
-                        $submission->teacher = $USER->id;
-                        $submission->timemarked = $timemarked;
-                        $grades[$curgrade['userid']] = new stdClass();
-
-                        set_grading_successful($grades, $submission, $curgrade, $timemarked);
-                    } else {
-                        $event = \mod_extserver\event\submission_grading_failed::create([
-                                'objectid' => $PAGE->cm->instance,
-                                'context' => $PAGE->context,
-                        ]);
-                        $event->add_record_snapshot('course', $PAGE->course);
-                        $event->trigger();
-                    }
-                }
-
-                $result['updated'] = $updated;
-
-                if (!empty($grades)) {
-                    $result['status'] = grade_update('mod/extserver', $this->assignment->courseid,
-                            'mod', 'extserver', $this->assignment->id, 0, $grades);
-                } else {
-                    $result['status'] = GRADE_UPDATE_OK;
-                }
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -803,22 +754,11 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @param stdClass $submission The submission record.
      *
-     * @return string HTML string with the upload attempts information.
+     * @return array
      */
-    private function print_uploadattempts($submission = null) {
+    private function has_uploadattempts($submission) {
 
         global $DB, $USER;
-
-        // Get current user submission if not provided.
-        if (!$submission) {
-            $submission = $DB->get_record('assign_submission',
-                ['assignment' => $this->assignment->get_instance()->id, 'userid' => $USER->id]);
-        }
-
-        // If no submission found, return empty string.
-        if (!$submission) {
-            return '';
-        }
 
         // Get the number of uploads and max uploads.
         $uploads = $DB->get_field('assignsubmission_external_server', 'uploads',
@@ -831,25 +771,26 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Unlimited uploads.
         if ($maxuploads < 0) {
             $uploadstring = get_string('unlimiteduploads', 'assignsubmission_external_server');
-            $type = 'success';
 
         // Show attempts.
         } else {
             $uploadstring = "$uploads/$maxuploads";
             $percent = $uploads / $maxuploads * 100;
-            if ($percent > 80) {
-                $type = 'danger';
-            } else if ($percent > 50) {
-                $type = 'warning';
-            } else {
-                $type = 'success';
-            }
         }
 
-        // Make badge.
-        $html = html_writer::tag('div', $uploadstring, [
-            'title' => get_string('upattempts', 'assignsubmission_external_server'), 'class' => "badge badge-$type p-2"]);
-        return $html;
+        // See if we still have uploads left.
+        if ($uploads < $maxuploads) {
+            $has_uploads = true;
+            $type = 'success';
+        } else {
+            $has_uploads = false;
+            $type = 'danger';
+        }
+
+        // Render text.
+        $html = html_writer::tag('span', $uploadstring, [
+            'title' => get_string('uploadattempts', 'assignsubmission_external_server'), 'class' => "text-$type"]);
+        return ['has_uploads' => $has_uploads, 'html' => $html];
     }
 
     /**
@@ -862,16 +803,47 @@ class assign_submission_external_server extends assign_submission_plugin {
     private function print_server_status($ext) {
         global $OUTPUT;
 
-        if ($ext->check_connection()) {
-            $status = get_string('ok');
-            $type = 'success';
+        if ($ext) {
+            if ($ext->check_connection()) {
+                $status = get_string('ok');
+                $type = 'success';
+            } else {
+                $status = get_string('error');
+                $type = 'danger';
+            }
         } else {
-            $status = get_string('error');
-            $type = 'danger';
+            $status = get_string('none');
+            $type = 'warning';
         }
 
-        // Make badge.
-        $html = html_writer::tag('div', $status, ['class' => "badge badge-$type p-2"]);
+        // Render text.
+        $html = html_writer::tag('span', $status, ['class' => "text-$type"]);
         return $html;
+    }
+
+    /**
+     * Gets the user that submitted a group submission.
+     *
+     * @param stdClass $submission The group submission record.
+     *
+     * @return stdClass $user.
+     */
+    public function get_group_submission_user($submission) {
+
+        // Get params.
+        $groupid = $submission->groupid;
+        $assignid = $submission->assignment;
+        $attempt = $submission->attemptnumber;
+
+        $groupmembers = groups_get_members($groupid);
+        foreach ($groupmembers as $member) {
+            $usersubmission = $this->assignment->get_user_submission($member->id, false);
+            if ($usersubmission &&
+                $usersubmission->status === ASSIGN_SUBMISSION_STATUS_SUBMITTED &&
+                $usersubmission->attemptnumber == $attempt) {
+                // This user likely triggered the group submission
+                return $member;
+            }
+        }
     }
 }

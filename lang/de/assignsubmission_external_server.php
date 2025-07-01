@@ -111,10 +111,33 @@ $string['selectserver'] = ' --- Externen Server auswählen ---';
 $string['submissionswarning'] = 'Es gibt bereits {$a} Abgabe(n) für diese Aufgabe. Deshalb sind einige der Einstellungen deaktiviert.';
 
 // Other new.
-$string['upattempts'] = 'Uploadversuche';
 $string['unlimiteduploads'] = 'unbegrenzt';
 $string['connectionstatus'] = 'Verbindung zum externem Server';
 $string['quickupload'] = 'Quick Upload';
 $string['quickupload_help'] = 'Neue Datei direkt an den externen Server schicken, zählt als Uploadversuch.';
 $string['upload'] = 'Upload';
 $string['needselectfile'] = 'Es wurde keine Datei ausgewählt.';
+$string['lastupload'] = 'Letzer Upload';
+$string['getgrades'] = 'Noten und Feedback abrufen';
+$string['externalservertitle'] = 'Externer Server "{$a}"';
+$string['uploadattempts'] = 'Uploads';
+$string['viewsubmissionat'] = 'Abgabe ansehen';
+$string['quickgradinginfo'] = '<ul><li>Sie können die Noten und Feedbacks für alle Teilnehmer/innen eines bestimmten Status auf einmal aktualisieren.</li>
+    <li>Einzelne Teilnehmer/innen können Sie auf der Seite für die {$a} aktualisieren.</li>
+    <li> Vorhandene Noten und Feedbacks werden dabei überschrieben.</li></ul>';
+$string['start'] = 'Start';
+$string['downloadgradesfor'] = 'Bewertungen herunterladen für';
+$string['all'] = 'alle Abgaben';
+$string['ungraded'] = 'alle nicht bewerteten';
+$string['submitted'] = 'alle abgegebenen';
+$string['confirmgrading'] = 'Bewertungen und Feedback für <strong>{$a->for}</strong> vom externen Server <strong>{$a->server}</strong> laden.<p><strong>Vorhandene Bewertungen und Feedback werden überschrieben!</strong></p>';
+$string['nonnumericgrade'] = 'Die Bewertung der Abgabe muss numerisch sein. Bitte kontrollieren Sie die Bewertungseinstellungen.';
+$string['nothingtograde'] = 'Keine entsprechenden Abgaben gefunden - nichts wurde bewertet.';
+$string['couldnotgetgrades'] = 'Die Bewertungen konnten nicht vom externen Server abgerufen werden. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
+$string['gradesupdated'] = 'Bewertungen erfolgreich aktualisiert. {$a} Bewertung(en) aktualisiert.';
+$string['nouploads'] = 'Keine Uploads';
+$string['unlimited'] = 'Unbegrenzt';
+$string['nouploadsleft'] = 'Sie haben keine Uploads mehr für diese Aufgabe.';
+$string['cannotdelete'] = 'Dieser Server kann nicht gelöscht werden, da er in {$a} Aufgabe(n) verwendet wird.';
+$string['noneselected'] = 'Kein externer Server ausgewählt. Bitte wählen Sie in den Einstellungen einen externen Server, der für diese Aufgabe verwendet werden soll.';
+$string['noneselectedstudent'] = 'Es wurde vom Trainer/der Trainerin kein externer Server ausgewählt. Bitte kontaktieren Sie den/die Trainer/in, um einen externen Server für diese Aufgabe zu konfigurieren.';

@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die;
 
 use assignsubmission_external_server\editserver_form;
 use assignsubmission_external_server\external_server;
+use assignsubmission_external_server\helper;
 
 // Security.
 require_login();
@@ -77,8 +78,18 @@ if (!empty($hide)) {
 // Delete a server.
 } elseif (!empty($delete)) {
 
+    $assignments = helper::get_assignments_using_server($delete);
+
     if (!$entry = $DB->get_record('assignsubmission_external_server_servers', ['id' => $delete])) {
         throw new moodle_exception('unknownserver', 'assignsubmission_external_server');
+
+    // Check if server is in use.
+    } else if ($assignments) {
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('error'));
+        echo $OUTPUT->notification(get_string('cannotdelete', 'assignsubmission_external_server', count($assignments)), 'notifyproblem');
+        echo $OUTPUT->continue_button($redirecturl);
+        die();
 
     // Delete confirmation modal.
     } else if (!$confirm) {

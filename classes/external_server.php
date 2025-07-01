@@ -30,6 +30,8 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use moodle_url;
 use \core\notification;
+use context_module;
+use stdClass;
 
 require_once($CFG->dirroot . '/mod/assign/submission/external_server/lib.php');
 require_once($CFG->libdir . '/pdflib.php');
@@ -77,6 +79,7 @@ class external_server {
         global $DB;
 
         if ($id != 0) {
+            $id = (string) $id;
             $this->obj = $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
             if ($this->obj->hash == null) {
                 $this->obj->hash = 'sha256';
@@ -300,7 +303,7 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'create',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timecreated,
+            'aid' => $assignment->id,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
@@ -389,7 +392,7 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'getgrades',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timecreated,
+            'aid' => $assignment->id,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
@@ -459,13 +462,12 @@ class external_server {
      * Uploads a file to the external server
      *
      * @param stored_file $file The file to upload.
-     * @param stdClass $submission The submission object.
      * @param stdClass $assignment The assignment object.
      * @return bool true if everything went right
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($file, $submission, $assignment) {
+    public function upload_file($file, $assignment) {
         global $USER;
 
         // Get params.
@@ -481,7 +483,7 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'submit',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timemodified,
+            'aid' => $assignment->id,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
@@ -510,14 +512,13 @@ class external_server {
         curl_close($ch);
 
         // Evaluate the result.
-        \core\notification::add('Your persistent message', \core\notification::INFO, true);
-        \core\notification::add("Your message here", \core\output\notification::NOTIFY_ERROR);
-
         if ($postresult) {
             if ($curlinfo['http_code'] == 200) { // HTTP/1.0 200 OK.
+                \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_SUCCESS);
                 return true;
             }
         }
+        \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
         return false;
     }
 
@@ -559,7 +560,7 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'view',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timecreated,
+            'aid' => $assignment->id,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
@@ -613,7 +614,7 @@ class external_server {
             'uidnr' => $USER->idnumber,
             'action' => 'view',
             'cidnr' => $assignment->course,
-            'aid' => $assignment->timemodified,
+            'aid' => $assignment->id,
             'aname' => $assignment->name,
             'fname' => $USER->firstname,
             'lname' => $USER->lastname,
@@ -713,5 +714,127 @@ class external_server {
             'status' => $status,
             'content' => $content,
         ];
+    }
+
+    /**
+     * Get grades and grade submissions automatically
+     *
+     * @param assign $assign The assignment instance
+     * @param int $filter (all, submitted, ungraded)
+     * @param int $userid if no filter is given, only grade this user
+     *
+     * @return array
+     */
+    public function grade_submissions($assignment, $context, $filter, $userid) {
+
+        global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
+        require_once($CFG->libdir.'/gradelib.php');
+        $assign = $assignment->get_instance();
+
+        // Check if assignment grading is set to numeric.
+        $grademax = $assign->grade;
+        if (!$grademax > 0) {
+            $result['status'] = 'error';
+            $result['message'] = get_string('nonnumericgrade', 'assignsubmission_external_server');
+            return $result;
+        }
+
+        // Get all sql condition for users that are allowed to submit assignments.
+        list($esql, $params) = get_enrolled_sql($context, 'mod/assign:submit');
+
+        // Fetch users.
+        if ($filter == 'all') {
+            $sql = 'SELECT u.username, u.id FROM {user} u '.
+                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
+                    'WHERE u.deleted = 0 AND eu.id=u.id ';
+        } else {
+            $where = '';
+
+            // Only ungradedd.
+            if ($filter == 'ungraded') {
+                $where = ' AND (s.timemarked < s.timemodified OR s.grade = -1) ';
+            } else if ($userid) {
+
+                // Get specific user.
+                $where = ' AND u.id = :userid ';
+                $params['userid'] = $userid;
+            }
+
+            $sql = 'SELECT u.username, u.id FROM {user} u '.
+                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
+                    'LEFT JOIN {assign_submission} s ON (u.id = s.userid) ' .
+                    'WHERE u.deleted = 0 AND eu.id=u.id '.
+                    'AND s.assignment = '. $assign->id .
+                    $where;
+        }
+        $users = $DB->get_records_sql($sql, $params);
+
+        // No users found.
+        if ($users == null) {
+            $result['status'] = 'warning';
+            $result['message'] = get_string('nothingtograde', 'assignsubmission_external_server');
+            return $result;
+
+        } else {
+
+            // Create a list of userids and usernames.
+            $userlist = [];
+            foreach ($users as $currentuser) {
+                $userlist[$currentuser->id] = $currentuser->username;
+                $useridlist[$currentuser->username] = $currentuser->id;
+            }
+
+            // Load grades from external server.
+            if (!$extgrades = $this->load_grades($assign, $userlist)) {
+                $result['status'] = 'error';
+                $result['message'] = get_string('couldnotgetgrades', 'assignsubmission_external_server');
+                return $result;
+            }
+
+            // Check if feedback comments are enabled.
+            $feedbackendabled = false;
+            $feedbackplugins = $assignment->get_feedback_plugins();
+            foreach ($feedbackplugins as $plugin) {
+                if ($plugin->get_type() == 'comments' && $plugin->is_enabled() && $plugin->is_visible()) {
+                    $feedbackendabled = true;
+                    break;
+                }
+            }
+
+            // Process grades.
+            $updated = 0;
+            foreach ($extgrades as $extgrade) {
+                $username = $extgrade['username'];
+                $comment = $extgrade['comment'];
+                if (array_key_exists($username, $useridlist)) {
+                    $userid = $useridlist[$username];
+
+                    // Grade.
+                    $grade = new stdClass();
+                    $grade->userid = $userid;
+                    $grade->grade  = $extgrade['grade'];
+                    $grade->attemptnumber = -1;        // -1 = latest attempt
+                    $grade->addattempt = false;
+
+                    // Comment.
+                    if ($feedbackendabled) {
+                        $grade->assignfeedbackcomments_editor = [
+                            'text' => $comment,
+                            'format' => FORMAT_PLAIN,
+                            'itemid' => 0, // Required if files are uploaded, but 0 is OK for plain text
+                        ];
+                    }
+
+                    // Save.
+                    $assignment->save_grade($userid, $grade);
+                    $updated++;
+                }
+            }
+
+            // Much success, very wow.
+            $result['status'] = 'success';
+            $result['message'] = get_string('gradesupdated', 'assignsubmission_external_server', $updated);
+            return $result;
+        }
     }
 }

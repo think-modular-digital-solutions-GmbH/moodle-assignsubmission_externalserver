@@ -30,6 +30,9 @@ defined('MOODLE_INTERNAL') || die;
 use moodleform;
 use assignsubmission_external_server\external_server;
 use assign_submission_external_server;
+use context_module;
+use moodle_url;
+use html_writer;
 
 /**
  * Quick submission edit form to save one click.
@@ -74,6 +77,7 @@ class quick_edit_form extends moodleform {
      * @throws HTML_Quickform_error
      */
     public function definition() {
+
         $mform = $this->_form;
 
         // Show error.
@@ -85,26 +89,39 @@ class quick_edit_form extends moodleform {
         }
 
         // Grading.
+        $cm = $this->assignment->get_course_module();
         $context = context_module::instance($cm->id);
         if (has_capability('mod/assign:grade', $context)) {
 
             // Header.
-            $mform->addElement('header', 'quickgradingheader', get_string('gradeverb'));
+            $mform->addElement('header', 'quickgradingheader', get_string('getgrades', 'assignsubmission_external_server'));
 
+            // Info text.
             $url = new moodle_url('/mod/assign/view.php',
                 ['id' => $cm->id, 'action' => 'grading']);
-            $html = html_writer::link($url, get_string('gradeitem:submissions', 'assign'));
-            $mform->addElement('static', 'quickgradinginfo', get_string('quickgrading', 'assignsubmission_external_server'),
-                $html);
-        }
+            $link = html_writer::link($url, get_string('gradeitem:submissions', 'assign'));
+            $text = get_string('quickgradinginfo', 'assignsubmission_external_server', $link);
+            $mform->addElement('html', html_writer::div($text));
 
+            // Status selection.
+            $options = [
+                'all' => get_string('all', 'assignsubmission_external_server'),
+                'submitted' => get_string('submitted', 'assignsubmission_external_server'),
+                'ungraded' => get_string('ungraded', 'assignsubmission_external_server'),
+            ];
+            $mform->addElement('select', 'status', get_string('downloadgradesfor', 'assignsubmission_external_server'), $options);
+
+            // Start grading button.
+            $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_external_server'));
+
+        }
 
         // Header for Submission.
         $mform->addElement('header', 'quickuploadheader', get_string('pluginname', 'assignsubmission_external_server'));
 
         // Submission info.
         $html = html_writer::div($this->submission_info(), 'float-right');
-        $mform->addElement('static', 'submissioninfo', get_string('submissioninfo', 'assignsubmission_external_server'),
+        $mform->addElement('static', 'submissioninfo', get_string('lastupload', 'assignsubmission_external_server'),
             $html);
 
         // Upload Filepicker.
@@ -117,6 +134,12 @@ class quick_edit_form extends moodleform {
         );
         $mform->addHelpButton('files_filemanager', 'quickupload', 'assignsubmission_external_server');
         $mform->addElement('submit', 'submitbutton', get_string('upload', 'assignsubmission_external_server'));
+
+        // Preserve values as hidden fields
+        $mform->addElement('hidden', 'id', $this->assignment->get_course_module()->id);
+        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'action', 'view');
+        $mform->setType('action', PARAM_RAW);
     }
 
     /**
@@ -128,11 +151,8 @@ class quick_edit_form extends moodleform {
 
         global $CFG, $USER;
 
-        $viewurl = new moodle_url('/mod/assign/view.php',
-            ['id' => $this->assignment->get_course_module()->id]);
+        $html = '';
         $assignment = $this->assignment->get_instance();
-        $cm = $this->assignment->get_course_module();
-
         if ($submission = $this->assignment->get_user_submission($USER->id, false)) {
             if ($submission->timemodified <= $assignment->duedate || empty($this->assignment->duedate)) {
                 $class = 'text-success';

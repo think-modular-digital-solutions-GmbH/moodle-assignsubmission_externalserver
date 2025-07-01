@@ -46,7 +46,7 @@ class helper {
      */
     public static function edit_icons($server) {
 
-        global $OUTPUT;
+        global $DB, $OUTPUT;
         $id = $server->id;
         $icons = [];
 
@@ -63,9 +63,16 @@ class helper {
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/show', get_string('show')));
         }
 
+        // Check if the server is used in any assignment.
+        $assignments = self::get_assignments_using_server($id);
+
         // Delete.
-        $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
-        $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/delete', get_string('delete')));
+        if ($assignments) {
+            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_external_server', count($assignments)), '', ['class' => 'iconsmall icon-disabled']);
+        } else {
+            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
+            $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/delete', get_string('delete')));
+        }
 
         // Test.
         $url = new \moodle_url('/mod/assign/submission/external_server/servertest.php', ['id' => $id, 'sesskey' => sesskey()]);
@@ -73,7 +80,6 @@ class helper {
             $url,
             get_string('checkconnection', 'assignsubmission_external_server')
         );
-
 
         $html = implode('&nbsp;', $icons);
         return $html;
@@ -161,11 +167,35 @@ class helper {
      */
     public static function get_upload_options($submissioncount = 0) {
         $maxuploads = [];
-        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'extserver');
-        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'extserver');
+        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_external_server');
+        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_external_server');
         for ($i = 100; $i > $submissioncount; $i--) {
             $maxuploads[$i] = $i;
         }
         return $maxuploads;
+    }
+
+    /**
+     * Gets all assignments that are using a specific external server.
+     *
+     * @param int $id The ID of the external server.
+     * @return array|false Array of assignments using the server, or false if none found
+     */
+    public static function get_assignments_using_server($id) {
+        global $DB;
+
+        $sql = "SELECT *
+                FROM {assign_plugin_config}
+                WHERE plugin = :plugin
+                AND subtype = :subtype
+                AND name = :name
+                AND " . $DB->sql_compare_text('value') . " = :value";
+        $params = [
+            'plugin' => 'external_server',
+            'subtype' => 'assignsubmission',
+            'name' => 'server',
+            'value' => (string) $id
+        ];
+        return $DB->get_records_sql($sql, $params);
     }
 }

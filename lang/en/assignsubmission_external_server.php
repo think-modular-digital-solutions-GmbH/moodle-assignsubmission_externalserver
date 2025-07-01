@@ -111,10 +111,34 @@ $string['selectserver'] = ' --- select external server ---';
 $string['submissionswarning'] = 'There are already {$a} submission(s) for this assignment. Some settings may not be changed anymore.';
 
 // Other new.
-$string['upattempts'] = 'Upload attempts';
 $string['unlimiteduploads'] = 'unlimited';
 $string['connectionstatus'] = 'Connection to external server';
 $string['quickupload'] = 'Quick upload';
 $string['quickupload_help'] = 'Upload a new file to the external server directly. Will still count as an upload attempt.';
 $string['upload'] = 'Upload';
 $string['needselectfile'] = 'Please provide a valid file to upload.';
+$string['lastupload'] = 'Last upload';
+$string['getgrades'] = 'Get grades and feedback from external server';
+$string['externalservertitle'] = 'External server "{$a}"';
+$string['uploadattempts'] = 'Uploads';
+$string['viewsubmissionat'] = 'View submission';
+$string['quickgradinginfo'] = '<ul>
+    <li>You can update the grades and feedback for all participants with a specific status at once.</li>
+    <li>You can update individual participants on the {$a} page.</li>
+    <li>Existing grades and feedback will be overwritten.</li></ul>';
+$string['start'] = 'Start';
+$string['downloadgradesfor'] = 'Download grades for';
+$string['all'] = 'all submissions';
+$string['ungraded'] = 'all ungraded';
+$string['submitted'] = 'all submitted';
+$string['confirmgrading'] = 'Load grades and feedback for <strong>{$a->for}</strong> from the external server <strong>{$a->server}</strong>. <p><strong>Existing grades and feedback will be overwritten!</strong></p>';
+$string['nonnumericgrade'] = 'Assignment needs to be set to a numeric grade. Please check the grading settings.';
+$string['nothingtograde'] = 'No submissions found - nothing to grade.';
+$string['couldnotgetgrades'] = 'Could not get grades from external server. Please check the server settings and try again.';
+$string['gradesupdated'] = 'Grades updated successfully. {$a} grade(s) updated.';
+$string['nouploads'] = 'No uploads';
+$string['unlimited'] = 'Unlimited';
+$string['nouploadsleft'] = 'You do not have any uploads left for this assignment.';
+$string['cannotdelete'] = 'This server cannot be deleted, it is in use in {$a} assignment(s).';
+$string['noneselected'] = 'No external server selected. Please select an external server in the settings to use for this assignment.';
+$string['noneselectedstudent'] = 'No external server has been selected by the teacher. Please contact your teacher to configure an external server for this assignment.';
