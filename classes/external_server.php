@@ -739,35 +739,36 @@ class external_server {
             return $result;
         }
 
-        // Get all sql condition for users that are allowed to submit assignments.
-        list($esql, $params) = get_enrolled_sql($context, 'mod/assign:submit');
-
-        // Fetch users.
-        if ($filter == 'all') {
-            $sql = 'SELECT u.username, u.id FROM {user} u '.
-                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
-                    'WHERE u.deleted = 0 AND eu.id=u.id ';
+        // Get single user.
+        if ($userid) {
+            $users = $DB->get_records('user', ['id' => $userid], 'username ASC', 'id, username');
         } else {
-            $where = '';
 
-            // Only ungradedd.
-            if ($filter == 'ungraded') {
-                $where = ' AND (s.timemarked < s.timemodified OR s.grade = -1) ';
-            } else if ($userid) {
+            // Get all sql condition for users that are allowed to submit assignments.
+            list($esql, $params) = get_enrolled_sql($context, 'mod/assign:submit');
+            $sql = 'SELECT u.id, u.username FROM {user} u '.
+                'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
+                'WHERE u.deleted = 0 AND eu.id=u.id ';
+            $users = $DB->get_records_sql($sql, $params);
+        }
 
-                // Get specific user.
-                $where = ' AND u.id = :userid ';
-                $params['userid'] = $userid;
+        // Only ungraded users.
+        if ($filter == 'ungraded') {
+            foreach ($users as $key => $user) {
+                if ($grade = $assignment->get_user_grade($user->id, false)) {
+                    unset($users[$key]);
+                }
             }
 
-            $sql = 'SELECT u.username, u.id FROM {user} u '.
-                    'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
-                    'LEFT JOIN {assign_submission} s ON (u.id = s.userid) ' .
-                    'WHERE u.deleted = 0 AND eu.id=u.id '.
-                    'AND s.assignment = '. $assign->id .
-                    $where;
+        // Only submitted users.
+        } else if ($filter == 'submitted') {
+            foreach ($users as $key => $user) {
+                $submission = $assignment->get_user_submission($user->id, false);
+                if (!$submission || $submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+                    unset($users[$key]);
+                }
+            }
         }
-        $users = $DB->get_records_sql($sql, $params);
 
         // No users found.
         if ($users == null) {
@@ -778,10 +779,9 @@ class external_server {
         } else {
 
             // Create a list of userids and usernames.
-            $userlist = [];
-            foreach ($users as $currentuser) {
-                $userlist[$currentuser->id] = $currentuser->username;
-                $useridlist[$currentuser->username] = $currentuser->id;
+            foreach ($users as $user) {
+                $userlist[$user->id] = $user->username;
+                $useridlist[$user->username] = $user->id;
             }
 
             // Load grades from external server.
@@ -826,7 +826,15 @@ class external_server {
                     }
 
                     // Save.
-                    $assignment->save_grade($userid, $grade);
+                    if ($assignment->get_instance()->teamsubmission) {
+                        $group = $assignment->get_submission_group($userid);
+                        $members = $assignment->get_submission_group_members($group->id, true);
+                        foreach ($members as $member) {
+                            $assignment->save_grade($member->id, $grade);
+                        }
+                    } else {
+                        $assignment->save_grade($userid, $grade);
+                    }
                     $updated++;
                 }
             }

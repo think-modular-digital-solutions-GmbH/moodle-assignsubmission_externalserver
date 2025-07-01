@@ -127,7 +127,7 @@ $string['quickgradinginfo'] = '<ul><li>Sie können die Noten und Feedbacks für 
     <li> Vorhandene Noten und Feedbacks werden dabei überschrieben.</li></ul>';
 $string['start'] = 'Start';
 $string['downloadgradesfor'] = 'Bewertungen herunterladen für';
-$string['all'] = 'alle Abgaben';
+$string['all'] = 'alle Teilnehmer/innen';
 $string['ungraded'] = 'alle nicht bewerteten';
 $string['submitted'] = 'alle abgegebenen';
 $string['confirmgrading'] = 'Bewertungen und Feedback für <strong>{$a->for}</strong> vom externen Server <strong>{$a->server}</strong> laden.<p><strong>Vorhandene Bewertungen und Feedback werden überschrieben!</strong></p>';

@@ -128,7 +128,7 @@ $string['quickgradinginfo'] = '<ul>
     <li>Existing grades and feedback will be overwritten.</li></ul>';
 $string['start'] = 'Start';
 $string['downloadgradesfor'] = 'Download grades for';
-$string['all'] = 'all submissions';
+$string['all'] = 'all participants';
 $string['ungraded'] = 'all ungraded';
 $string['submitted'] = 'all submitted';
 $string['confirmgrading'] = 'Load grades and feedback for <strong>{$a->for}</strong> from the external server <strong>{$a->server}</strong>. <p><strong>Existing grades and feedback will be overwritten!</strong></p>';

@@ -446,7 +446,9 @@ class assign_submission_external_server extends assign_submission_plugin {
         $userid = $submission->userid;
         if ($userid == 0) {
             $groupid = $submission->groupid;
-            $user = $this->get_group_submission_user($submission);
+            if ($user = $this->get_group_submission_user($submission)) {
+                $userid = $user->id;
+            }
         } else {
             $user = core_user::get_user($userid);
             $groupid = 0;
@@ -461,17 +463,19 @@ class assign_submission_external_server extends assign_submission_plugin {
         if (has_capability('mod/assign:grade', $context)) {
 
             // Link to view the full submission.
-            $ext = $this->get_external_server();
-            $url = $ext->url_teacherview($this->assignment->get_instance(), $user->username);
-            $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',
-                'target' => '_blank']);
+            if ($user) {
+                $ext = $this->get_external_server();
+                $url = $ext->url_teacherview($this->assignment->get_instance(), $user->username);
+                $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',
+                    'target' => '_blank']);
 
-            // Link to update grade/feedback.
-            $assignmentid = $submission->assignment;
-            $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
-            $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
-                ['cmid' => $cm->id, 'userid' => $submission->userid, 'groupid' => $groupid]);
-            $html .= html_writer::link($url, get_string('gradeverb'), ['class' => 'btn btn-primary']);
+                // Link to update grade/feedback.
+                $assignmentid = $submission->assignment;
+                $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
+                $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
+                    ['cmid' => $cm->id, 'userid' => $userid, 'groupid' => $groupid]);
+                $html .= html_writer::link($url, get_string('gradeverb'), ['class' => 'btn btn-primary']);
+            }
         }
 
         return $html;
