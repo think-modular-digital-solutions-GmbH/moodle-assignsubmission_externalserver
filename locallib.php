@@ -734,8 +734,6 @@ class assign_submission_external_server extends assign_submission_plugin {
             $html .= ob_get_clean();
         }
 
-
-
         // Status table.
         $table = new html_table();
         $table->attributes['class'] = 'assignsubmission-external-server-table';

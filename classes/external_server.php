@@ -235,6 +235,7 @@ class external_server {
     protected function add_group_data(array &$data, $secret, $hash) {
         global $COURSE, $DB;
 
+        // Check if this server needs group info.
         if ($this->obj->groupinfo == self::NO_GROUPINFO) {
             return;
         }
@@ -284,46 +285,39 @@ class external_server {
     public function create_assignment($assignment) {
         global $USER;
 
+        // Check requirements.
         if ($this->concheck != null) {
             return $this->concheck;
         }
-
         if ($this->obj == null) {
             return $this->concheck = false;
         }
 
+        // Common parameters.
+        $params = $this->get_common_params($assignment);
+
+        // Additional parameters.
+        $params['action'] = 'create';
+        $params['role'] = 'teacher';
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
+
+        // Start cURL request.
         $ch = curl_init();
-        // Set URL and other appropriate options.
         curl_setopt($ch, CURLOPT_URL, $this->obj->url);
-
-        $postdata = [
-            'timestamp' => time(),
-            'user' => $USER->username,
-            'skey' => $USER->sesskey,
-            'uidnr' => $USER->idnumber,
-            'action' => 'create',
-            'cidnr' => $assignment->course,
-            'aid' => $assignment->id,
-            'aname' => $assignment->name,
-            'fname' => $USER->firstname,
-            'lname' => $USER->lastname,
-            'role' => 'teacher',
-        ];
-        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->auth_secret, $this->obj->hash);
-        $this->add_group_data($postdata, $this->obj->auth_secret, $this->obj->hash);
-
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+        // Get the result.
         $postresult = curl_exec($ch);
-
         $curlinfo = curl_getinfo($ch);
         $this->debuginfo = curl_multi_getcontent($ch);
         curl_close($ch);
 
+        // Success.
         if ($postresult) {
             $this->httpcode = $curlinfo['http_code'];
 
@@ -350,19 +344,21 @@ class external_server {
             return $this->concheck = false;
         }
 
+        // Start cURL request.
         $ch = curl_init();
-        // Set URL and other appropriate options.
         curl_setopt($ch, CURLOPT_URL, $this->obj->url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);
         curl_exec($ch);
+
+        // Get the result.
         $info = curl_getinfo($ch);
         $this->debuginfo = curl_multi_getcontent($ch);
+        $this->httpcode = $info['http_code'];
         curl_close($ch);
 
-        $this->httpcode = $info['http_code'];
-
+        // Check the HTTP code.
         if ($info['http_code'] == 200) {
             $this->concheck = true;
         } else {
@@ -384,20 +380,14 @@ class external_server {
     public function load_grades($assignment, $userlist = false) {
         global $USER;
 
-        $url = $this->obj->url;
-        $params = [
-            'timestamp' => time(),
-            'user' => $USER->username,
-            'skey' => $USER->sesskey,
-            'uidnr' => $USER->idnumber,
-            'action' => 'getgrades',
-            'cidnr' => $assignment->course,
-            'aid' => $assignment->id,
-            'aname' => $assignment->name,
-            'fname' => $USER->firstname,
-            'lname' => $USER->lastname,
-            'role' => 'teacher',
-        ];
+        // Common parameters.
+        $params = $this->get_common_params($assignment);
+
+        // Additional parameters.
+        $params['action'] = 'create';
+        $params['role'] = 'teacher';
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
         if ($userlist) {
             $params['unames'] = [];
             foreach ($userlist as $cur) {
@@ -405,26 +395,26 @@ class external_server {
                 $params['unames'][] = $cur;
             }
         }
-        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
-        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
+        // Get the URL.
+        $url = $this->obj->url;
         $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 
+        // Set cURL options.
         $ch = curl_init($url);
-
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+        // Execute cURL request.
         $result = curl_exec($ch);
-
         $curlinfo = curl_getinfo($ch);
         $this->debuginfo = curl_multi_getcontent($ch);
         curl_close($ch);
-
         $this->httpcode = $curlinfo['http_code'];
 
+        // Evaluate the result.
         if ($result) {
             $xmlstr = $result;
             // HTTP/1.0 200 OK.
@@ -475,31 +465,23 @@ class external_server {
         $filename = $file->get_filename();
         $tmpfile = $file->copy_content_to_temp();
 
-        // Create payload.
-        $postdata = [
-            'timestamp' => time(),
-            'user' => $USER->username,
-            'skey' => $USER->sesskey,
-            'uidnr' => $USER->idnumber,
-            'action' => 'submit',
-            'cidnr' => $assignment->course,
-            'aid' => $assignment->id,
-            'aname' => $assignment->name,
-            'fname' => $USER->firstname,
-            'lname' => $USER->lastname,
-            'role' => 'student',
-            'filename' => $filename,
-            'file' => curl_file_create($tmpfile, $file->get_mimetype(), $filename),
-            'filehash' => hash_file($this->obj->hash, $tmpfile),
-        ];
-        $postdata['akey'] = $this->calc_akey($postdata, $this->obj->auth_secret, $this->obj->hash);
-        $this->add_group_data($postdata, $this->obj->auth_secret, $this->obj->hash);
+        // Common parameters.
+        $params = $this->get_common_params($assignment);
+
+        // Additional parameters.
+        $params['action'] = 'submit';
+        $params['role'] = 'student';
+        $params['filename'] = $filename;
+        $params['file'] = curl_file_create($tmpfile, $file->get_mimetype(), $filename);
+        $params['filehash'] = hash_file($this->obj->hash, $tmpfile);
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
+        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
         // Set cURL options.
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -547,26 +529,13 @@ class external_server {
     public function build_teacherview($assignment, $studusername = '') {
         global $USER;
 
-        if ($this->obj != null) {
-            $url = $this->obj->url;
-        } else {
-            $url = '';
-        }
+        // Common parameters.
+        $params = $this->get_common_params($assignment);
 
-        $params = [
-            'timestamp' => time(),
-            'user' => $USER->username,
-            'skey' => $USER->sesskey,
-            'uidnr' => $USER->idnumber,
-            'action' => 'view',
-            'cidnr' => $assignment->course,
-            'aid' => $assignment->id,
-            'aname' => $assignment->name,
-            'fname' => $USER->firstname,
-            'lname' => $USER->lastname,
-            'role' => 'teacher',
-            'studusername' => $studusername,
-        ];
+        // Additional parameters.
+        $params['action'] = 'view';
+        $params['role'] = 'teacher';
+        $params['studusername'] = $studusername;
         if ($this->obj != null) {
             $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         } else {
@@ -574,6 +543,12 @@ class external_server {
         }
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
+        // Get the URL.
+        if ($this->obj != null) {
+            $url = $this->obj->url;
+        } else {
+            $url = '';
+        }
         $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         return $url;
     }
@@ -606,24 +581,17 @@ class external_server {
     public function url_studentview($assignment) {
         global $USER;
 
-        $url = $this->obj->url;
-        $params = [
-            'timestamp' => time(),
-            'user' => $USER->username,
-            'skey' => $USER->sesskey,
-            'uidnr' => $USER->idnumber,
-            'action' => 'view',
-            'cidnr' => $assignment->course,
-            'aid' => $assignment->id,
-            'aname' => $assignment->name,
-            'fname' => $USER->firstname,
-            'lname' => $USER->lastname,
-            'role' => 'student',
-        ];
+        // Common parameters.
+        $params = $this->get_common_params($assignment);
 
+        // Additional parameters.
+        $params['action'] = 'view';
+        $params['role'] = 'student';
         $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
+        // Get the URL.
+        $url = $this->obj->url;
         $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         return $url;
     }
@@ -844,5 +812,29 @@ class external_server {
             $result['message'] = get_string('gradesupdated', 'assignsubmission_external_server', $updated);
             return $result;
         }
+    }
+
+    /**
+     * Get common parameters for external server requests.
+     *
+     * @return array
+     */
+    private function get_common_params($assignment) {
+        global $USER;
+
+        $cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false, MUST_EXIST);
+        $timecreated = $cm->added;
+
+        return [
+            'timestamp' => time(),
+            'user' => $USER->username,
+            'skey' => $USER->sesskey,
+            'uidnr' => $USER->idnumber,
+            'cidnr' => $assignment->course,
+            'aid' => $timecreated,
+            'aname' => $assignment->name,
+            'fname' => $USER->firstname,
+            'lname' => $USER->lastname,
+        ];
     }
 }

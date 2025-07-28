@@ -1,40 +1,59 @@
-# External server submission type
+# ---------------------------------------------------------------
+# This software is provided under the GNU General Public License
+# http://www.gnu.org/licenses/gpl.html
+# with Copyright © 2009 onwards
+#
+# Dipl.-Ing. Andreas Hruska
+# andreas.hruska@tuwien.ac.at
+#
+# Dipl.-Ing. Mag. rer.soc.oec. Katarzyna Potocka
+# katarzyna.potocka@tuwien.ac.at
+#
+# Vienna University of Technology
+# Teaching Support Center
+# Guﬂhausstraﬂe 28/E015
+# 1040 Wien
+# http://tsc.tuwien.ac.at/
+# ---------------------------------------------------------------
+# FOR Moodle 3.4
+# ---------------------------------------------------------------
 
-## Installation
+README.txt
+v.2018-01-24
 
-Place in /mod/assign/submission/
 
-## Configuration
+Extserver-Module DUMMY PACKAGE
+==============================
 
-As an administrator you can set the default values instance-wide on the settings page for
-administrators in the extserver module, as well as manage and test the available external servers.
+NOTICE: COURSE ID 0 is used for Testrequests
 
-## Description
+INSTALLATION
+====================================================================================================
+    Enter your secret (in moodle_extserver_lib.php in line 31)
+    Enter your upload directory (in moodle_extserver_upload.php line 71)
+        NOTE: the webserver (php) needs write access in this directory
 
-The external server submission type  enables users to submit files to be processed automatically by an external server.
+RECOMMENDED CONFIGURATION
+====================================================================================================
+    Allow access from moodle and the web to moodle_extserver.php
+    Allow access from moodle and deny the web to moodle_extserver_upload.php
+    Deny web access to your upload directory
 
-The activity module stores the submitted files and sends it via curl to the chosen server. This server is used to process the files in an automated way (e.g. automatically compile and run a certain source code) and is able to return an automatically calculated grade and feedback afterwards.
+INTERFACE // REQUESTS FROM MOODLE PLUGIN TO EXTERNAL SERVER
+====================================================================================================
+External Server communication runs via CURL HTTP requests.
+The External Server Module will request
+I) Connection check:
 
-### Usage Example
+    GET request to
+        ~/moodle_extserver.php
 
-Students of a computer science course have to write code to fullfill a certain task. The source code has to be submitted via this activity until a (optional) certain deadline. As soon as the students submit their version of the solution, the files get transfered to the external server and are automatically compiled and tested. Based on the output of the compiler, the testing framework and
-similar criteria the server calculates the grade and prepares an automated feedback for the students.
+without any variables, just to check HTTP Status Code!
 
-After everyone has submitted their solution (or the deadline passed) and all the processing is done, the teacher grades the students simply by fetching the grades from the external server. Afterwards the teacher is able to overrule the automatic grading or grade everyone manually from the start.
+II) Teacher View:
 
-## Documentation / Interface description
-
-Server-side code is included in this plugin under /tests/demo.
-
-### Connection check:
-
-GET request to the URL set in the server settings.
-
-Without any variables - just to check HTTP Status Code.
-
-### Teacher View:
-
-GET request to the URL set in the server settings.
+    GET request to
+        ~/moodle_extserver.php
 
 with following variables:
 
@@ -58,9 +77,10 @@ with following variables:
 
 Answer will be displayed in iframe!
 
-### Student View
+III) Student View:
 
-GET request to the URL set in the server settings.
+    GET request to
+        ~/moodle_extserver.php
 
 with following variables:
 
@@ -83,9 +103,10 @@ with following variables:
 
 Answer will be displayed in iframe!
 
-### Upload file
+IV) Upload file:
 
-GET request to the **Upload URL** set in the server settings.
+    POST request to
+        ~/moodle_extserver_upload.php
 
 with following variables:
 
@@ -109,9 +130,10 @@ with following variables:
     groupinfo     = (optional) JSON-encoded array of objects containing ID, name and members (=array of usernames)
     groupinfohash = (optional) hashed JSON encoded groupinfo with prepended server secret
 
-### Load Grades:
+V) Load Grades:
 
-GET request to the URL set in the server settings.
+    GET request to
+        ~/moodle_extserver.php
 
 with following variables:
 
@@ -144,19 +166,5 @@ expects XML of the following format in return:
         ...
     </assignment>
 
-
-## License
-
-This plugin is free software: you can redistribute it and/or modify it under the terms of the GNU
-General Public License as published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
-
-The plugin is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License with Moodle. If not, see
-<http://www.gnu.org/licenses/>.
-
-
-Good luck and have fun!
+CHANGELOG
+====================================================================================================

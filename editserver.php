@@ -71,10 +71,12 @@ if ($id) {
 if (!empty($hide)) {
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '0', ['id' => $server->id]);
     redirect($redirecturl);
+
 // Show a server.
 } elseif (!empty($show)) {
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '1', ['id' => $server->id]);
     redirect($redirecturl);
+
 // Delete a server.
 } elseif (!empty($delete)) {
 

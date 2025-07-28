@@ -72,17 +72,11 @@ class editserver_form extends moodleform {
         $mform->addElement('text', 'url', get_string('server:url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('url', PARAM_URL);
         $mform->addHelpButton('url', 'server:url', 'assignsubmission_external_server');
-        if (isset($server->url)) {
-            $mform->setConstant('serverurl', $server->url);
-        }
 
         // Form URL.
         $mform->addElement('text', 'form_url', get_string('server:form_url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('form_url', PARAM_URL);
         $mform->addHelpButton('form_url', 'server:form_url', 'assignsubmission_external_server');
-        if (isset($server->form_url)) {
-            $mform->setConstant('form_url', $server->form_url);
-        }
 
         // Authentification type.
         $authoptions = ['api_key' => get_string('server:auth_api_key', 'assignsubmission_external_server'),
@@ -99,6 +93,14 @@ class editserver_form extends moodleform {
         if (isset($server->auth_secret)) {
             $mform->setConstant('serversecret', $server->auth_secret);
         }
+
+        // Group information.
+        $groupinfo = [external_server::NO_GROUPINFO => get_string('server:groupinfo_not_needed', 'assignsubmission_external_server'),
+                      external_server::NEEDS_GROUP_INFO => get_string('server:groupinfo_must_be_sent', 'assignsubmission_external_server'),
+                     ];
+        $mform->addElement('select', 'groupinfo', get_string('server:groupinfo', 'assignsubmission_external_server'), $groupinfo);
+        $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_external_server');
+        $mform->setDefault('groupinfo', external_server::NO_GROUPINFO);
 
         // Hash algorithm.
         $hashalgorithms = hash_algos();
@@ -122,15 +124,6 @@ class editserver_form extends moodleform {
         if (isset($server->sslverification)) {
             $mform->setConstant('sslverification', $server->sslverification);
         }
-
-        // Group information.
-        $groupinfo = [external_server::NO_GROUPINFO => get_string('server:groupinfo_not_needed', 'assignsubmission_external_server'),
-                      external_server::NEEDS_GROUP_INFO => get_string('server:groupinfo_must_be_sent', 'assignsubmission_external_server'),
-                     ];
-        $mform->addElement('select', 'groupinfo', get_string('server:groupinfo', 'assignsubmission_external_server'), $groupinfo);
-        $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_external_server');
-        $mform->setAdvanced('groupinfo');
-        $mform->setDefault('groupinfo', external_server::NO_GROUPINFO);
 
         // Contact information.
         $mform->addElement('header', 'contact', get_string('server:contact', 'assignsubmission_external_server'));
