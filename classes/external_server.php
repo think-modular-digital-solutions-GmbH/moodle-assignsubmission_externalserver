@@ -384,9 +384,8 @@ class external_server {
         $params = $this->get_common_params($assignment);
 
         // Additional parameters.
-        $params['action'] = 'create';
+        $params['action'] = 'getgrades';
         $params['role'] = 'teacher';
-        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
         if ($userlist) {
             $params['unames'] = [];
@@ -395,6 +394,7 @@ class external_server {
                 $params['unames'][] = $cur;
             }
         }
+        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
 
         // Get the URL.
         $url = $this->obj->url;
