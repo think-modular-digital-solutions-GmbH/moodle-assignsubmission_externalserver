@@ -38,6 +38,7 @@ $string['editserver'] = 'Externen Server "{$a}" bearbeiten';
 $string['noservers'] = 'Keine externen Server konfiguriert';
 $string['filetypes'] = 'Erlaubte Dateitypen';
 $string['filetypes_help'] = 'Die akzeptierten Dateitypen können als kommagetrennte Liste mit Dateiendungen eingeschränkt werden. Falls das Feld leer ist, sind alle Dateitypen erlaubt.';
+$string['file_uploaded'] = 'Datei erfolgreich an den externen Server hochgeladen.';
 $string['uploads'] = 'Anzahl der erlaubten Uploads';
 $string['uploads_help'] = 'Legt fest wie oft ein/e Teilnehmer/in eine Datei hochladen darf. Nur die jeweils zuletzt hochgeladene Datei wird am Moodle Server gespeichert.';
 $string['addexternalserver'] = 'Externen Server hinzufügen';

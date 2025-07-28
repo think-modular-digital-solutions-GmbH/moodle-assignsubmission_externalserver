@@ -457,8 +457,8 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($file, $assignment) {
-        global $USER;
+    public function upload_file($file, $assignment, $notify = true) {
+        global $PAGE, $USER;
 
         // Get params.
         $url = $this->obj->form_url;
@@ -496,29 +496,20 @@ class external_server {
         // Evaluate the result.
         if ($postresult) {
             if ($curlinfo['http_code'] == 200) { // HTTP/1.0 200 OK.
-                \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_SUCCESS);
+                if ($notify) {
+                    \core\notification::add(get_string('file_uploaded', 'assignsubmission_external_server'), \core\output\notification::NOTIFY_SUCCESS);
+                }
                 return true;
             }
         }
-        \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
+        if ($notify) {
+            \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
+        }
         return false;
     }
 
     /**
-     * generates the url to get the view for a teacher
-     *
-     * @param stdClass $assignment
-     * @param string $studusername
-     * @return string
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    public function url_teacherview($assignment, $studusername = '') {
-        return $this->build_teacherview($assignment, $studusername);
-    }
-
-    /**
-     * does the actual url generation
+     * Generates the url to get the view for a teacher
      *
      * @param stdClass $assignment
      * @param string $studusername
@@ -623,15 +614,15 @@ class external_server {
     public function print_response($title, $content, $ok) {
         global $OUTPUT;
 
-        static $i = 1;
+        static $i = 0;
         $id = 'collapse-section-' . $i++;
         $chevron = '<i class="fa fa-chevron-right mr-1 rotate-icon"></i>';
 
         if ($ok) {
-            $textclass = 'text-success';
+            $textclass = 'success';
             $symbol = '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
         } else {
-            $textclass = 'text-error';
+            $textclass = 'error';
             $symbol = '<i class="fa fa-exclamation-triangle text-danger"></i>';
         }
 
@@ -647,7 +638,8 @@ class external_server {
         echo html_writer::tag('a',
             $chevron . ' ' . $title . ' ' . $symbol,
             [
-                'class' => "h4 d-block $textclass collapsed",
+                'class' => "h4 d-block text-$textclass collapsed",
+                'data-behat' => "$textclass-$i",
                 'data-toggle' => 'collapse',
                 'href' => '#' . $id,
                 'aria-expanded' => 'false',
@@ -822,8 +814,12 @@ class external_server {
     private function get_common_params($assignment) {
         global $USER;
 
-        $cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false, MUST_EXIST);
-        $timecreated = $cm->added;
+        if ($cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false)) {
+            $timecreated = $cm->added;
+        } else {
+            // Should only happen in behat tests and on fresh installs.
+            $timecreated = time();
+        }
 
         return [
             'timestamp' => time(),

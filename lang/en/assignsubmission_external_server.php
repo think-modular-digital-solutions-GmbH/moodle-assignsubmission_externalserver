@@ -38,6 +38,7 @@ $string['editserver'] = 'Edit external server "{$a}"';
 $string['noservers'] = 'No external servers configured';
 $string['filetypes'] = 'Allowed file types';
 $string['filetypes_help'] = 'Accepted file types can be restricted by entering a list of file extensions. If the field is left empty, then all file types are allowed.';
+$string['file_uploaded'] = 'File uploaded successfully to external server.';
 $string['uploads'] = 'Number of uploads';
 $string['uploads_help'] = 'Defines how many times a student can upload a file. Only the last uploaded file will be saved on the Moodle server';
 $string['addexternalserver'] = 'Add external server';
@@ -91,12 +92,12 @@ $string['server:groupinfo_not_needed'] = 'not required';
 $string['server:groupinfo_must_be_sent'] = 'required';
 
 // Servertest.
-$string['checkconnection'] = 'Check Connection';
+$string['checkconnection'] = 'Check connection';
 $string['testing'] = 'Testing external server "{$a->name}" on {$a->site}';
-$string['createassignment'] = 'Create Assignment';
-$string['studentview'] = 'Student View';
-$string['teacherview'] = 'Teacher View';
-$string['loadgrades'] = 'Load Grades';
+$string['createassignment'] = 'Create assignment';
+$string['studentview'] = 'Student view';
+$string['teacherview'] = 'Teacher view';
+$string['loadgrades'] = 'Load grades';
 $string['sslerror'] = 'The connection has been shut down before any output was made.
 Maybe there is a problem with the SSL certificate.
 Please install the trusted CA\'s certificates on your server!';

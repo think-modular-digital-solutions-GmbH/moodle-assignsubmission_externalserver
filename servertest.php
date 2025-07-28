@@ -93,12 +93,12 @@ $file = $fs->get_file(
 if (!$file) {
     $file = $fs->create_file_from_pathname($fileinfo, $tmpfilepath);
 }
-$result = $extserver->upload_file($file, $assignment);
+$result = $extserver->upload_file($file, $assignment, false);
 $content = $extserver->get_debuginfo();
 $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 
 // Teacher View.
-$extviewurl = $extserver->url_teacherview($assignment, '');
+$extviewurl = $extserver->build_teacherview($assignment, '');
 $result = $extserver->test_api_call($extviewurl);
 $extserver->print_response(get_string('teacherview', 'assignsubmission_external_server'),
     $result['content'], $result['status'], $extserver);
