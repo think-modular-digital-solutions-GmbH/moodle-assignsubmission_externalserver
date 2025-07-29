@@ -64,9 +64,6 @@ class editserver_form extends moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addHelpButton('name', 'server:name', 'assignsubmission_external_server');
         $mform->addRule('name', get_string('server:name_missing', 'assignsubmission_external_server'), 'required', null, 'client');
-        if (isset($server->name)) {
-            $mform->setConstant('name', $server->name);
-        }
 
         // Url.
         $mform->addElement('text', 'url', get_string('server:url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
@@ -84,15 +81,32 @@ class editserver_form extends moodleform {
                         'jwt' => get_string('server:auth_jwt', 'assignsubmission_external_server')];
         $mform->addElement('select', 'auth_type', get_string('server:auth_type', 'assignsubmission_external_server'), $authoptions);
         $mform->addHelpButton('auth_type', 'server:auth_type', 'assignsubmission_external_server');
-        $mform->setDefault('autht_ype', 'api_key');
+        $mform->setDefault('auth_type', 'api_key');
 
         // Authentification secret.
         $mform->addElement('passwordunmask', 'auth_secret', get_string('server:auth_secret', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_external_server');
-        if (isset($server->auth_secret)) {
-            $mform->setConstant('serversecret', $server->auth_secret);
-        }
+
+        // oauth2 token endpoint.
+        $mform->addElement('text', 'oauth2_endpoint', get_string('server:oauth2_endpoint', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->setType('oauth2_endpoint', PARAM_URL);
+        $mform->hideif('oauth2_endpoint', 'auth_type', 'eq', 'api_key');
+
+        // oauth2 client id.
+        $mform->addElement('text', 'oauth2_client_id', get_string('server:oauth2_client_id', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->setType('oauth2_client_id', PARAM_TEXT);
+        $mform->hideif('oauth2_client_id', 'auth_type', 'eq', 'api_key');
+
+        // JWT issuer.
+        $mform->addElement('text', 'jwt_issuer', get_string('server:jwt_issuer', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->setType('jwt_issuer', PARAM_TEXT);
+        $mform->hideif('jwt_issuer', 'auth_type', 'neq', 'jwt');
+
+        // JWT audience.
+        $mform->addElement('text', 'jwt_audience', get_string('server:jwt_audience', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->setType('jwt_audience', PARAM_TEXT);
+        $mform->hideif('jwt_audience', 'auth_type', 'neq', 'jwt');
 
         // Group information.
         $groupinfo = [external_server::NO_GROUPINFO => get_string('server:groupinfo_not_needed', 'assignsubmission_external_server'),
@@ -109,9 +123,6 @@ class editserver_form extends moodleform {
         $mform->addHelpButton('hash', 'server:hashalgorithm', 'assignsubmission_external_server');
         $mform->setAdvanced('hash');
         $mform->setDefault('hash', 'sha256');
-        if (isset($server->hash)) {
-            $mform->setConstant('hash', $server->hash);
-        }
 
         // SSL verification.
         $sslverificationoptions = [0 => get_string('server:sslverification_none', 'assignsubmission_external_server'),

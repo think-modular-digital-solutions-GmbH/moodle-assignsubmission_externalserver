@@ -64,7 +64,7 @@ $string['server:auth_type'] = 'Authentifizierungstyp';
 $string['server:auth_type_help'] = 'Wählen Sie den Authentifizierungstyp für den externen Server.';
 $string['server:auth_api_key'] = 'API Key';
 $string['server:auth_jwt'] = 'JWT';
-$string['server:auth_oauth2'] = 'OAUTH2';
+$string['server:auth_oauth2'] = 'OAuth2';
 $string['server:auth_secret'] = 'Schlüssel:';
 $string['server:auth_secret_help'] = 'Je nach Authentifizierungstyp, entweder ein API Key oder ein Shared Secret.';
 $string['server:contact'] = 'Kontakt';
@@ -90,6 +90,10 @@ $string['server:groupinfo'] = 'Gruppeninformationen';
 $string['server:groupinfo_help'] = 'Einstellung legt fest, ob der externe Server die Gruppeninformationen benötigt oder nicht. Auf \'erforderlich\' setzen, wenn externer Server Gruppeninfos benötigt um korrekt zu arbeiten. Auf \'nicht erforderlich\' setzen, wenn diese nicht benötigt werden';
 $string['server:groupinfo_not_needed'] = 'nicht erforderlich';
 $string['server:groupinfo_must_be_sent'] = 'erforderlich';
+$string['server:oauth2_endpoint'] = 'OAuth2 Endpoint';
+$string['server:oauth2_client_id'] = 'OAuth2 Client ID';
+$string['server:jwt_issuer'] = 'JWT Issuer';
+$string['server:jwt_audience'] = 'JWT Audience';
 
 // Servertest.
 $string['checkconnection'] = 'Verbindung prüfen';
@@ -142,3 +146,7 @@ $string['nouploadsleft'] = 'Sie haben keine Uploads mehr für diese Aufgabe.';
 $string['cannotdelete'] = 'Dieser Server kann nicht gelöscht werden, da er in {$a} Aufgabe(n) verwendet wird.';
 $string['noneselected'] = 'Kein externer Server ausgewählt. Bitte wählen Sie in den Einstellungen einen externen Server, der für diese Aufgabe verwendet werden soll.';
 $string['noneselectedstudent'] = 'Es wurde vom Trainer/der Trainerin kein externer Server ausgewählt. Bitte kontaktieren Sie den/die Trainer/in, um einen externen Server für diese Aufgabe zu konfigurieren.';
+
+// Errors.
+$string['error:couldnotgetjwttoken'] = 'Konnte kein JWT Token vom externen Server abrufen. HTTP Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
+$string['error:requestfailed'] = 'Die Anfrage an den externen Server ist fehlgeschlagen. HTTP-Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';

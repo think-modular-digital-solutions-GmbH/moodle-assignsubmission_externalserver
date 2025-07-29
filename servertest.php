@@ -66,9 +66,9 @@ $assignment->course = '0';
 
 // Student View.
 $extviewurl = $extserver->url_studentview($assignment);
-$result = $extserver->test_api_call($extviewurl);
+$result = $extserver->http_request([], 'GET', $extviewurl);
 $extserver->print_response(get_string('studentview', 'assignsubmission_external_server'),
-    $result['content'], $result['status'], $extserver);
+    $result, $extserver->get_httpcode(), $extserver);
 
 // Submit file.
 $tmpfilename = 'uploadtest.zip';
@@ -99,9 +99,9 @@ $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 
 // Teacher View.
 $extviewurl = $extserver->build_teacherview($assignment, '');
-$result = $extserver->test_api_call($extviewurl);
-$extserver->print_response(get_string('teacherview', 'assignsubmission_external_server'),
-    $result['content'], $result['status'], $extserver);
+$result = $extserver->http_request([], 'GET', $extviewurl);
+$extserver->print_response(get_string('studentview', 'assignsubmission_external_server'),
+    $result, $extserver->get_httpcode(), $extserver);
 
 // Get grades.
 list($testuser, $params) = $DB->get_in_or_equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -115,7 +115,10 @@ if ($extserver->get_httpcode() == 501) {
 } else {
     $result = false;
 }
-if (!empty($content) && $content) {
+echo "<pre>";
+var_dump($content);
+die();
+if ($content && !empty($content)) {
     $pretty = new DOMDocument();
     $pretty->preserveWhiteSpace = false;
     $pretty->loadXML($content);

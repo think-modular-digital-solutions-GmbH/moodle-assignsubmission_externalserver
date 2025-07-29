@@ -146,6 +146,10 @@ if ($mform->is_cancelled()) {
     $newserver->form_url = $data->form_url;
     $newserver->auth_type = $data->auth_type;
     $newserver->auth_secret = $data->auth_secret;
+    $newserver->oauth2_client_id = $data->oauth2_client_id ?? '';
+    $newserver->oauth2_endpoint = $data->oauth2_endpoint ?? '';
+    $newserver->jwt_issuer = $data->jwt_issuer ?? '';
+    $newserver->jwt_audience = $data->jwt_audience ?? '';
     $newserver->hash = $data->hash;
     $newserver->sslverification = $data->sslverification;
     $newserver->groupinfo = $data->groupinfo;

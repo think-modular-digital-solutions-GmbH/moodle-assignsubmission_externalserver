@@ -32,6 +32,7 @@ use moodle_url;
 use \core\notification;
 use context_module;
 use stdClass;
+use GuzzleHttp\Client;
 
 require_once($CFG->dirroot . '/mod/assign/submission/external_server/lib.php');
 require_once($CFG->libdir . '/pdflib.php');
@@ -60,6 +61,9 @@ class external_server {
         'getgrades'   => ['unames'],
     ];
 
+    /** @var Client Guzzle HTTP client */
+    private $httpclient = null;
+
     /** @var stdClass Database record */
     public $obj = null;
     /** @var bool whether or not the connection is ok */
@@ -78,6 +82,7 @@ class external_server {
     public function __construct($id) {
         global $DB;
 
+        // Get external server from DB.
         if ($id != 0) {
             $id = (string) $id;
             $this->obj = $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
@@ -85,6 +90,13 @@ class external_server {
                 $this->obj->hash = 'sha256';
             }
         }
+
+        // Initialize the HTTP client.
+        $this->httpclient = new Client([
+            'base_uri' => $this->obj->url,
+            'timeout' => 10,
+            'verify' => !empty($this->obj->sslverification),
+        ]);
     }
 
     /**
@@ -140,7 +152,8 @@ class external_server {
     }
 
     /**
-     * Calculates the key which is used for security
+     * Calculates the key which is used for security.
+     *
      * @param string[]|string[][] $params all the params used for the request, which should be hashed
      * @param string $secret server secret
      * @param string $hash hashing algorithm to use!
@@ -202,6 +215,7 @@ class external_server {
 
     /**
      * Calculates the hash over user's group data!
+     *
      * @param string $jsongroupinfo json encoded group information
      * @param string $secret server secret
      * @param string $hash hashing algorithm to use!
@@ -224,7 +238,7 @@ class external_server {
     }
 
     /**
-     * Adds the group info (groupinfo and groupinfohash) to the given data array
+     * Adds the group info (groupinfo and groupinfohash) to the given data array.
      *
      * @param mixed[] $data the object to add groupinfo to!
      * @param string $secret the servers secret (for hashing group-infos!)
@@ -275,7 +289,8 @@ class external_server {
     }
 
     /**
-     * Sends the external server a request that a new assignment was created
+     * Sends the external server a request that a new assignment was created.
+     *
      * @deprecated this now works implicitly if a teacher views an assignment wich the server didnt know befor
      * @param stdClass $assignment
      * @return NULL|boolean
@@ -285,7 +300,7 @@ class external_server {
     public function create_assignment($assignment) {
         global $USER;
 
-        // Check requirements.
+        // Check prerequisites.
         if ($this->concheck != null) {
             return $this->concheck;
         }
@@ -302,27 +317,14 @@ class external_server {
         $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
-        // Start cURL request.
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->obj->url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-        // Get the result.
-        $postresult = curl_exec($ch);
-        $curlinfo = curl_getinfo($ch);
-        $this->debuginfo = curl_multi_getcontent($ch);
-        curl_close($ch);
+        // Make request.
+        $result = $this->http_request($params, 'POST');
 
         // Success.
-        if ($postresult) {
-            $this->httpcode = $curlinfo['http_code'];
+        if ($result) {
 
             // HTTP/1.0 201 Created.
-            if ($curlinfo['http_code'] == 201) {
+            if ($this->httpcode == 201) {
                 return true;
             }
         }
@@ -336,30 +338,20 @@ class external_server {
      * @return bool true if extserver retuns with http OK else it returns false
      */
     public function check_connection() {
+
+        // Check prerequisites.
         if ($this->concheck != null) {
             return $this->concheck;
         }
-
         if ($this->obj == null) {
             return $this->concheck = false;
         }
 
-        // Start cURL request.
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->obj->url);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-        curl_exec($ch);
-
-        // Get the result.
-        $info = curl_getinfo($ch);
-        $this->debuginfo = curl_multi_getcontent($ch);
-        $this->httpcode = $info['http_code'];
-        curl_close($ch);
+        // Make request.
+        $response = $this->http_request();
 
         // Check the HTTP code.
-        if ($info['http_code'] == 200) {
+        if ($this->httpcode == 200) {
             $this->concheck = true;
         } else {
             $this->concheck = false;
@@ -396,35 +388,20 @@ class external_server {
         }
         $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
 
-        // Get the URL.
-        $url = $this->obj->url;
-        $url = "$url?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-
-        // Set cURL options.
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-        // Execute cURL request.
-        $result = curl_exec($ch);
-        $curlinfo = curl_getinfo($ch);
-        $this->debuginfo = curl_multi_getcontent($ch);
-        curl_close($ch);
-        $this->httpcode = $curlinfo['http_code'];
+        // Make request.
+        $response = $this->http_request($params);
 
         // Evaluate the result.
-        if ($result) {
-            $xmlstr = $result;
+        if ($response) {
+
             // HTTP/1.0 200 OK.
-            if ($curlinfo['http_code'] == 200) {
+            if ($this->httpcode == 200) {
                 // Xml to array.
                 $parser = xml_parser_create('');
                 xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
                 xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
                 xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-                $result = xml_parse_into_struct($parser, trim($xmlstr), $xmlvalues);
+                $result = xml_parse_into_struct($parser, trim($response), $xmlvalues);
 
                 if ($result == 0) {
                     // Xml parse error.
@@ -477,25 +454,12 @@ class external_server {
         $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
 
-        // Set cURL options.
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, !empty($this->obj->sslverification));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->obj->sslverification);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-        // Execute cURL request.
-        $postresult = curl_exec($ch);
-        $curlinfo = curl_getinfo($ch);
-        $this->debuginfo = curl_multi_getcontent($ch);
-        $this->httpcode = $curlinfo['http_code'];
-        curl_close($ch);
+        // Make request.
+        $response = $this->http_request($params, 'POST');
 
         // Evaluate the result.
-        if ($postresult) {
-            if ($curlinfo['http_code'] == 200) { // HTTP/1.0 200 OK.
+        if ($response) {
+            if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
                 if ($notify) {
                     \core\notification::add(get_string('file_uploaded', 'assignsubmission_external_server'), \core\output\notification::NOTIFY_SUCCESS);
                 }
@@ -563,7 +527,8 @@ class external_server {
     }
 
     /**
-     * generates the url to get the view for a student
+     * Generates the url to get the view for a student.
+     *
      * @param stdClass $assignment
      * @return string
      * @throws coding_exception
@@ -588,7 +553,8 @@ class external_server {
     }
 
     /**
-     * displays the iframe
+     * Displays the iframe.
+     *
      * @param stdClass $assignment
      * @throws coding_exception
      * @throws dml_exception
@@ -833,4 +799,142 @@ class external_server {
             'lname' => $USER->lastname,
         ];
     }
+
+    /**
+     * Build header for external server requests.
+     *
+     * @return array
+     */
+    public function get_headers() {
+
+        $auth_type = $this->obj->auth_type;
+        $headers = [
+            'Content-Type' => 'application/json'
+        ];
+
+        // API key only.
+        if ($auth_type == 'api_key') {
+
+        } else if ($auth_type == 'oauth2') {
+
+        } else if ($auth_type == 'jwt') {
+            $headers['Authorization'] = 'Bearer ' . $this->get_jwt_token();
+        }
+
+
+        return $headers;
+    }
+
+    /**
+     * Get JWT token.
+     *
+     * @return string JWT token
+     */
+    private function get_jwt_token() {
+
+        // Get params.
+        $token_url = $this->obj->oauth2_endpoint;
+        $client_id = $this->obj->oauth2_client_id;
+        $client_secret = $this->obj->auth_secret;
+        $jwt_issuer = $this->obj->jwt_issuer;
+        $jwt_audience = $this->obj->jwt_audience;
+
+        // Build the token request.
+        $response = $this->httpclient->post($token_url, [
+            'headers' => [
+                'Content-Type' => 'application/json'
+            ],
+            'json' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => $client_id,
+                'client_secret' => $client_secret,
+                'audience' => $jwt_audience,
+                'issuer' => $jwt_issuer
+            ]
+        ]);
+
+        // Get the token from the response.
+        $status_code = $response->getStatusCode();
+        $body = json_decode($response->getBody()->getContents(), true);
+        if ($status_code != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldntnotgetjwttoken', 'assignsubmission_external_server', $status_code),
+                \core\output\notification::NOTIFY_ERROR);
+        }
+
+        return $body['access_token'];
+    }
+
+    /**
+     * Make an HTTP request to the external server.
+     *
+     * @param array $params Parameters for the request.
+     * @param string $type HTTP method type (GET or POST).
+     * @param string|null $url Optional URL to override the base URL.     *
+     * @return false|mixed The response from the server or false on failure.
+     * @throws \GuzzleHttp\Exception\RequestException
+     */
+    public function http_request(array $params = [], $type = 'GET', $url = null) {
+        try {
+
+            // GET.
+            if ($type === 'GET') {
+                $payload = [
+                    'headers' => $this->get_headers(),
+                    'http_errors' => false, // allow access to non-2xx responses
+                ];
+
+                // Either get payload from params or use the given URL.
+                if ($url === null) {
+                    $url = $this->obj->url;
+                }
+                if (!empty($params)) {
+                    $payload['query'] = $params;
+                }
+
+                $response = $this->httpclient->get($url, $payload);
+
+            // POST.
+            } else {
+                $params['headers'] = $this->get_headers();
+                $response = $this->httpclient->post($this->obj->url, [
+                    'form_params' => $params,
+                ]);
+            }
+
+            $result = $response->getBody()->getContents();
+            $this->httpcode = $response->getStatusCode();
+            $this->debuginfo = $this->get_debuginfo_from_response($response);
+            return $result;
+
+        } catch (RequestException $e) {
+            $this->debuginfo = $e->getMessage();
+            $this->httpcode = 0;
+            $error = get_string('error:requestfailed', 'assignsubmission_external_server', $this->debuginfo);
+            \core\notification::add($error, \core\output\notification::NOTIFY_ERROR);
+            return false;
+        }
+    }
+
+    /**
+     * Set debug information from the response.
+     *
+     * @param \GuzzleHttp\Psr7\Response $response The response object.
+     * @return void
+     */
+    private function get_debuginfo_from_response($response) {
+        $status = $response->getStatusCode();
+        $reason = $response->getReasonPhrase();
+        $headers = $response->getHeaders();
+
+        // Reconstruct headers
+        $headerString = "HTTP/1.1 {$status} {$reason}\n";
+        foreach ($headers as $name => $values) {
+            foreach ($values as $value) {
+                $headerString .= "{$name}: {$value}\n";
+            }
+        }
+
+        return $headerString;
+    }
 }
+

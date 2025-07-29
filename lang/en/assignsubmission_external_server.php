@@ -64,7 +64,7 @@ $string['server:auth_type'] = 'Authentification type';
 $string['server:auth_type_help'] = 'Select the authentification type for the external server.';
 $string['server:auth_api_key'] = 'API key';
 $string['server:auth_jwt'] = 'JWT';
-$string['server:auth_oauth2'] = 'OAUTH2';
+$string['server:auth_oauth2'] = 'OAuth2';
 $string['server:auth_secret'] = 'Key/secret:';
 $string['server:auth_secret_help'] = 'Depending on the authentification type, you may have to enter a secret key or token here. This is used to verify the authenticity of requests from Moodle to the external server.';
 $string['server:contact'] = 'Contact';
@@ -90,6 +90,10 @@ $string['server:groupinfo'] = 'Group informations';
 $string['server:groupinfo_help'] = 'Setting defines if external server requires group information to work properly. Set to \'required\' if the external server needs group information. Set to \'not required\' if group information is not used.';
 $string['server:groupinfo_not_needed'] = 'not required';
 $string['server:groupinfo_must_be_sent'] = 'required';
+$string['server:oauth2_endpoint'] = 'OAuth2 endpoint';
+$string['server:oauth2_client_id'] = 'OAuth2 client ID';
+$string['server:jwt_issuer'] = 'JWT issuer';
+$string['server:jwt_audience'] = 'JWT audience';
 
 // Servertest.
 $string['checkconnection'] = 'Check connection';
@@ -143,3 +147,7 @@ $string['nouploadsleft'] = 'You do not have any uploads left for this assignment
 $string['cannotdelete'] = 'This server cannot be deleted, it is in use in {$a} assignment(s).';
 $string['noneselected'] = 'No external server selected. Please select an external server in the settings to use for this assignment.';
 $string['noneselectedstudent'] = 'No external server has been selected by the teacher. Please contact your teacher to configure an external server for this assignment.';
+
+// Errors.
+$string['error:couldnotgetjwttoken'] = 'Could not get JWT token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
+$string['error:requestfailed'] = 'Request to external server failed. HTTP status code: {$a}. Please check the server settings and try again.';
