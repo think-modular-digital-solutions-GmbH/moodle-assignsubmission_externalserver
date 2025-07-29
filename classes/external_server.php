@@ -609,16 +609,17 @@ class external_server {
         echo html_writer::tag('a',
             $chevron . ' ' . $title . ' ' . $symbol,
             [
-                'class' => "h4 d-block text-$textclass collapsed",
+                'class' => "h4 d-block text-$textclass",
                 'data-behat' => "$textclass-$i",
                 'data-toggle' => 'collapse',
                 'href' => '#' . $id,
                 'aria-expanded' => 'false',
                 'aria-controls' => $id,
+                'role' => 'button',
             ]
         );
 
-        echo html_writer::start_div('collapse mt-2', ['id' => $id]);
+        echo html_writer::start_div('collapse show mt-2', ['id' => $id]);
         echo html_writer::div("<pre>$content</pre>", 'extserver-result ml-4');
         echo html_writer::end_div();
         echo html_writer::end_div();
@@ -949,7 +950,7 @@ class external_server {
             }
 
             $result = $response->getBody()->getContents();
-            $resulthtml = '<div class="d-inline-block alert alert-success">' . $result . '</div>';
+            $resulthtml = '<div class="d-inline-block alert alert-info m-3">' . $result . '</div>';
             $this->httpcode = $response->getStatusCode();
             $this->debuginfo = $this->get_debuginfo_from_response($response) . $resulthtml;
             return $result;

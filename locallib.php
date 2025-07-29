@@ -711,6 +711,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Check uploadattempts.
         $uploadattempts = $this->has_uploadattempts($submission, $quickedit);
 
+        $context = $this->assignment->get_context();
         if ($uploadattempts['has_uploads'] || has_capability('mod/assign:grade', $context)) {
 
             // Embed form.
@@ -789,21 +790,22 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // Unlimited uploads.
         if ($maxuploads < 0) {
+            $has_uploads = true;
+            $type = 'success';
             $uploadstring = get_string('unlimiteduploads', 'assignsubmission_external_server');
 
         // Show attempts.
         } else {
             $uploadstring = "$uploads/$maxuploads";
-            $percent = $uploads / $maxuploads * 100;
-        }
 
-        // See if we still have uploads left.
-        if ($uploads < $maxuploads) {
-            $has_uploads = true;
-            $type = 'success';
-        } else {
-            $has_uploads = false;
-            $type = 'danger';
+            // See if we still have uploads left.
+            if ($uploads < $maxuploads) {
+                $has_uploads = true;
+                $type = 'success';
+            } else {
+                $has_uploads = false;
+                $type = 'danger';
+            }
         }
 
         // Render text.

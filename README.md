@@ -26,6 +26,8 @@ After everyone has submitted their solution (or the deadline passed) and all the
 
 Server-side code is included in this plugin under /tests/demo.
 
+If you want to use this exact code for testing purposes, just chown wwwdata for the /upload directory, so you can upload files.
+
 ### Connection check:
 
 GET request to the URL set in the server settings.
