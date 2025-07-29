@@ -150,4 +150,5 @@ $string['noneselectedstudent'] = 'No external server has been selected by the te
 
 // Errors.
 $string['error:couldnotgetjwttoken'] = 'Could not get JWT token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
+$string['error:couldnotgetoauth2token'] = 'Could not get OAuth2 token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
 $string['error:requestfailed'] = 'Request to external server failed. HTTP status code: {$a}. Please check the server settings and try again.';

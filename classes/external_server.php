@@ -821,13 +821,47 @@ class external_server {
         if ($auth_type == 'api_key') {
 
         } else if ($auth_type == 'oauth2') {
-
+            $headers['Authorization'] = 'Bearer ' . $this->get_oauth2_token();
         } else if ($auth_type == 'jwt') {
             $headers['Authorization'] = 'Bearer ' . $this->get_jwt_token();
         }
 
-
         return $headers;
+    }
+
+    /**
+     * Get OAuth2 token.
+     *
+     * @return string OAuth2 token
+     */
+    private function get_oauth2_token() {
+
+        // Get params.
+        $token_url = $this->obj->oauth2_endpoint;
+        $client_id = $this->obj->oauth2_client_id;
+        $client_secret = $this->obj->auth_secret;
+
+        // Build the token request.
+        $response = $this->httpclient->post($token_url, [
+            'headers' => [
+                'Content-Type' => 'application/json'
+            ],
+            'json' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => $client_id,
+                'client_secret' => $client_secret
+            ]
+        ]);
+
+        // Get the token from the response.
+        $status_code = $response->getStatusCode();
+        $body = json_decode($response->getBody()->getContents(), true);
+        if ($status_code != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldntnotgetoauth2token', 'assignsubmission_external_server', $status_code),
+                \core\output\notification::NOTIFY_ERROR);
+        }
+
+        return $body['access_token'];
     }
 
     /**

@@ -693,23 +693,32 @@ class assign_submission_external_server extends assign_submission_plugin {
         $title = get_string('externalservertitle', 'assignsubmission_external_server', $extservername);
         $html = html_writer::tag('h2', $title);
 
+        // Quick submission/grading edit form.
+        $url = new moodle_url('/mod/assign/view.php', [
+            'id' => $cmid,
+            'action' => 'view',
+        ]);
+        $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
+
+        // Determine if quickedit form was used to submit.
+        $quickedit = false;
+        if ($data = $mform->get_data()) {
+            if (isset($data->submitbutton)) {
+                $quickedit = true;
+            }
+        }
+
         // Check uploadattempts.
-        $uploadattempts = $this->has_uploadattempts($submission);
-        if ($uploadattempts['has_uploads']) {
+        $uploadattempts = $this->has_uploadattempts($submission, $quickedit);
+
+        if ($uploadattempts['has_uploads'] || has_capability('mod/assign:grade', $context)) {
 
             // Embed form.
             ob_start();
-
-            // Quick submission/grading edit form.
-            $url = new moodle_url('/mod/assign/view.php', [
-                'id' => $cmid,
-                'action' => 'view',
-            ]);
-            $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
             $mform->display();
 
             // Handle submission.
-            if ($data = $mform->get_data()) {
+            if ($data) {
 
                 // Grading.
                 if (isset($data->gradebutton)) {
@@ -720,6 +729,8 @@ class assign_submission_external_server extends assign_submission_plugin {
 
                 // Submission.
                 } else {
+
+                    $quickedit = 1; // Used to fake progression on the upload counter.
 
                     // Update the submission record
                     $submission->timemodified = time();
@@ -755,10 +766,11 @@ class assign_submission_external_server extends assign_submission_plugin {
      * Prints the upload attempts for the current user.
      *
      * @param stdClass $submission The submission record.
+     * @param bool $quickedit We have to add one submission if quickedit form was used.
      *
      * @return array
      */
-    private function has_uploadattempts($submission) {
+    private function has_uploadattempts($submission, $quickedit = false) {
 
         global $DB, $USER;
 
@@ -767,6 +779,11 @@ class assign_submission_external_server extends assign_submission_plugin {
             array('submission' => $submission->id));
         if (!$uploads) {
             $uploads = 0; // Default to 0 if no uploads found.
+        }
+
+        // If quick edit form was used, we have to add one upload.
+        if ($quickedit) {
+            $uploads++;
         }
         $maxuploads = $this->get_config('uploads');
 
