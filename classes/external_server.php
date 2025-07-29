@@ -454,7 +454,7 @@ class external_server {
         $params['action'] = 'submit';
         $params['role'] = 'student';
         $params['filename'] = $filename;
-        $params['file'] = curl_file_create($tmpfile, $file->get_mimetype(), $filename);
+        $params['file'] = ['path' => $tmpfile, 'mime' => $file->get_mimetype(), 'filename' => $filename];
         $params['filehash'] = hash_file($this->obj->hash, $tmpfile);
         $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
         $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
@@ -915,12 +915,13 @@ class external_server {
     public function http_request(array $params = [], $type = 'GET', $url = null) {
         try {
 
+            $payload = [
+                'headers' => $this->get_headers(),
+                'http_errors' => false, // allow access to non-2xx responses
+            ];
+
             // GET.
             if ($type === 'GET') {
-                $payload = [
-                    'headers' => $this->get_headers(),
-                    'http_errors' => false, // allow access to non-2xx responses
-                ];
 
                 // Either get payload from params or use the given URL.
                 if ($url === null) {
@@ -934,22 +935,30 @@ class external_server {
 
             // POST.
             } else {
-                $params['headers'] = $this->get_headers();
-                $response = $this->httpclient->post($this->obj->url, [
-                    'form_params' => $params,
-                ]);
+
+                // Convert file uploads to multipart/form-data.
+                if (!empty($params['file'])) {
+                    unset($payload['headers']['Content-Type']); // Guzzle will set the correct Content-Type for multipart requests.
+                    $payload['multipart'] = $this->convert_to_multipart($params);
+                    $url = $this->obj->form_url;
+                } else {
+                    $payload['form_params'] = $params;
+                    $url = $this->obj->url;
+                }
+                $response = $this->httpclient->post($url, $payload);
             }
 
             $result = $response->getBody()->getContents();
+            $resulthtml = '<div class="d-inline-block alert alert-success">' . $result . '</div>';
             $this->httpcode = $response->getStatusCode();
-            $this->debuginfo = $this->get_debuginfo_from_response($response);
+            $this->debuginfo = $this->get_debuginfo_from_response($response) . $resulthtml;
             return $result;
 
         } catch (RequestException $e) {
             $this->debuginfo = $e->getMessage();
             $this->httpcode = 0;
             $error = get_string('error:requestfailed', 'assignsubmission_external_server', $this->debuginfo);
-            \core\notification::add($error, \core\output\notification::NOTIFY_ERROR);
+               \core\notification::add($error, \core\output\notification::NOTIFY_ERROR);
             return false;
         }
     }
@@ -966,14 +975,45 @@ class external_server {
         $headers = $response->getHeaders();
 
         // Reconstruct headers
-        $headerString = "HTTP/1.1 {$status} {$reason}\n";
+        $header_string = "HTTP/1.1 {$status} {$reason}\n";
         foreach ($headers as $name => $values) {
             foreach ($values as $value) {
-                $headerString .= "{$name}: {$value}\n";
+                $header_string .= "{$name}: {$value}\n";
             }
         }
 
-        return $headerString;
+        return $header_string;
     }
+
+    /**
+     * Converts the given parameters to a multipart array for file upload.
+     *
+     * @param array $params The parameters to convert.
+     * @return array The multipart array.
+     */
+    private function convert_to_multipart(array $params): array {
+        $multipart = [];
+
+        foreach ($params as $key => $value) {
+            if ($key === 'file' && is_array($value)) {
+                $multipart[] = [
+                    'name'     => $key,
+                    'contents' => fopen($value['path'], 'r'),
+                    'filename' => $value['filename'],
+                    'headers'  => [
+                        'Content-Type' => $value['mime']
+                    ]
+                ];
+            } else {
+                $multipart[] = [
+                    'name'     => $key,
+                    'contents' => $value
+                ];
+            }
+        }
+
+        return $multipart;
+    }
+
 }
 
