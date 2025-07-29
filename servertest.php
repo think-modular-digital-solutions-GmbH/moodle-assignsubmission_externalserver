@@ -106,7 +106,7 @@ $extserver->print_response(get_string('studentview', 'assignsubmission_external_
 // Get grades.
 list($testuser, $params) = $DB->get_in_or_equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 $userlist = $DB->get_fieldset_select('user', 'username', " id ".$testuser, $params);
-$res = $extserver->load_grades($assignment, $userlist);
+$res = $extserver->load_grades($assignment, $userlist, true);
 $content = $extserver->get_debuginfo();
 if ($extserver->get_httpcode() == 501) {
     $result = true;
@@ -115,13 +115,10 @@ if ($extserver->get_httpcode() == 501) {
 } else {
     $result = false;
 }
-echo "<pre>";
-var_dump($content);
-die();
-if ($content && !empty($content)) {
+if ($result && !empty($result)) {
     $pretty = new DOMDocument();
     $pretty->preserveWhiteSpace = false;
-    $pretty->loadXML($content);
+    $pretty->loadXML($result);
     $pretty->formatOutput = true;
     $content = '<code>' . htmlentities($pretty->saveXML(), ENT_COMPAT) . '</code>';
 }

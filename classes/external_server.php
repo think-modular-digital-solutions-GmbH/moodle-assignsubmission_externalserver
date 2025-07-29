@@ -365,11 +365,12 @@ class external_server {
      *
      * @param stdClass $assignment
      * @param string[]|bool $userlist
+     * @param bool $responseonly if true, only the response is returned, not the grades
      * @return bool|mixed:
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function load_grades($assignment, $userlist = false) {
+    public function load_grades($assignment, $userlist = false, $responseonly = false) {
         global $USER;
 
         // Common parameters.
@@ -396,6 +397,10 @@ class external_server {
 
             // HTTP/1.0 200 OK.
             if ($this->httpcode == 200) {
+
+                if ($responseonly) {
+                    return $response;
+                }
                 // Xml to array.
                 $parser = xml_parser_create('');
                 xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
