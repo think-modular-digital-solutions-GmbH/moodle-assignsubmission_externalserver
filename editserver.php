@@ -114,7 +114,7 @@ if (!empty($hide)) {
         echo $OUTPUT->header();
 
         // Deleting not allowed, server already in use.
-        if ($DB->count_records('assignsubmission_external_server', ['extservid' => $delete]) > 0) {
+        if (helper::get_assignments_using_server($id)) {
             throw new moodle_exception('delete:disabled', 'extserver');
         }
 

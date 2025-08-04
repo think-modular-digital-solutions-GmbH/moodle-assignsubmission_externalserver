@@ -47,7 +47,7 @@ $string['deleteexternalserver'] = 'Delete external server "{$a}"';
 $string['confirmdeleting'] = 'Are you sure you want to delete the external server "{$a}"? This action cannot be undone.';
 $string['unknownserver'] = 'Invalid server ID';
 $string['delete:disabled'] = 'Server is in use and cannot be deleted';
-$string['delete:success'] = 'Server deleted successdeletingfully';
+$string['delete:success'] = 'Server deleted successfully';
 $string['delete:error'] = 'Error deleting server';
 
 // Server form.
