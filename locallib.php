@@ -483,7 +483,8 @@ class assign_submission_external_server extends assign_submission_plugin {
                 $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
                 $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
                     ['cmid' => $cm->id, 'userid' => $userid, 'groupid' => $groupid]);
-                $html .= html_writer::link($url, get_string('gradeverb'), ['class' => 'btn btn-primary']);
+                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_external_server'), 
+                    ['class' => 'btn btn-primary mb-1']);
             }
         }
 

@@ -154,3 +154,4 @@ $string['error:couldnotgetoauth2token'] = 'Could not get OAuth2 token from exter
 $string['error:requestfailed'] = 'Request to external server failed. HTTP status code: {$a}. Please check the server settings and try again.';
 
 $string['expandresponse'] = 'View the response from the external server';
+$string['gradeverb'] = 'Get grade from external server';
