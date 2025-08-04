@@ -151,3 +151,5 @@ $string['noneselectedstudent'] = 'Es wurde vom Trainer/der Trainerin kein extern
 $string['error:couldnotgetjwttoken'] = 'Konnte keinen JWT Token vom externen Server abrufen. HTTP Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
 $string['error:couldnotgetoauth2token'] = 'Konnte keinen OAuth2 Token vom externen Server abrufen. HTTP Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
 $string['error:requestfailed'] = 'Die Anfrage an den externen Server ist fehlgeschlagen. HTTP-Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
+
+$string['expandresponse'] = 'Antwort des externen Servers anzeigen.';

@@ -49,6 +49,9 @@ $PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/external_ser
 $PAGE->set_heading(get_string('testing', 'assignsubmission_external_server',
     ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
 $PAGE->requires->css(new moodle_url('/mod/assign/submission/external_server/styles.css'));
+$PAGE->requires->js_call_amd('core/bootstraptoggle', 'init');
+$PAGE->requires->js_call_amd('core/bootstrap', 'init');
+
 
 // Start output.
 echo $OUTPUT->header();
