@@ -81,6 +81,12 @@ class assign_submission_external_server extends assign_submission_plugin {
         }
         $filetypes = (string)$filetypes;
 
+        // Add fieldset.
+        $mform->addElement('html', html_writer::start_div('border rounded', 
+            ['class' => 'assignsubmission-external-server-settings-details']));
+        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'), 
+            ['class' => 'assignsubmission-external-server-settings-legend']));
+
         // External server.
         $name = get_string('externalserver', 'assignsubmission_external_server');
         $submissioncount = $this->count_submissions();
@@ -136,6 +142,9 @@ class assign_submission_external_server extends assign_submission_plugin {
             $warning = $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING);
             $mform->addElement('html', $warning);
         }
+
+        // End fieldset.
+        $mform->addElement('html', html_writer::end_div());
     }
 
     /**
