@@ -582,19 +582,17 @@ class external_server {
      * @param string $content The server response's content
      * @param bool $ok Whether or not the response is ok
      */
-    public function print_response($title, $content, $ok) {
-        global $OUTPUT;
-
+    public function print_response($title, $content, $ok) {       
+        
         static $i = 0;
-        $id = 'collapse-section-' . $i++;
-        $chevron = '<i class="fa fa-chevron-right mr-1 rotate-icon"></i>';
+        $id = 'collapse-section-' . $i++;        
 
         if ($ok) {
             $textclass = 'success';
-            $symbol = '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+            $symbol = '<i class="fa fa-check-square-o ml-1" aria-hidden="true"></i>';
         } else {
-            $textclass = 'error';
-            $symbol = '<i class="fa fa-exclamation-triangle text-danger"></i>';
+            $textclass = 'danger';
+            $symbol = '<i class="fa fa-exclamation-triangle text-danger ml-1"></i>';
         }
 
         if (!$ok && empty($content)) {
@@ -602,27 +600,11 @@ class external_server {
             $content = ($httpcode === 0)
                 ? get_string('sslerror', 'assignsubmission_external_server')
                 : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
-        }
+        }        
 
-        echo html_writer::start_div('collapse-section mb-3');
-
-        echo html_writer::tag('a',
-            $chevron . ' ' . $title . ' ' . $symbol,
-            [
-                'class' => "h4 d-block text-$textclass",
-                'data-behat' => "$textclass-$i",
-                'data-toggle' => 'collapse',
-                'href' => '#' . $id,
-                'aria-expanded' => 'false',
-                'aria-controls' => $id,
-                'role' => 'button',
-            ]
-        );
-
-        echo html_writer::start_div('collapse show mt-2', ['id' => $id]);
-        echo html_writer::div("<pre>$content</pre>", 'extserver-result ml-4');
-        echo html_writer::end_div();
-        echo html_writer::end_div();
+        $summary = html_writer::tag('summary', $title . $symbol, ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i",]);
+        $content = html_writer::div($content, 'mb-3');
+        echo html_writer::tag('details', $summary . "<pre>$content</pre>", ['class' => 'moodle-collapsible extserver-result ml-4']);
     }
 
     /**

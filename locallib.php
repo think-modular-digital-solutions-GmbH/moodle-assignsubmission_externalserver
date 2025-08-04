@@ -757,27 +757,10 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // iFrame.
         if ($ext) {
-            $toggle_id = 'assignsubmission-external-server-response-toggle-' . $cmid;
+            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_external_server'), ['class' => 'h6 mt-3']);
+            $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
-            $button = html_writer::tag('button',
-                get_string('expandresponse', 'assignsubmission_external_server'),
-                [
-                    'class' => 'btn btn-link',
-                    'type' => 'button',
-                    'data-bs-toggle' => 'collapse',
-                    'data-bs-target' => "#$toggle_id",
-                    'aria-expanded' => 'false',
-                    'aria-controls' => $toggle_id
-                ]
-            );
-
-            $content = html_writer::div(
-                $ext->view_externalframe($this->assignment->get_instance()),
-                'collapse mt-2', // class
-                ['id' => $toggle_id] // attributes
-            );
-
-            $html .= html_writer::div($button . $content, 'my-collapsible-wrapper');
+            $html .= html_writer::tag('details', $summary . $content, ['class' => 'moodle-collapsible']);
         }
 
         $html .= '<hr>';

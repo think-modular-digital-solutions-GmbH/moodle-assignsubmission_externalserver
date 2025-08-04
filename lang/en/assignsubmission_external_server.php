@@ -153,4 +153,4 @@ $string['error:couldnotgetjwttoken'] = 'Could not get JWT token from external se
 $string['error:couldnotgetoauth2token'] = 'Could not get OAuth2 token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
 $string['error:requestfailed'] = 'Request to external server failed. HTTP status code: {$a}. Please check the server settings and try again.';
 
-$string['expandresponse'] = 'View the response from the external server.';
+$string['expandresponse'] = 'View the response from the external server';
