@@ -123,15 +123,15 @@ $string['quickupload_help'] = 'Neue Datei direkt an den externen Server schicken
 $string['upload'] = 'Upload';
 $string['needselectfile'] = 'Es wurde keine Datei ausgewählt.';
 $string['lastupload'] = 'Letzer Upload';
-$string['getgrades'] = 'Noten und Feedback abrufen';
+$string['getgrades'] = 'Bewertungen und Feedback abrufen';
 $string['externalservertitle'] = 'Externer Server "{$a}"';
 $string['uploadattempts'] = 'Uploads';
 $string['viewsubmissionat'] = 'Abgabe ansehen';
-$string['quickgradinginfo'] = '<ul><li>Sie können die Noten und Feedbacks für alle Teilnehmer/innen eines bestimmten Status auf einmal aktualisieren.</li>
+$string['quickgradinginfo'] = '<ul><li>Sie können die Bewertungen und Feedbacks für alle Teilnehmer/innen eines bestimmten Status auf einmal aktualisieren.</li>
     <li>Einzelne Teilnehmer/innen können Sie auf der Seite für die {$a} aktualisieren.</li>
-    <li> Vorhandene Noten und Feedbacks werden dabei überschrieben.</li></ul>';
+    <li> Vorhandene Bewertungen und Feedbacks werden dabei überschrieben.</li></ul>';
 $string['start'] = 'Start';
-$string['downloadgradesfor'] = 'Bewertungen herunterladen für';
+$string['downloadgradesfor'] = 'Bewertungen laden für';
 $string['all'] = 'alle Teilnehmer/innen';
 $string['ungraded'] = 'alle nicht bewerteten';
 $string['submitted'] = 'alle abgegebenen';

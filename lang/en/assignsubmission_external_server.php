@@ -132,7 +132,7 @@ $string['quickgradinginfo'] = '<ul>
     <li>You can update individual participants on the {$a} page.</li>
     <li>Existing grades and feedback will be overwritten.</li></ul>';
 $string['start'] = 'Start';
-$string['downloadgradesfor'] = 'Download grades for';
+$string['downloadgradesfor'] = 'Load grades for';
 $string['all'] = 'all participants';
 $string['ungraded'] = 'all ungraded';
 $string['submitted'] = 'all submitted';
