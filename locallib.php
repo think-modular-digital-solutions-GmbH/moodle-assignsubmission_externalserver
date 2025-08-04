@@ -82,9 +82,9 @@ class assign_submission_external_server extends assign_submission_plugin {
         $filetypes = (string)$filetypes;
 
         // Add fieldset.
-        $mform->addElement('html', html_writer::start_div('border rounded', 
+        $mform->addElement('html', html_writer::start_div('border rounded',
             ['class' => 'assignsubmission-external-server-settings-details']));
-        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'), 
+        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'),
             ['class' => 'assignsubmission-external-server-settings-legend']));
 
         // External server.
@@ -210,7 +210,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                                                     'assignsubmission_external_server',
                                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
                                                     $submissionid);
-            $mform->addElement('filepicker', 'files_filemanager', $this->get_name(), null, $fileoptions);
+            $mform->addElement('filepicker', 'external_server_filemanager', $this->get_name(), null, $fileoptions);
 
         } else {
 
@@ -255,19 +255,20 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Save file.
         $fileoptions = $this->get_file_options();
         $fileoptions['maxbytes'] = (int) $fileoptions['maxbytes'];
-        $data = file_postupdate_standard_filemanager($data,
-                                                     'files',
-                                                     $fileoptions,
-                                                     $this->assignment->get_context(),
-                                                     'assignsubmission_external_server',
-                                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
-                                                     $submission->id);
 
+        $draftitemid = $data->external_server_filemanager; 
+        file_save_draft_area_files(
+            $draftitemid,
+            $this->assignment->get_context()->id,
+            'assignsubmission_external_server',
+            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+            $submission->id,
+            $fileoptions
+        );       
 
         $filesubmission = $this->get_file_submission($submission->id);
 
         // Plagiarism code event trigger when files are uploaded.
-
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
                                      'assignsubmission_external_server',
@@ -275,7 +276,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                                      $submission->id,
                                      'id',
                                      false
-        );
+        );        
 
         // No files uploaded - this can happen via the quick_edit_form.
         if (!$files) {
@@ -327,13 +328,12 @@ class assign_submission_external_server extends assign_submission_plugin {
             'filesubmissioncount' => $count,
             'groupid' => $groupid,
             'groupname' => $groupname
-        );
+        );        
 
         // File was submitted.
-        if ($filesubmission) {
+        if ($filesubmission && $files) {
 
-            $filesubmission->numfiles = $this->count_files($submission->id,
-                                                           ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
+            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
 
             // Increment the number of uploads.
             $filesubmission->uploads++;
@@ -352,7 +352,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             $event->trigger();
 
             // Upload the file to the external server.
-            $file = reset($files);
+            $file = reset($files);                        
             $externalserver = $this->get_external_server();
             if ($externalserver) {
                 $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
@@ -540,7 +540,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         $files = $fs->get_area_files(context_user::instance($USER->id)->id,
                                      'user',
                                      'draft',
-                                     $data->files_filemanager,
+                                     $data->external_server_filemanager,
                                      'id',
                                      false);
         return count($files) == 0;
@@ -584,21 +584,6 @@ class assign_submission_external_server extends assign_submission_plugin {
             $DB->insert_record('assignsubmission_external_server', $filesubmission);
         }
         return true;
-    }
-
-    /**
-     * Return a description of external params suitable for uploading a file submission from a webservice.
-     *
-     * @return \core_external\external_description|null
-     */
-    public function get_external_parameters() {
-        return array(
-            'files_filemanager' => new external_value(
-                PARAM_INT,
-                'The id of a draft area containing files for this submission.',
-                VALUE_OPTIONAL
-            )
-        );
     }
 
     /**
@@ -686,10 +671,10 @@ class assign_submission_external_server extends assign_submission_plugin {
         }
 
         // String for external server name.
+        $context = $this->assignment->get_context();
         if ($ext) {
             $extservername = $ext->obj->name;
         } else {
-            $context = $this->assignment->get_context();
             if (has_capability('mod/assign:grade', $context)) {
                 $message = get_string('noneselected', 'assignsubmission_external_server');
             } else {
@@ -708,6 +693,26 @@ class assign_submission_external_server extends assign_submission_plugin {
             'action' => 'view',
         ]);
         $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
+
+        // Get file for filepicker.
+        $draftitemid = file_get_submitted_draft_itemid('external_server_filemanager');        
+        if (empty($draftitemid)) {
+            $draftitemid = \file_get_unused_draft_itemid();
+        }
+        $fileoptions = $this->get_file_options();
+        file_prepare_draft_area(
+            $draftitemid,
+            $this->assignment->get_context()->id,
+            'assignsubmission_external_server',
+            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+            $submission->id,
+            $fileoptions
+        );
+
+        // Set the draft item ID into a data object
+        $formdata = new stdClass();
+        $formdata->external_server_filemanager = $draftitemid;
+        $mform->set_data($formdata);
 
         // Determine if quickedit form was used to submit.
         $quickedit = false;
@@ -746,8 +751,9 @@ class assign_submission_external_server extends assign_submission_plugin {
                     $submission->timemodified = time();
                     $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
 
-                    // Save the core submission record (handles group mode properly)
-                    $this->assignment->save_submission($data, $notices);
+                    // Save the core submission record (handles group mode properly)                    
+                    $plugin = $this->assignment->get_submission_plugin_by_type('external_server');
+                    $plugin->save($submission, $data);
                 }
             }
 

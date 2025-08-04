@@ -125,14 +125,14 @@ class quick_edit_form extends moodleform {
             $html);
 
         // Upload Filepicker.
-        $fileoptions = $this->extserver->get_file_options();
+        $fileoptions = $this->extserver->get_file_options();                
         $mform->addElement('filepicker',
-                            'files_filemanager',
+                            'external_server_filemanager',
                             get_string('quickupload', 'assignsubmission_external_server'),
                             null,
                             $fileoptions
         );
-        $mform->addHelpButton('files_filemanager', 'quickupload', 'assignsubmission_external_server');
+        $mform->addHelpButton('external_server_filemanager', 'quickupload', 'assignsubmission_external_server');
         $mform->addElement('submit', 'submitbutton', get_string('upload', 'assignsubmission_external_server'));
 
         // Preserve values as hidden fields
