@@ -25,20 +25,7 @@
 function xmldb_assignsubmission_external_server_upgrade($oldversion) {
     global $DB;
 
-    $dbman = $DB->get_manager();
-
-    // Add JWT audience field.
-    if ($oldversion < 2025072804) {
-
-        $table = new xmldb_table('assignsubmission_external_server_servers');
-
-        $field = new xmldb_field('jwt_audience', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'jwt_issuer');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        upgrade_plugin_savepoint(true, 2025072804, 'assignsubmission', 'external_server');
-    }
+    $dbman = $DB->get_manager();    
 
     // Add OAuth2 client ID, endpoint and JWT issuer fields.
     if ($oldversion < 2025072803) {
@@ -61,6 +48,19 @@ function xmldb_assignsubmission_external_server_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2025072803, 'assignsubmission', 'external_server');
+    }
+
+    // Add JWT audience field.
+    if ($oldversion < 2025072804) {
+
+        $table = new xmldb_table('assignsubmission_external_server_servers');
+
+        $field = new xmldb_field('jwt_audience', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'jwt_issuer');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025072804, 'assignsubmission', 'external_server');
     }
 
     return true;
