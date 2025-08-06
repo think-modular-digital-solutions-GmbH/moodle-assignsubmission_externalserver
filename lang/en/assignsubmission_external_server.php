@@ -41,8 +41,6 @@ $string['filetypes_help'] = 'Accepted file types can be restricted by entering a
 $string['file_uploaded'] = 'File uploaded successfully to external server.';
 $string['uploads'] = 'Number of uploads';
 $string['uploads_help'] = 'Defines how many times a student can upload a file. Only the last uploaded file will be saved on the Moodle server';
-$string['addexternalserver'] = 'Add external server';
-$string['editexternalserver'] = 'Edit external server "{$a}"';
 $string['deleteexternalserver'] = 'Delete external server "{$a}"';
 $string['confirmdeleting'] = 'Are you sure you want to delete the external server "{$a}"? This action cannot be undone.';
 $string['unknownserver'] = 'Invalid server ID';
@@ -98,7 +96,6 @@ $string['server:jwt_audience'] = 'JWT audience';
 // Servertest.
 $string['checkconnection'] = 'Check connection';
 $string['testing'] = 'Testing external server "{$a->name}" on {$a->site}';
-$string['createassignment'] = 'Create assignment';
 $string['studentview'] = 'Student view';
 $string['teacherview'] = 'Teacher view';
 $string['loadgrades'] = 'Load grades';
@@ -113,20 +110,16 @@ $string['enabled_help'] = 'Participants can send a submission to a preconfigured
 $string['externalserver'] = 'Server';
 $string['externalserver_help'] = 'Select the external server to use for this assignment. External servers can be configured in the site administration.';
 $string['selectserver'] = ' --- select external server ---';
-$string['submissionswarning'] = 'There are already {$a} submission(s) for this assignment. Some settings may not be changed anymore.';
+$string['submissionswarning'] = 'There are already submissions with a max of {$a} uploads(s) for this assignment. Some settings may not be changed anymore.';
 
 // Other new.
 $string['unlimiteduploads'] = 'unlimited';
 $string['connectionstatus'] = 'Connection to external server';
-$string['quickupload'] = 'Quick upload';
-$string['quickupload_help'] = 'Upload a new file to the external server directly. Will still count as an upload attempt.';
 $string['upload'] = 'Upload';
 $string['needselectfile'] = 'Please provide a valid file to upload.';
-$string['lastupload'] = 'Last upload';
 $string['getgrades'] = 'Get grades and feedback from external server';
 $string['externalservertitle'] = 'External server "{$a}"';
 $string['uploadattempts'] = 'Uploads';
-$string['viewsubmissionat'] = 'View submission';
 $string['quickgradinginfo'] = '<ul>
     <li>You can update the grades and feedback for all participants with a specific status at once.</li>
     <li>You can update individual participants on the {$a} page.</li>

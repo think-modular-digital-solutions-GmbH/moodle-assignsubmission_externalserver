@@ -31,7 +31,7 @@ define('ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS', ['server', 'maxbytes', 'file
 
 use assignsubmission_external_server\helper;
 use assignsubmission_external_server\external_server;
-use assignsubmission_external_server\quick_edit_form;
+use assignsubmission_external_server\quick_grading_form;
 
 /**
  * Library class for external server submission plugin
@@ -89,7 +89,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // External server.
         $name = get_string('externalserver', 'assignsubmission_external_server');
-        $submissioncount = $this->count_submissions();
+        $submissioncount = $this->get_max_submissions();
         if ($submissioncount > 0) {
             $visible = []; // If there are already submissions, include all the servers, so that now-invisible still show as selected.
         } else {
@@ -127,7 +127,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // Number of uploads.
         $name = get_string('uploads', 'assignsubmission_external_server');
-        $options = helper::get_upload_options($this->count_submissions());
+        $options = helper::get_upload_options($submissioncount);
         $mform->addElement('select', 'assignsubmission_external_server_uploads', $name, $options);
         $mform->addHelpButton('assignsubmission_external_server_uploads', 'uploads', 'assignsubmission_external_server');
         $mform->setDefault('assignsubmission_external_server_uploads', $uploads);
@@ -196,11 +196,17 @@ class assign_submission_external_server extends assign_submission_plugin {
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
         global $OUTPUT;
 
+        // Add fieldset.
+        $mform->addElement('html', html_writer::start_div('border rounded',
+            ['class' => 'assignsubmission-external-server-settings-details']));
+        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'),
+            ['class' => 'assignsubmission-external-server-settings-legend']));
+
         // Check if there are uploads left.
-        $has_uploads = $this->has_uploadattempts($submission)['has_uploads'];
+        $uploadattempts = $this->has_uploadattempts($submission);
 
         // Display filepicker.
-        if ($has_uploads) {
+        if ($uploadattempts['has_uploads']) {
             $fileoptions = $this->get_file_options();
             $submissionid = $submission ? $submission->id : 0;
             $data = file_prepare_standard_filemanager($data,
@@ -218,6 +224,14 @@ class assign_submission_external_server extends assign_submission_plugin {
             $message = get_string('nouploadsleft', 'assignsubmission_external_server');
             $mform->addElement('static', 'no_uploads', '', $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING));
         }
+
+        // Upload attempts.
+        $html = html_writer::div($uploadattempts['html'], 'float-right pt-1');
+        $mform->addElement('static', 'uploadattempts', get_string('uploadattempts', 'assignsubmission_external_server'),
+            $html);
+
+        // End fieldset.
+        $mform->addElement('html', html_writer::end_div());
 
         return true;
     }
@@ -256,7 +270,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         $fileoptions = $this->get_file_options();
         $fileoptions['maxbytes'] = (int) $fileoptions['maxbytes'];
 
-        $draftitemid = $data->external_server_filemanager; 
+        $draftitemid = $data->external_server_filemanager;
         file_save_draft_area_files(
             $draftitemid,
             $this->assignment->get_context()->id,
@@ -264,7 +278,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
             $submission->id,
             $fileoptions
-        );       
+        );
 
         $filesubmission = $this->get_file_submission($submission->id);
 
@@ -276,9 +290,9 @@ class assign_submission_external_server extends assign_submission_plugin {
                                      $submission->id,
                                      'id',
                                      false
-        );        
+        );
 
-        // No files uploaded - this can happen via the quick_edit_form.
+        // No files uploaded.
         if (!$files) {
             $url = new moodle_url('/mod/assign/view.php', [
                 'id' => $this->assignment->get_course_module()->id,
@@ -328,7 +342,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             'filesubmissioncount' => $count,
             'groupid' => $groupid,
             'groupname' => $groupname
-        );        
+        );
 
         // File was submitted.
         if ($filesubmission && $files) {
@@ -341,10 +355,6 @@ class assign_submission_external_server extends assign_submission_plugin {
             // Update filesubmission.
             $DB->update_record('assignsubmission_external_server', $filesubmission);
 
-            // Update submission - this is needed for quick_edit_form to update it.
-            $submission->timemodified = time();
-            $DB->update_record('assign_submission', $submission);
-
             // Fire event.
             $params['objectid'] = $filesubmission->id;
             $event = \assignsubmission_external_server\event\submission_updated::create($params);
@@ -352,7 +362,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             $event->trigger();
 
             // Upload the file to the external server.
-            $file = reset($files);                        
+            $file = reset($files);
             $externalserver = $this->get_external_server();
             if ($externalserver) {
                 $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
@@ -483,7 +493,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                 $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
                 $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
                     ['cmid' => $cm->id, 'userid' => $userid, 'groupid' => $groupid]);
-                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_external_server'), 
+                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_external_server'),
                     ['class' => 'btn btn-primary mb-1']);
             }
         }
@@ -621,18 +631,20 @@ class assign_submission_external_server extends assign_submission_plugin {
     }
 
     /**
-     * Checks if there are already submissions for this assignment.
+     * Checks if there are already submissions for this assignment and
+     * returns the max number of upload attempts.
      *
-     * @return bool
+     * @return int The max number of upload attempts for a submissions.
      */
-    public function count_submissions() {
+    public function get_max_submissions() {
         global $DB;
 
         if (!$this->assignment->get_context()) {
             return 0;
         } else {
-            return $DB->count_records('assignsubmission_external_server',
-                ['assignment' => $this->assignment->get_instance()->id]);
+            return $DB->get_field('assignsubmission_external_server', 'MAX(uploads)', [
+                'assignment' => $this->assignment->get_instance()->id,
+            ]);
         }
     }
 
@@ -658,7 +670,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      */
     public function view_header() {
 
-        global $OUTPUT, $USER;
+        global $OUTPUT, $PAGE, $USER;
 
         $ext = $this->get_external_server();
         $cmid = $this->assignment->get_course_module()->id;
@@ -688,52 +700,21 @@ class assign_submission_external_server extends assign_submission_plugin {
         $title = get_string('externalservertitle', 'assignsubmission_external_server', $extservername);
         $html = html_writer::tag('h2', $title);
 
-        // Quick submission/grading edit form.
-        $url = new moodle_url('/mod/assign/view.php', [
-            'id' => $cmid,
-            'action' => 'view',
-        ]);
-        $mform = new quick_edit_form($this, $this->assignment, $submission, $url);
-
-        // Get file for filepicker.
-        $draftitemid = file_get_submitted_draft_itemid('external_server_filemanager');        
-        if (empty($draftitemid)) {
-            $draftitemid = \file_get_unused_draft_itemid();
-        }
-        $fileoptions = $this->get_file_options();
-        file_prepare_draft_area(
-            $draftitemid,
-            $this->assignment->get_context()->id,
-            'assignsubmission_external_server',
-            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
-            $submission->id,
-            $fileoptions
-        );
-
-        // Set the draft item ID into a data object
-        $formdata = new stdClass();
-        $formdata->external_server_filemanager = $draftitemid;
-        $mform->set_data($formdata);
-
-        // Determine if quickedit form was used to submit.
-        $quickedit = false;
-        if ($data = $mform->get_data()) {
-            if (isset($data->submitbutton)) {
-                $quickedit = true;
-            }
-        }
-
-        // Check uploadattempts.
-        $uploadattempts = $this->has_uploadattempts($submission, $quickedit);
-
+        // Quick grading form.
         $context = $this->assignment->get_context();
-        if ($uploadattempts['has_uploads'] || has_capability('mod/assign:grade', $context)) {
+        if (has_capability('mod/assign:grade', $context)) {
+            $url = new moodle_url('/mod/assign/view.php', [
+                'id' => $cmid,
+                'action' => 'view',
+            ]);
+            $mform = new quick_grading_form($this, $this->assignment, $submission, $url);
 
             // Embed form.
             ob_start();
             $mform->display();
 
             // Handle submission.
+            $data = $mform->get_data();
             if ($data) {
 
                 // Grading.
@@ -742,19 +723,6 @@ class assign_submission_external_server extends assign_submission_plugin {
                         'status' => $data->status, 'cmid' => $cmid
                     ]);
                     redirect($url);
-
-                // Submission.
-                } else {
-
-                    $quickedit = 1; // Used to fake progression on the upload counter.
-
-                    // Update the submission record
-                    $submission->timemodified = time();
-                    $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
-
-                    // Save the core submission record (handles group mode properly)                    
-                    $plugin = $this->assignment->get_submission_plugin_by_type('external_server');
-                    $plugin->save($submission, $data);
                 }
             }
 
@@ -763,6 +731,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         }
 
         // Status table.
+        $uploadattempts = $this->has_uploadattempts($submission);
         $table = new html_table();
         $table->attributes['class'] = 'assignsubmission-external-server-table';
         $table->data = [
@@ -772,11 +741,20 @@ class assign_submission_external_server extends assign_submission_plugin {
         $html .= html_writer::table($table);
 
         // iFrame.
+        $PAGE->requires->js(new moodle_url('/mod/assign/submission/external_server/js/save_toggle_state.js'));
         if ($ext) {
-            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_external_server'), ['class' => 'h6 mt-3']);
+            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_external_server'),
+                ['class' => 'h6 mt-3']);
             $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
-            $html .= html_writer::tag('details', $summary . $content, ['class' => 'moodle-collapsible']);
+            // Get open state for collapsible from user preferences.
+            $is_open = get_user_preferences('assignsubmission_external_server_expanded', 0); // default: closed
+            $details_attributes = ['id' => 'external-server-details'];
+            if ($is_open) {
+                $details_attributes['open'] = 'open';
+            }
+
+            $html .= html_writer::tag('details', $summary . $content, $details_attributes);
         }
 
         $html .= '<hr>';
@@ -788,28 +766,25 @@ class assign_submission_external_server extends assign_submission_plugin {
      * Prints the upload attempts for the current user.
      *
      * @param stdClass $submission The submission record.
-     * @param bool $quickedit We have to add one submission if quickedit form was used.
      *
      * @return array
      */
-    private function has_uploadattempts($submission, $quickedit = false) {
+    public function has_uploadattempts($submission) {
 
         global $DB, $USER;
 
         // Get the number of uploads and max uploads.
-        $uploads = $DB->get_field('assignsubmission_external_server', 'uploads',
-            array('submission' => $submission->id));
+        $uploads = 0;
+        if ($submission) {
+            $uploads = $DB->get_field('assignsubmission_external_server', 'uploads',
+                array('submission' => $submission->id));
+        }
         if (!$uploads) {
             $uploads = 0; // Default to 0 if no uploads found.
         }
 
-        // If quick edit form was used, we have to add one upload.
-        if ($quickedit) {
-            $uploads++;
-        }
-        $maxuploads = $this->get_config('uploads');
-
         // Unlimited uploads.
+        $maxuploads = $this->get_config('uploads');
         if ($maxuploads < 0) {
             $has_uploads = true;
             $type = 'success';

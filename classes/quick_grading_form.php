@@ -42,7 +42,7 @@ use html_writer;
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quick_edit_form extends moodleform {
+class quick_grading_form extends moodleform {
 
     /** @var assign_submission_external_server $extserver The assignment instance */
     protected $extserver;
@@ -78,7 +78,9 @@ class quick_edit_form extends moodleform {
      */
     public function definition() {
 
-        $mform = $this->_form;
+        global $USER;
+
+        $mform = $this->_form;        
 
         // Show error.
         $error = optional_param('error', null, PARAM_TEXT);
@@ -115,26 +117,7 @@ class quick_edit_form extends moodleform {
             $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_external_server'));
 
         }
-
-        // Header for Submission.
-        $mform->addElement('header', 'quickuploadheader', get_string('pluginname', 'assignsubmission_external_server'));
-
-        // Submission info.
-        $html = html_writer::div($this->submission_info(), 'float-right');
-        $mform->addElement('static', 'submissioninfo', get_string('lastupload', 'assignsubmission_external_server'),
-            $html);
-
-        // Upload Filepicker.
-        $fileoptions = $this->extserver->get_file_options();                
-        $mform->addElement('filepicker',
-                            'external_server_filemanager',
-                            get_string('quickupload', 'assignsubmission_external_server'),
-                            null,
-                            $fileoptions
-        );
-        $mform->addHelpButton('external_server_filemanager', 'quickupload', 'assignsubmission_external_server');
-        $mform->addElement('submit', 'submitbutton', get_string('upload', 'assignsubmission_external_server'));
-
+        
         // Preserve values as hidden fields
         $mform->addElement('hidden', 'id', $this->assignment->get_course_module()->id);
         $mform->setType('id', PARAM_INT);

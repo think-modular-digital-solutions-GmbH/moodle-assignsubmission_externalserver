@@ -840,7 +840,7 @@ class external_server {
         $status_code = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldntnotgetoauth2token', 'assignsubmission_external_server', $status_code),
+            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $status_code),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -879,7 +879,7 @@ class external_server {
         $status_code = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldntnotgetjwttoken', 'assignsubmission_external_server', $status_code),
+            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $status_code),
                 \core\output\notification::NOTIFY_ERROR);
         }
 

@@ -86,79 +86,6 @@ class helper {
     }
 
     /**
-     * Helper function for getting the outcomes of user, if any.
-     * This was mostly created for code maintenance, to reduce the dublicated
-     * codelines here. Still a lot to do.
-     *
-     * @param bool $usesoutcomes tells whether or not the activity is set to use outcomes
-     * @param class $gradinginfo info on the grading of the user
-     * @param array $auser user info from the database
-     * @param bool $quickgrade whether or not quickgrading is active
-     * @param int $tabindex used for indexing the quickgrading fields so they can be tabbed in the right order
-     * @return string $outcomes indicates the relevant outcome
-     */
-    public static function mod_extserver_get_outcomes($usesoutcomes, $gradinginfo, $auser, $quickgrade, &$tabindex) {
-        $outcomes = '';
-        if ($usesoutcomes) {
-            foreach ($gradinginfo->outcomes as $n => $outcome) {
-                $outcomes .= '<div class="outcome"><label>'.$outcome->name.'</label>';
-                $options = make_grades_menu(-$outcome->scaleid);
-
-                if ($outcome->grades[$auser->id]->locked || !$quickgrade) {
-                    $options[0] = get_string('nooutcome', 'grades');
-                    $outcomes .= ': <span id="outcome_'.$n.'_'.$auser->id.'">'.
-                            $options[$outcome->grades[$auser->id]->grade].'</span>';
-                } else {
-                    $attributes = [];
-                    $attributes['tabindex'] = $tabindex++;
-                    $attributes['id'] = 'outcome_'.$n.'_'.$auser->id;
-                    $outcomes .= ' '.html_writer::select($options, 'outcome_'.$n.'['.$auser->id.']',
-                            $outcome->grades[$auser->id]->grade,
-                            [0 => get_string('nooutcome', 'grades')], $attributes);
-                }
-                $outcomes .= '</div>';
-            }
-        }
-        return $outcomes;
-    }
-
-    /**
-     * Helper function for setting the grades and calling an event on success.
-     * This was mostly created for code maintenance, to reduce the dublicated
-     * codelines here. Still a lot to do.
-     *
-     * @param stdClass $grades the grades to be set on user basis
-     * @param class $submission the submission being graded
-     * @param array $curgrade grades for the current user
-     * @param time $timemarked the time the grading was marked
-     * @return void
-     */
-    public static function set_grading_successful(&$grades, &$submission, $curgrade, $timemarked) {
-        global $DB, $PAGE;
-        $grades[$curgrade['userid']]->userid = $curgrade['userid'];
-        $grades[$curgrade['userid']]->rawgrade = $curgrade['grade'];
-        $grades[$curgrade['userid']]->dategraded = $timemarked;
-        $mailinfo = get_user_preferences('extserver_mailinfo', 0);
-        if (!$mailinfo) {
-            $submission->mailed = 1; // Treat as already mailed.
-        } else {
-            $submission->mailed = 0; // Make sure mail goes out (again, even).
-        }
-
-        // Don't update these.
-            unset($submission->data1);
-            unset($submission->data2);
-
-        $DB->update_record('extserver_submissions', $submission);
-        $event = \mod_extserver\event\submission_graded::create([
-                'objectid' => $PAGE->cm->instance,
-                'context' => $PAGE->context,
-        ]);
-        $event->add_record_snapshot('course', $PAGE->course);
-        $event->trigger();
-    }
-
-    /**
      * Get the options for number of uploads.
      *
      * @param int $submissioncount the current number of submissions
@@ -169,7 +96,7 @@ class helper {
         $maxuploads = [];
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_external_server');
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_external_server');
-        for ($i = 100; $i > $submissioncount; $i--) {
+        for ($i = 100; $i >= $submissioncount; $i--) {
             $maxuploads[$i] = $i;
         }
         return $maxuploads;

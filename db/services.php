@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the external server submission plugin.
+ * Services for the external server submission plugin.
  *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
@@ -25,15 +25,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Basics.
-$plugin->requires  = 2024100100;
-$plugin->component = 'assignsubmission_external_server';
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [];
-
-// Version.
-$plugin->version   = 2025080403602;
-$plugin->release = '1.0.0';
-
-// Supported versions.
-$plugin->supported = [404, 500];
+$functions = [
+    'assignsubmission_external_server_set_toggle_state' => [
+        'classname'   => 'assignsubmission_external_server\external',
+        'methodname'  => 'set_toggle_state',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => '',
+    ],
+];

@@ -41,8 +41,6 @@ $string['filetypes_help'] = 'Die akzeptierten Dateitypen können als kommagetren
 $string['file_uploaded'] = 'Datei erfolgreich an den externen Server hochgeladen.';
 $string['uploads'] = 'Anzahl der erlaubten Uploads';
 $string['uploads_help'] = 'Legt fest wie oft ein/e Teilnehmer/in eine Datei hochladen darf. Nur die jeweils zuletzt hochgeladene Datei wird am Moodle Server gespeichert.';
-$string['addexternalserver'] = 'Externen Server hinzufügen';
-$string['editexternalserver'] = 'Externen Server "{$a}" bearbeiten';
 $string['deleteexternalserver'] = 'Externen Server "{$a}" löschen';
 $string['confirmdeleting'] = 'Sind Sie sicher, dass Sie den externen Server "{$a}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
 $string['unknownserver'] = 'Ungültige Server ID';
@@ -98,7 +96,6 @@ $string['server:jwt_audience'] = 'JWT Audience';
 // Servertest.
 $string['checkconnection'] = 'Verbindung prüfen';
 $string['testing'] = 'Testen des externen Servers "{$a->name}" auf der Seite "{$a->site}"';
-$string['createassignment'] = 'Aufgabe erstellen';
 $string['studentview'] = 'Teilnehmer/innen Ansicht';
 $string['teacherview'] = 'Trainer/innen Ansicht';
 $string['loadgrades'] = 'Bewertungen laden';
@@ -113,20 +110,16 @@ $string['enabled_help'] = 'Teilnehmer/innen können eine Abgabe an einen vorkonf
 $string['externalserver'] = 'Server';
 $string['externalserver_help'] = 'Wählen Sie den externen Server, an den die Abgabe gesendet werden soll. Externe Server müssen zuvor in den Einstellungen des Plugins konfiguriert werden.';
 $string['selectserver'] = ' --- Externen Server auswählen ---';
-$string['submissionswarning'] = 'Es gibt bereits {$a} Abgabe(n) für diese Aufgabe. Deshalb sind einige der Einstellungen deaktiviert.';
+$string['submissionswarning'] = 'Es gibt bereits Abgabe(n) mit bis zu {$a} Upload(s) für diese Aufgabe. Deshalb sind einige der Einstellungen deaktiviert.';
 
 // Other new.
 $string['unlimiteduploads'] = 'unbegrenzt';
 $string['connectionstatus'] = 'Verbindung zum externem Server';
-$string['quickupload'] = 'Quick Upload';
-$string['quickupload_help'] = 'Neue Datei direkt an den externen Server schicken, zählt als Uploadversuch.';
 $string['upload'] = 'Upload';
 $string['needselectfile'] = 'Es wurde keine Datei ausgewählt.';
-$string['lastupload'] = 'Letzer Upload';
 $string['getgrades'] = 'Bewertungen und Feedback abrufen';
 $string['externalservertitle'] = 'Externer Server "{$a}"';
 $string['uploadattempts'] = 'Uploads';
-$string['viewsubmissionat'] = 'Abgabe ansehen';
 $string['quickgradinginfo'] = '<ul><li>Sie können die Bewertungen und Feedbacks für alle Teilnehmer/innen eines bestimmten Status auf einmal aktualisieren.</li>
     <li>Einzelne Teilnehmer/innen können Sie auf der Seite für die {$a} aktualisieren.</li>
     <li> Vorhandene Bewertungen und Feedbacks werden dabei überschrieben.</li></ul>';
