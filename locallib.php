@@ -636,7 +636,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return int The max number of upload attempts for a submissions.
      */
-    public function get_max_submissions() {
+    public function get_max_submissions() : int {
         global $DB;
 
         if (!$this->assignment->get_context()) {
@@ -644,7 +644,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         } else {
             return $DB->get_field('assignsubmission_external_server', 'MAX(uploads)', [
                 'assignment' => $this->assignment->get_instance()->id,
-            ]);
+            ]) ?: 0;
         }
     }
 

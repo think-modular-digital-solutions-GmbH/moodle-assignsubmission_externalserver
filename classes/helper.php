@@ -92,11 +92,11 @@ class helper {
      *
      * @return array
      */
-    public static function get_upload_options($submissioncount = 0) {
+    public static function get_upload_options(int $submissioncount = 0) {
         $maxuploads = [];
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_external_server');
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_external_server');
-        for ($i = 100; $i >= $submissioncount; $i--) {
+        for ($i = $submissioncount; $i <= 100; $i++) {
             $maxuploads[$i] = $i;
         }
         return $maxuploads;
