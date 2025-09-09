@@ -44,8 +44,8 @@ class behat_assignsubmission_external_server extends behat_base {
         global $CFG, $DB;
         $record = (object)[
             'name' => 'behat_test',
-            'url' => $CFG->wwwroot . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php',
-            'form_url' => $CFG->wwwroot . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php',
+            'url' => $CFG->wwwroot . '/mod/assign/submission/external_server/vendor/demo/moodle_external_assignment.php',
+            'form_url' => $CFG->wwwroot . '/mod/assign/submission/external_server/vendor/demo/moodle_external_assignment_upload.php',
             'auth_type' => 'api_key',
             'auth_secret' => '2345678987654',
             'hash' => 'sha256',

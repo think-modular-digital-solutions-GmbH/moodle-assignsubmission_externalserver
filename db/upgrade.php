@@ -25,7 +25,7 @@
 function xmldb_assignsubmission_external_server_upgrade($oldversion) {
     global $DB;
 
-    $dbman = $DB->get_manager();    
+    $dbman = $DB->get_manager();
 
     // Add OAuth2 client ID, endpoint and JWT issuer fields.
     if ($oldversion < 2025072803) {

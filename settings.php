@@ -45,7 +45,7 @@ $settings->add(new admin_setting_configselect('assignsubmission_external_server/
 
 // File types setting.
 $settings->add(new admin_setting_filetypes('assignsubmission_external_server/filetypes',
-    new lang_string('filetypes', 'assignsubmission_external_server'), // get_string does not work for setting_filetypes.
+    new lang_string('filetypes', 'assignsubmission_external_server'),
     new lang_string('filetypes_help', 'assignsubmission_external_server'),
     ''
 ));

@@ -1,4 +1,4 @@
-@assignsubmission_external_server
+@assignsubmission_external_server @assignsubmission
 Feature: In order to test the external server submission plugin
   I will add the external server shipped with the plugin
   and test it.
@@ -15,5 +15,3 @@ Feature: In order to test the external server submission plugin
     Then "//a[@data-behat='success-2']" "xpath_element" should exist
     Then "//a[@data-behat='success-4']" "xpath_element" should exist
     Then "//a[@data-behat='success-5']" "xpath_element" should exist
-
-

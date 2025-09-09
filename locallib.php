@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Library file for external server submission plugin
+ *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 // Constants.
 define('ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA', 'submission_external_server');
@@ -32,6 +32,7 @@ define('ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS', ['server', 'maxbytes', 'file
 use assignsubmission_external_server\helper;
 use assignsubmission_external_server\external_server;
 use assignsubmission_external_server\quick_grading_form;
+use \core\output\notification;
 
 /**
  * Library class for external server submission plugin
@@ -59,7 +60,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      */
     private function get_file_submission($submissionid) {
         global $DB;
-        return $DB->get_record('assignsubmission_external_server', array('submission'=>$submissionid));
+        return $DB->get_record('assignsubmission_external_server', ['submission' => $submissionid]);
     }
 
     /**
@@ -91,7 +92,8 @@ class assign_submission_external_server extends assign_submission_plugin {
         $name = get_string('externalserver', 'assignsubmission_external_server');
         $submissioncount = $this->get_max_submissions();
         if ($submissioncount > 0) {
-            $visible = []; // If there are already submissions, include all the servers, so that now-invisible still show as selected.
+            // If there are already submissions, include all the servers, so that now-invisible still show as selected.
+            $visible = [];
         } else {
             $visible = ['visible' => 1];
         }
@@ -176,7 +178,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                         'maxbytes' => $this->get_config('maxbytes'),
                         'maxfiles' => 1,
                         'accepted_types' => $this->get_configured_typesets(),
-                        'return_types' => (FILE_INTERNAL | FILE_CONTROLLED_LINK)
+                        'return_types' => (FILE_INTERNAL | FILE_CONTROLLED_LINK),
         ];
         // Use module default if nothing is set.
         if ($fileoptions['maxbytes'] == 0) {
@@ -222,7 +224,8 @@ class assign_submission_external_server extends assign_submission_plugin {
 
             // No uploads left, display message.
             $message = get_string('nouploadsleft', 'assignsubmission_external_server');
-            $mform->addElement('static', 'no_uploads', '', $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING));
+            $mform->addElement('static', 'no_uploads', '',
+                $OUTPUT->notification($message, notification::NOTIFY_WARNING));
         }
 
         // Upload attempts.
@@ -303,15 +306,15 @@ class assign_submission_external_server extends assign_submission_plugin {
         }
 
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
-        $params = array(
+        $params = [
             'context' => context_module::instance($this->assignment->get_course_module()->id),
             'courseid' => $this->assignment->get_course()->id,
             'objectid' => $submission->id,
-            'other' => array(
+            'other' => [
                 'content' => '',
-                'pathnamehashes' => array_keys($files)
-            )
-        );
+                'pathnamehashes' => array_keys($files),
+            ],
+        ];
         if (!empty($submission->userid) && ($submission->userid != $USER->id)) {
             $params['relateduserid'] = $submission->userid;
         }
@@ -326,7 +329,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         $groupid = 0;
         // Get the group name as other fields are not transcribed in the logs and this information is important.
         if (empty($submission->userid) && !empty($submission->groupid)) {
-            $groupname = $DB->get_field('groups', 'name', array('id' => $submission->groupid), MUST_EXIST);
+            $groupname = $DB->get_field('groups', 'name', ['id' => $submission->groupid], MUST_EXIST);
             $groupid = $submission->groupid;
         } else {
             $params['relateduserid'] = $submission->userid;
@@ -335,14 +338,14 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Unset the objectid and other field from params for use in submission events.
         unset($params['objectid']);
         unset($params['other']);
-        $params['other'] = array(
+        $params['other'] = [
             'submissionid' => $submission->id,
             'submissionattempt' => $submission->attemptnumber,
             'submissionstatus' => $submission->status,
             'filesubmissioncount' => $count,
             'groupid' => $groupid,
-            'groupname' => $groupname
-        );
+            'groupname' => $groupname,
+        ];
 
         // File was submitted.
         if ($filesubmission && $files) {
@@ -375,8 +378,8 @@ class assign_submission_external_server extends assign_submission_plugin {
 
             return $updatestatus;
 
-        // No file was submitted - this should not happen, but we handle it gracefully.
         } else {
+            // No file was submitted - this should not happen, but we handle it gracefully.
             $filesubmission = new stdClass();
             $filesubmission->numfiles = $this->count_files($submission->id,
                                                            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
@@ -425,7 +428,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return array - return an array of files indexed by filename
      */
     public function get_files(stdClass $submission, stdClass $user) {
-        $result = array();
+        $result = [];
         $fs = get_file_storage();
 
         $files = $fs->get_area_files($this->assignment->get_context()->id,
@@ -522,7 +525,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         global $DB;
         // Will throw exception on failure.
         $DB->delete_records('assignsubmission_external_server',
-                            array('assignment'=>$this->assignment->get_instance()->id));
+            ['assignment' => $this->assignment->get_instance()->id]);
 
         return true;
     }
@@ -562,7 +565,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return array - An array of fileareas (keys) and descriptions (values)
      */
     public function get_file_areas() {
-        return array(ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA=>$this->get_name());
+        return [ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA => $this->get_name()];
     }
 
     /**
@@ -584,7 +587,7 @@ class assign_submission_external_server extends assign_submission_plugin {
                                      'id',
                                      false);
         foreach ($files as $file) {
-            $fieldupdates = array('itemid' => $destsubmission->id);
+            $fieldupdates = ['itemid' => $destsubmission->id];
             $fs->create_file_from_storedfile($fieldupdates, $file);
         }
 
@@ -619,7 +622,7 @@ class assign_submission_external_server extends assign_submission_plugin {
     /**
      * Get the type sets configured for this assignment.
      *
-     * @return array('groupname', 'mime/type', ...)
+     * @return array
      */
     private function get_configured_typesets() {
         $typeslist = (string)$this->get_config('filetypes');
@@ -786,7 +789,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Unlimited uploads.
         $maxuploads = $this->get_config('uploads');
         if ($maxuploads < 0) {
-            $has_uploads = true;
+            $hasuploads = true;
             $type = 'success';
             $uploadstring = get_string('unlimiteduploads', 'assignsubmission_external_server');
 
@@ -796,10 +799,10 @@ class assign_submission_external_server extends assign_submission_plugin {
 
             // See if we still have uploads left.
             if ($uploads < $maxuploads) {
-                $has_uploads = true;
+                $hasuploads = true;
                 $type = 'success';
             } else {
-                $has_uploads = false;
+                $hasuploads = false;
                 $type = 'danger';
             }
         }
@@ -807,7 +810,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Render text.
         $html = html_writer::tag('span', $uploadstring, [
             'title' => get_string('uploadattempts', 'assignsubmission_external_server'), 'class' => "text-$type"]);
-        return ['has_uploads' => $has_uploads, 'html' => $html];
+        return ['has_uploads' => $hasuploads, 'html' => $html];
     }
 
     /**
@@ -858,7 +861,8 @@ class assign_submission_external_server extends assign_submission_plugin {
             if ($usersubmission &&
                 $usersubmission->status === ASSIGN_SUBMISSION_STATUS_SUBMITTED &&
                 $usersubmission->attemptnumber == $attempt) {
-                // This user likely triggered the group submission
+
+                // This user likely triggered the group submission.
                 return $member;
             }
         }

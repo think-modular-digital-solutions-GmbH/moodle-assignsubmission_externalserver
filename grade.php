@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Grade submissions from external server.
+ *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
@@ -23,6 +25,8 @@
 
 require('../../../../config.php');
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
+defined('MOODLE_INTERNAL') || die;
 
 use assignsubmission_external_server\external_server;
 use core_user;
@@ -38,8 +42,7 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $context = context_module::instance($cmid);
 $assignment = new assign($context, $cm, $course);
-$extserver_assignment = $assignment->get_plugin_by_type('assignsubmission', 'external_server');
-$ext = $extserver_assignment->get_external_server();
+$ext = $assignment->get_plugin_by_type('assignsubmission', 'external_server')->get_external_server();
 
 // Permission check.
 require_login();

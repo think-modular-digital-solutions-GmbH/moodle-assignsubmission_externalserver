@@ -72,14 +72,15 @@ if (!empty($hide)) {
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '0', ['id' => $server->id]);
     redirect($redirecturl);
 
-// Show a server.
-} elseif (!empty($show)) {
+} else if (!empty($show)) {
+
+    // Show a server.
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '1', ['id' => $server->id]);
     redirect($redirecturl);
 
-// Delete a server.
-} elseif (!empty($delete)) {
+} else if (!empty($delete)) {
 
+    // Delete a server.
     $assignments = helper::get_assignments_using_server($delete);
 
     if (!$entry = $DB->get_record('assignsubmission_external_server_servers', ['id' => $delete])) {

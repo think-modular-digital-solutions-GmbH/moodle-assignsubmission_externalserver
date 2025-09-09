@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use moodle_url;
-use \core\notification;
+use core\notification;
 use context_module;
 use stdClass;
 use GuzzleHttp\Client;
@@ -466,13 +466,14 @@ class external_server {
         if ($response) {
             if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
                 if ($notify) {
-                    \core\notification::add(get_string('file_uploaded', 'assignsubmission_external_server'), \core\output\notification::NOTIFY_SUCCESS);
+                    notification::add(get_string('file_uploaded', 'assignsubmission_external_server'),
+                        \core\output\notification::NOTIFY_SUCCESS);
                 }
                 return true;
             }
         }
         if ($notify) {
-            \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
+            notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
         }
         return false;
     }
@@ -582,10 +583,10 @@ class external_server {
      * @param string $content The server response's content
      * @param bool $ok Whether or not the response is ok
      */
-    public function print_response($title, $content, $ok) {       
-        
+    public function print_response($title, $content, $ok) {
+
         static $i = 0;
-        $id = 'collapse-section-' . $i++;        
+        $id = 'collapse-section-' . $i++;
 
         if ($ok) {
             $textclass = 'success';
@@ -600,7 +601,7 @@ class external_server {
             $content = ($httpcode === 0)
                 ? get_string('sslerror', 'assignsubmission_external_server')
                 : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
-        }        
+        }
 
         $summary = html_writer::tag('summary', $title . $symbol, ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i",]);
         $content = html_writer::div($content, 'mb-3');
@@ -820,27 +821,27 @@ class external_server {
     private function get_oauth2_token() {
 
         // Get params.
-        $token_url = $this->obj->oauth2_endpoint;
-        $client_id = $this->obj->oauth2_client_id;
-        $client_secret = $this->obj->auth_secret;
+        $tokenurl = $this->obj->oauth2_endpoint;
+        $clientid = $this->obj->oauth2_client_id;
+        $secret = $this->obj->auth_secret;
 
         // Build the token request.
-        $response = $this->httpclient->post($token_url, [
+        $response = $this->httpclient->post($tokenurl, [
             'headers' => [
                 'Content-Type' => 'application/json'
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
-                'client_id' => $client_id,
-                'client_secret' => $client_secret
+                'client_id' => $clientid,
+                'client_secret' => $secret
             ]
         ]);
 
         // Get the token from the response.
-        $status_code = $response->getStatusCode();
+        $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
-        if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $status_code),
+        if ($statuscode != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -855,31 +856,31 @@ class external_server {
     private function get_jwt_token() {
 
         // Get params.
-        $token_url = $this->obj->oauth2_endpoint;
-        $client_id = $this->obj->oauth2_client_id;
-        $client_secret = $this->obj->auth_secret;
-        $jwt_issuer = $this->obj->jwt_issuer;
-        $jwt_audience = $this->obj->jwt_audience;
+        $tokenurl = $this->obj->oauth2_endpoint;
+        $clientid = $this->obj->oauth2_client_id;
+        $secret = $this->obj->auth_secret;
+        $jwtissuer = $this->obj->jwt_issuer;
+        $jwtaudience = $this->obj->jwt_audience;
 
         // Build the token request.
-        $response = $this->httpclient->post($token_url, [
+        $response = $this->httpclient->post($tokenurl, [
             'headers' => [
                 'Content-Type' => 'application/json'
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
-                'client_id' => $client_id,
-                'client_secret' => $client_secret,
-                'audience' => $jwt_audience,
-                'issuer' => $jwt_issuer
+                'client_id' => $clientid,
+                'client_secret' => $secret,
+                'audience' => $jwtaudience,
+                'issuer' => $jwtissuer
             ]
         ]);
 
         // Get the token from the response.
-        $status_code = $response->getStatusCode();
+        $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
-        if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $status_code),
+        if ($statuscode != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -958,14 +959,14 @@ class external_server {
         $headers = $response->getHeaders();
 
         // Reconstruct headers
-        $header_string = "HTTP/1.1 {$status} {$reason}\n";
+        $headerstring = "HTTP/1.1 {$status} {$reason}\n";
         foreach ($headers as $name => $values) {
             foreach ($values as $value) {
-                $header_string .= "{$name}: {$value}\n";
+                $headerstring .= "{$name}: {$value}\n";
             }
         }
 
-        return $header_string;
+        return $headerstring;
     }
 
     /**

@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Add/edit server form for the external server submission plugin.
+ *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
@@ -24,8 +26,6 @@
 namespace assignsubmission_external_server;
 
 require_once($CFG->libdir . '/formslib.php');
-
-defined('MOODLE_INTERNAL') || die;
 
 use moodleform;
 use assignsubmission_external_server\external_server;
@@ -60,18 +60,21 @@ class editserver_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Name.
-        $mform->addElement('text', 'name', get_string('server:name', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'name',
+            get_string('server:name', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addHelpButton('name', 'server:name', 'assignsubmission_external_server');
         $mform->addRule('name', get_string('server:name_missing', 'assignsubmission_external_server'), 'required', null, 'client');
 
         // Url.
-        $mform->addElement('text', 'url', get_string('server:url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'url',
+            get_string('server:url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('url', PARAM_URL);
         $mform->addHelpButton('url', 'server:url', 'assignsubmission_external_server');
 
         // Form URL.
-        $mform->addElement('text', 'form_url', get_string('server:form_url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'form_url',
+            get_string('server:form_url', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('form_url', PARAM_URL);
         $mform->addHelpButton('form_url', 'server:form_url', 'assignsubmission_external_server');
 
@@ -79,32 +82,38 @@ class editserver_form extends moodleform {
         $authoptions = ['api_key' => get_string('server:auth_api_key', 'assignsubmission_external_server'),
                         'oauth2' => get_string('server:auth_oauth2', 'assignsubmission_external_server'),
                         'jwt' => get_string('server:auth_jwt', 'assignsubmission_external_server')];
-        $mform->addElement('select', 'auth_type', get_string('server:auth_type', 'assignsubmission_external_server'), $authoptions);
+        $mform->addElement('select', 'auth_type',
+            get_string('server:auth_type', 'assignsubmission_external_server'), $authoptions);
         $mform->addHelpButton('auth_type', 'server:auth_type', 'assignsubmission_external_server');
         $mform->setDefault('auth_type', 'api_key');
 
         // Authentification secret.
-        $mform->addElement('passwordunmask', 'auth_secret', get_string('server:auth_secret', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('passwordunmask', 'auth_secret',
+            get_string('server:auth_secret', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_external_server');
 
-        // oauth2 token endpoint.
-        $mform->addElement('text', 'oauth2_endpoint', get_string('server:oauth2_endpoint', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        // OAuth2 token endpoint.
+        $mform->addElement('text', 'oauth2_endpoint',
+            get_string('server:oauth2_endpoint', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('oauth2_endpoint', PARAM_URL);
         $mform->hideif('oauth2_endpoint', 'auth_type', 'eq', 'api_key');
 
-        // oauth2 client id.
-        $mform->addElement('text', 'oauth2_client_id', get_string('server:oauth2_client_id', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        // OAuth2 client id.
+        $mform->addElement('text', 'oauth2_client_id',
+            get_string('server:oauth2_client_id', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('oauth2_client_id', PARAM_TEXT);
         $mform->hideif('oauth2_client_id', 'auth_type', 'eq', 'api_key');
 
         // JWT issuer.
-        $mform->addElement('text', 'jwt_issuer', get_string('server:jwt_issuer', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'jwt_issuer',
+            get_string('server:jwt_issuer', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('jwt_issuer', PARAM_TEXT);
         $mform->hideif('jwt_issuer', 'auth_type', 'neq', 'jwt');
 
         // JWT audience.
-        $mform->addElement('text', 'jwt_audience', get_string('server:jwt_audience', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'jwt_audience',
+            get_string('server:jwt_audience', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('jwt_audience', PARAM_TEXT);
         $mform->hideif('jwt_audience', 'auth_type', 'neq', 'jwt');
 
@@ -128,7 +137,8 @@ class editserver_form extends moodleform {
         $sslverificationoptions = [0 => get_string('server:sslverification_none', 'assignsubmission_external_server'),
                                    2 => get_string('server:sslverification_identity', 'assignsubmission_external_server'),
                                 ];
-        $mform->addElement('select', 'sslverification', get_string('server:sslverification', 'assignsubmission_external_server'), $sslverificationoptions);
+        $mform->addElement('select', 'sslverification',
+            get_string('server:sslverification', 'assignsubmission_external_server'), $sslverificationoptions);
         $mform->addHelpButton('sslverification', 'server:sslverification', 'assignsubmission_external_server');
         $mform->setAdvanced('sslverification');
         $mform->setDefault('sslverification', 2);
@@ -140,7 +150,8 @@ class editserver_form extends moodleform {
         $mform->addElement('header', 'contact', get_string('server:contact', 'assignsubmission_external_server'));
 
         // Contact name.
-        $mform->addElement('text', 'contact_name', get_string('server:contact_name', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'contact_name',
+            get_string('server:contact_name', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('contact_name', PARAM_TEXT);
         $mform->addHelpButton('contact_name', 'server:contact_name', 'assignsubmission_external_server');
         if (isset($server->contact_name)) {
@@ -148,7 +159,8 @@ class editserver_form extends moodleform {
         }
 
         // Contact email.
-        $mform->addElement('text', 'contact_email', get_string('server:contact_email', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'contact_email',
+            get_string('server:contact_email', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('contact_email', PARAM_EMAIL);
         $mform->addHelpButton('contact_email', 'server:contact_email', 'assignsubmission_external_server');
         if (isset($server->contact_email)) {
@@ -156,15 +168,17 @@ class editserver_form extends moodleform {
         }
 
         // Contact phone.
-        $mform->addElement('text', 'contact_phone', get_string('server:contact_phone', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'contact_phone',
+            get_string('server:contact_phone', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('contact_phone', PARAM_TEXT);
         $mform->addHelpButton('contact_phone', 'server:contact_phone', 'assignsubmission_external_server');
         if (isset($server->contact_phone)) {
-            $mform->setConstant('contactphone', $server->contact_phone);
+            $mform->setConstant('contact_phone', $server->contact_phone);
         }
 
         // Contact organization.
-        $mform->addElement('text', 'contact_org', get_string('server:contact_org', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
+        $mform->addElement('text', 'contact_org',
+        get_string('server:contact_org', 'assignsubmission_external_server'), 'maxlength="254" size="50"');
         $mform->setType('contact_org', PARAM_TEXT);
         $mform->addHelpButton('contact_org', 'server:contact_org', 'assignsubmission_external_server');
         if (isset($server->contact_org)) {

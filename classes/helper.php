@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Helper methods for the external server submission plugin.
+ *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber
  * @copyright  2025 think-modular
@@ -22,8 +24,6 @@
  */
 
 namespace assignsubmission_external_server;
-
-defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use moodle_url;
@@ -56,10 +56,12 @@ class helper {
 
         // Show/hide.
         if ($server->visible) {
-            $url =  new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]);
+            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+                ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/hide', get_string('hide')));
         } else {
-            $url =  new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]);
+            $url =  new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+                ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/show', get_string('show')));
         }
 
@@ -68,9 +70,11 @@ class helper {
 
         // Delete.
         if ($assignments) {
-            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_external_server', count($assignments)), '', ['class' => 'iconsmall icon-disabled']);
+            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_external_server',
+                count($assignments)), '', ['class' => 'iconsmall icon-disabled']);
         } else {
-            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
+            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+                ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/delete', get_string('delete')));
         }
 
@@ -121,7 +125,7 @@ class helper {
             'plugin' => 'external_server',
             'subtype' => 'assignsubmission',
             'name' => 'server',
-            'value' => (string) $id
+            'value' => (string) $id,
         ];
         return $DB->get_records_sql($sql, $params);
     }

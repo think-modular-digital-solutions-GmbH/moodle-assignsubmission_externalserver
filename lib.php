@@ -23,8 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Serves files.
  *
@@ -43,7 +41,7 @@ function assignsubmission_external_server_pluginfile($course,
                                           $filearea,
                                           $args,
                                           $forcedownload,
-                                          array $options=array()) {
+                                          array $options=[]) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -53,7 +51,7 @@ function assignsubmission_external_server_pluginfile($course,
     require_login($course, false, $cm);
     $itemid = (int)array_shift($args);
     $record = $DB->get_record('assign_submission',
-                              array('id'=>$itemid),
+                              ['id' => $itemid],
                               'userid, assignment, groupid',
                               MUST_EXIST);
     $userid = $record->userid;
