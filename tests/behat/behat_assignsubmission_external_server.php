@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for the external server submission plugin.
+ * Behat tests for the external server submission plugin.
  *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
@@ -24,6 +24,15 @@
  */
 require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
 
+/**
+ * Behat steps for the external server submission plugin.
+ *
+ * @package    assignsubmission_external_server
+ * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ */
 class behat_assignsubmission_external_server extends behat_base {
 
     /**
