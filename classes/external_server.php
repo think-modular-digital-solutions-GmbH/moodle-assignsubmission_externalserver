@@ -79,7 +79,8 @@ class external_server {
      * @param int $id ID of external server to fetch from DB
      * @throws dml_exception
      */
-    public function __construct($id) {
+    public function __construct($id)
+    {
         global $DB;
 
         // Get external server from DB.
@@ -105,7 +106,7 @@ class external_server {
      * @param int $id ID of the external server in the DB
      * @return stdClass|null DB record or null if not found
      */
-    public static function get_server($id) {
+    public static function get_server($id): ?\stdClass {
         global $DB;
         return $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
     }
@@ -116,7 +117,7 @@ class external_server {
      * @return array DB records
      * @throws dml_exception
      */
-    public static function get_servers() {
+    public static function get_servers(): array {
         global $DB;
         return $DB->get_records('assignsubmission_external_server_servers', ['visible' => '1']);
     }
@@ -127,7 +128,7 @@ class external_server {
      * @return array DB records
      * @throws dml_exception
      */
-    public static function get_all_servers() {
+    public static function get_all_servers(): array {
         global $DB;
         return $DB->get_records('assignsubmission_external_server_servers');
     }
@@ -139,7 +140,7 @@ class external_server {
      * @return true
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
-    public static function delete_server($id) {
+    public static function delete_server($id): bool {
         global $DB;
 
         if (!is_numeric($id)) {
@@ -160,7 +161,7 @@ class external_server {
      * @return string
      * @throws coding_exception
      */
-    public function calc_akey($params, $secret, $hash) {
+    public function calc_akey($params, $secret, $hash): string {
         global $OUTPUT;
 
         $string = $secret;
@@ -221,7 +222,7 @@ class external_server {
      * @param string $hash hashing algorithm to use!
      * @return string
      */
-    public function calc_groups_hash($jsongroupinfo, $secret, $hash) {
+    public function calc_groups_hash($jsongroupinfo, $secret, $hash): string {
         if (empty($jsongroupinfo)) {
             return '';
         }
@@ -246,7 +247,7 @@ class external_server {
      * @return void
      * @throws dml_exception
      */
-    protected function add_group_data(array &$data, $secret, $hash) {
+    protected function add_group_data(array &$data, $secret, $hash): void {
         global $COURSE, $DB;
 
         // Check if this server needs group info.
@@ -297,7 +298,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function create_assignment($assignment) {
+    public function create_assignment($assignment): ?bool {
         global $USER;
 
         // Check prerequisites.
@@ -337,7 +338,7 @@ class external_server {
      *
      * @return bool true if extserver retuns with http OK else it returns false
      */
-    public function check_connection() {
+    public function check_connection(): bool {
 
         // Check prerequisites.
         if ($this->concheck != null) {
@@ -370,7 +371,8 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function load_grades($assignment, $userlist = false, $responseonly = false) {
+    public function load_grades($assignment, $userlist = false, $responseonly = false)
+    {
         global $USER;
 
         // Common parameters.
@@ -441,7 +443,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($file, $assignment, $notify = true) {
+    public function upload_file($file, $assignment, $notify = true): bool
         global $PAGE, $USER;
 
         // Get params.
@@ -489,7 +491,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function build_teacherview($assignment, $studusername = '') {
+    public function build_teacherview($assignment, $studusername = ''): string
         global $USER;
 
         // Common parameters.
@@ -521,7 +523,7 @@ class external_server {
      *
      * @return string the debuginfo
      */
-    public function get_debuginfo() {
+    public function get_debuginfo(): string
         return $this->debuginfo;
     }
 
@@ -530,7 +532,7 @@ class external_server {
      *
      * @return string http status code
      */
-    public function get_httpcode() {
+    public function get_httpcode(): string|bool
         return $this->httpcode;
     }
 
@@ -542,7 +544,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function url_studentview($assignment) {
+    public function url_studentview($assignment): string
         global $USER;
 
         // Common parameters.
@@ -567,7 +569,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function view_externalframe($assignment) {
+    public function view_externalframe($assignment): string
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
@@ -585,7 +587,7 @@ class external_server {
      * @param string $content The server response's content
      * @param bool $ok Whether or not the response is ok
      */
-    public function print_response($title, $content, $ok) {
+    public function print_response($title, $content, $ok): void
 
         static $i = 0;
         $id = 'collapse-section-' . $i++;
@@ -617,7 +619,7 @@ class external_server {
      * @param string $url The URL to send the request to.
      * @return array
      */
-    public function test_api_call($url) {
+    public function test_api_call($url): array
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -644,7 +646,7 @@ class external_server {
      *
      * @return array
      */
-    public function grade_submissions($assignment, $context, $filter, $userid) {
+    public function grade_submissions($assignment, $context, $filter, $userid): array
 
         global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
         require_once($CFG->libdir.'/gradelib.php');
@@ -773,7 +775,7 @@ class external_server {
      *
      * @return array
      */
-    private function get_common_params($assignment) {
+    private function get_common_params($assignment): array
         global $USER;
 
         if ($cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false)) {
@@ -801,7 +803,7 @@ class external_server {
      *
      * @return array
      */
-    public function get_headers() {
+    public function get_headers(): array
 
         $authtype = $this->obj->auth_type;
         $headers = [
@@ -823,7 +825,7 @@ class external_server {
      *
      * @return string OAuth2 token
      */
-    private function get_oauth2_token() {
+    private function get_oauth2_token(): string
 
         // Get params.
         $tokenurl = $this->obj->oauth2_endpoint;
@@ -858,7 +860,7 @@ class external_server {
      *
      * @return string JWT token
      */
-    private function get_jwt_token() {
+    private function get_jwt_token(): string
 
         // Get params.
         $tokenurl = $this->obj->oauth2_endpoint;
@@ -901,7 +903,7 @@ class external_server {
      * @return false|mixed The response from the server or false on failure.
      * @throws \GuzzleHttp\Exception\RequestException
      */
-    public function http_request(array $params = [], $type = 'GET', $url = null) {
+    public function http_request(array $params = [], $type = 'GET', $url = null): mixed
         try {
 
             $payload = [
@@ -957,7 +959,7 @@ class external_server {
      * @param \GuzzleHttp\Psr7\Response $response The response object.
      * @return void
      */
-    private function get_debuginfo_from_response($response) {
+    private function get_debuginfo_from_response($response): string
         $status = $response->getStatusCode();
         $reason = $response->getReasonPhrase();
         $headers = $response->getHeaders();
@@ -979,7 +981,7 @@ class external_server {
      * @param array $params The parameters to convert.
      * @return array The multipart array.
      */
-    private function convert_to_multipart(array $params): array {
+    private function convert_to_multipart(array $params): array
         $multipart = [];
 
         foreach ($params as $key => $value) {

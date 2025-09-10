@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <ruleset name="assignsubmission_external_server">
     <rule ref="moodle"/>
+    <!-- exclude specific dirs -->
     <exclude-pattern>tests/demo/**</exclude-pattern>
 </ruleset>
