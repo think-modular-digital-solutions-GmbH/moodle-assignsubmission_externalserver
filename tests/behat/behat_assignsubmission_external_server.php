@@ -40,10 +40,10 @@ class behat_assignsubmission_external_server extends behat_base {
      *
      * @Given I add an external server pointing to this Moodle site
      */
-    public function i_add_external_server_pointing_to_this_site() {
+    public function i_add_external_server_pointing_to_this_site(): void {
         global $CFG, $DB;
-        $url = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment.php";
-        $formurl = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment_upload.php";
+        $url = "{$CFG->wwwroot}/public/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment.php";
+        $formurl = "{$CFG->wwwroot}/public/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment_upload.php";
         $record = (object)[
             'name' => 'behat_test',
             'url' => $url,

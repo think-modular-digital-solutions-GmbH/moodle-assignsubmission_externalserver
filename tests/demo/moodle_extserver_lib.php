@@ -26,18 +26,18 @@ $actionparams = array('submit'      => array('filename', 'filehash'),
                       'teacherview' => array('studusername'),
                       'getgrades'   => array('unames'));
 
-function get_secret() {
+function get_secret(): string {
     $secret = '2345678987654';
     return $secret;
 }
 
-function get_hash_algorithm() {
+function get_hash_algorithm(): string {
     $hash = 'sha256'; // TODO: change this to your actual hash algorithm!
     return $hash;
 }
 
 // function to check the akey
-function check_akey($params, $akey) {
+function check_akey($params, $akey): bool {
     global $akeyparams, $actionparams;
 
     // common server secret
@@ -100,7 +100,7 @@ function check_akey($params, $akey) {
 }
 
 // function to check the groupinfo's integrity
-function check_groupinfo($groupinfo, $groupinfohash) {
+function check_groupinfo($groupinfo, $groupinfohash): bool {
     // common server secret
     $secret = get_secret();
     $hash = get_hash_algorithm();
@@ -123,7 +123,7 @@ function check_groupinfo($groupinfo, $groupinfohash) {
 }
 
 // function to check the file hash
-function check_file_hash($filename, $filehash) {
+function check_file_hash($filename, $filehash): bool {
     $uploadhash = hash_file(get_hash_algorithm(), $filename);
 
     if ($uploadhash == $filehash) {
@@ -133,7 +133,7 @@ function check_file_hash($filename, $filehash) {
     return false;
 }
 
-function assignment_exists($aid){
+function assignment_exists($aid): bool {
   // Check if an assignment already exists
 
   return true;

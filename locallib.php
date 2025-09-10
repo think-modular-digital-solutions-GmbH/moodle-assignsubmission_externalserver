@@ -48,7 +48,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * Get the name of the submission plugin
      * @return string
      */
-    public function get_name() {
+    public function get_name(): string {
         return get_string('pluginname', 'assignsubmission_external_server');
     }
 
@@ -58,7 +58,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param int $submissionid
      * @return mixed
      */
-    private function get_file_submission($submissionid) {
+    private function get_file_submission($submissionid): mixed {
         global $DB;
         return $DB->get_record('assignsubmission_external_server', ['submission' => $submissionid]);
     }
@@ -69,7 +69,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param MoodleQuickForm $mform The form to add elements to
      * @return void
      */
-    public function get_settings(MoodleQuickForm $mform) {
+    public function get_settings(MoodleQuickForm $mform): void {
         global $CFG, $DB, $OUTPUT;
 
         // Get instance settings or default settings.
@@ -155,7 +155,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $data
      * @return bool
      */
-    public function save_settings(stdClass $data) {
+    public function save_settings(stdClass $data): bool {
         foreach (ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS as $setting) {
             $property = "assignsubmission_external_server_$setting";
             if (!empty($data->$property)) {
@@ -173,7 +173,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return array
      */
-    public function get_file_options() {
+    public function get_file_options(): array {
         $fileoptions = ['subdirs' => 1,
                         'maxbytes' => $this->get_config('maxbytes'),
                         'maxfiles' => 1,
@@ -195,7 +195,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $data
      * @return bool
      */
-    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
+    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data): bool {
         global $OUTPUT;
 
         // Add fieldset.
@@ -246,7 +246,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param string $area
      * @return int
      */
-    private function count_files($submissionid, $area) {
+    private function count_files($submissionid, $area): int {
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
                                      'assignsubmission_external_server',
@@ -266,7 +266,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $data
      * @return bool
      */
-    public function save(stdClass $submission, stdClass $data) {
+    public function save(stdClass $submission, stdClass $data): bool|int {
         global $USER, $DB, $OUTPUT;
 
         // Save file.
@@ -402,7 +402,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $submission The submission
      * @return boolean
      */
-    public function remove(stdClass $submission) {
+    public function remove(stdClass $submission): bool {
         global $DB;
         $fs = get_file_storage();
 
@@ -427,7 +427,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $user The user record - unused
      * @return array - return an array of files indexed by filename
      */
-    public function get_files(stdClass $submission, stdClass $user) {
+    public function get_files(stdClass $submission, stdClass $user): array {
         $result = [];
         $fs = get_file_storage();
 
@@ -456,7 +456,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param bool $showviewlink Set this to true if the list of files is long
      * @return string
      */
-    public function view_summary(stdClass $submission, & $showviewlink) {
+    public function view_summary(stdClass $submission, & $showviewlink): string {
 
         // Uploaded file.
         $html = $this->assignment->render_area_files('assignsubmission_external_server',
@@ -510,7 +510,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $submission
      * @return string
      */
-    public function view(stdClass $submission) {
+    public function view(stdClass $submission): string {
         return $this->assignment->render_area_files('assignsubmission_external_server',
                                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
                                                     $submission->id);
@@ -521,7 +521,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return bool
      */
-    public function delete_instance() {
+    public function delete_instance(): bool {
         global $DB;
         // Will throw exception on failure.
         $DB->delete_records('assignsubmission_external_server',
@@ -534,7 +534,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * Return true if there are no submission files
      * @param stdClass $submission
      */
-    public function is_empty(stdClass $submission) {
+    public function is_empty(stdClass $submission): bool {
         return $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA) == 0;
     }
 
@@ -547,7 +547,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $data The submission data
      * @return bool
      */
-    public function submission_is_empty(stdClass $data) {
+    public function submission_is_empty(stdClass $data): bool {
         global $USER;
         $fs = get_file_storage();
         // Get a count of all the draft files, excluding any directories.
@@ -564,7 +564,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * Get file areas returns a list of areas this plugin stores files
      * @return array - An array of fileareas (keys) and descriptions (values)
      */
-    public function get_file_areas() {
+    public function get_file_areas(): array {
         return [ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA => $this->get_name()];
     }
 
@@ -574,7 +574,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $sourcesubmission
      * @param stdClass $destsubmission
      */
-    public function copy_submission(stdClass $sourcesubmission, stdClass $destsubmission) {
+    public function copy_submission(stdClass $sourcesubmission, stdClass $destsubmission): bool {
         global $DB;
 
         // Copy the files across.
@@ -606,7 +606,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return array the list of settings
      * @since Moodle 3.2
      */
-    public function get_config_for_external() {
+    public function get_config_for_external(): array {
         global $CFG;
 
         $configs = $this->get_config();
@@ -624,7 +624,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return array
      */
-    private function get_configured_typesets() {
+    private function get_configured_typesets(): array {
         $typeslist = (string)$this->get_config('filetypes');
 
         $util = new \core_form\filetypes_util();
@@ -654,7 +654,7 @@ class assign_submission_external_server extends assign_submission_plugin {
     /**
      * Returns external server for this assignment.
      */
-    public function get_external_server() {
+    public function get_external_server(): ?external_server {
         global $DB;
 
         $serverid = $this->get_config('server');
@@ -671,7 +671,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return string
      */
-    public function view_header() {
+    public function view_header(): string {
 
         global $OUTPUT, $PAGE, $USER;
 
@@ -773,7 +773,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return array
      */
-    public function has_uploadattempts($submission) {
+    public function has_uploadattempts($submission): array {
 
         global $DB, $USER;
 
@@ -821,7 +821,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return string
      */
-    private function print_server_status($ext) {
+    private function print_server_status($ext): string {
         global $OUTPUT;
 
         if ($ext) {
@@ -849,7 +849,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return stdClass $user.
      */
-    public function get_group_submission_user($submission) {
+    public function get_group_submission_user($submission): ?\stdClass {
 
         // Get params.
         $groupid = $submission->groupid;

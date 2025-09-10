@@ -47,7 +47,7 @@ class external extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function set_toggle_state_parameters() {
+    public static function set_toggle_state_parameters(): external_function_parameters {
         return new external_function_parameters([
             'state' => new external_value(PARAM_BOOL, 'Expanded state'),
         ]);
@@ -59,7 +59,7 @@ class external extends external_api {
      * @param bool $state The new state
      * @return array status
      */
-    public static function set_toggle_state($state) {
+    public static function set_toggle_state($state): array {
         global $USER;
         set_user_preference('assignsubmission_external_server_expanded', $state, $USER);
         return ['status' => true];
@@ -70,7 +70,7 @@ class external extends external_api {
      *
      * @return external_description
      */
-    public static function set_toggle_state_returns() {
+    public static function set_toggle_state_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_BOOL),
         ]);

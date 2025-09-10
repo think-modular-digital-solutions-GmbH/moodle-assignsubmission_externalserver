@@ -44,7 +44,7 @@ class helper {
      * @param obj $server the server object containing the server details.
      * @return string HTML string containing the edit and delete icons.
      */
-    public static function edit_icons($server) {
+    public static function edit_icons($server): string {
 
         global $DB, $OUTPUT;
         $id = $server->id;
@@ -96,7 +96,7 @@ class helper {
      *
      * @return array
      */
-    public static function get_upload_options(int $submissioncount = 0) {
+    public static function get_upload_options(int $submissioncount = 0): array {
         $maxuploads = [];
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_external_server');
         $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_external_server');
@@ -112,7 +112,7 @@ class helper {
      * @param int $id The ID of the external server.
      * @return array|false Array of assignments using the server, or false if none found
      */
-    public static function get_assignments_using_server($id) {
+    public static function get_assignments_using_server($id): array|false {
         global $DB;
 
         $sql = "SELECT *

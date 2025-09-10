@@ -41,7 +41,7 @@ function assignsubmission_external_server_pluginfile($course,
                                           $filearea,
                                           $args,
                                           $forcedownload,
-                                          array $options=[]) {
+                                          array $options=[]): bool {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {

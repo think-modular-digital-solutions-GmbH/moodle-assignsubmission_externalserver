@@ -65,7 +65,8 @@ class quick_grading_form extends moodleform {
      * @param array $customdata Custom data for the form
      */
     public function __construct(assign_submission_external_server
-        $extserver, $assignment, $submission, $actionurl, $customdata = null) {
+        $extserver, $assignment, $submission, $actionurl, $customdata = null)
+    {
         $this->extserver = $extserver;
         $this->assignment = $assignment;
         $this->submission = $submission;
@@ -81,7 +82,7 @@ class quick_grading_form extends moodleform {
      * @throws dml_exception
      * @throws HTML_Quickform_error
      */
-    public function definition() {
+    public function definition(): void {
 
         global $USER;
 
@@ -135,7 +136,7 @@ class quick_grading_form extends moodleform {
      *
      * @return string
      */
-    private function submission_info() {
+    private function submission_info(): string {
 
         global $CFG, $USER;
 

@@ -53,7 +53,7 @@ class editserver_form extends moodleform {
      * @throws dml_exception
      * @throws HTML_Quickform_error
      */
-    public function definition() {
+    public function definition(): void {
         $mform = $this->_form;
         $this->context = \context_system::instance();
         confirm_sesskey();
@@ -221,7 +221,7 @@ class editserver_form extends moodleform {
      * @throws dml_exception
      * @throws coding_exception
      */
-    public function validation($data, $files) {
+    public function validation($data, $files): array {
         global $DB;
 
         // Get errors from parent validation.
