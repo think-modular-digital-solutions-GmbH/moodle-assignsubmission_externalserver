@@ -42,10 +42,12 @@ class behat_assignsubmission_external_server extends behat_base {
      */
     public function i_add_external_server_pointing_to_this_site() {
         global $CFG, $DB;
+        $url = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment.php";
+        $formurl = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/behat/demo/moodle_external_assignment_upload.php";
         $record = (object)[
             'name' => 'behat_test',
-            'url' => $CFG->wwwroot . '/mod/assign/submission/external_server/vendor/demo/moodle_external_assignment.php',
-            'form_url' => $CFG->wwwroot . '/mod/assign/submission/external_server/vendor/demo/moodle_external_assignment_upload.php',
+            'url' => $url,
+            'form_url' => $formurl,
             'auth_type' => 'api_key',
             'auth_secret' => '2345678987654',
             'hash' => 'sha256',
@@ -56,5 +58,4 @@ class behat_assignsubmission_external_server extends behat_base {
         ];
         $DB->insert_record('assignsubmission_external_server_servers', $record);
     }
-
 }

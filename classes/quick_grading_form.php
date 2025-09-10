@@ -25,6 +25,8 @@
 
 namespace assignsubmission_external_server;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir . '/formslib.php');
 
 use moodleform;
@@ -57,7 +59,9 @@ class quick_grading_form extends moodleform {
      * Constructor
      *
      * @param assign_submission_external_server $extserver The assignment instance
+     * @param stdClass $assignment The assignment
      * @param stdClass stdClass $submission The submission
+     * @param moodle_url $actionurl The form action URL
      * @param array $customdata Custom data for the form
      */
     public function __construct(assign_submission_external_server

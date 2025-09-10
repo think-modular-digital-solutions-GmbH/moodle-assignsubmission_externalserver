@@ -82,7 +82,7 @@ if (!$servers) {
     $table->head = [
         get_string('server:name', 'assignsubmission_external_server'),
         get_string('server:contact_name', 'assignsubmission_external_server'),
-        get_string('actions')
+        get_string('actions'),
     ];
     $table->attributes['class'] = 'generaltable';
     $table->id = 'external-server-list';

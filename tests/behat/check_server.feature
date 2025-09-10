@@ -4,7 +4,7 @@ Feature: In order to test the external server submission plugin
   and test it.
 
   Scenario: Check external server demopackage
-    Given I add an external server pointing to this Moodle site
+    Given I add an external server pointing to this site
     And I log in as "admin"
     And I am on homepage
     And I follow "Site administration"

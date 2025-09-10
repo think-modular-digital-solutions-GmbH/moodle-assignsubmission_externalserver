@@ -25,6 +25,8 @@
 
 namespace assignsubmission_external_server;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir . '/formslib.php');
 
 use moodleform;
@@ -118,8 +120,10 @@ class editserver_form extends moodleform {
         $mform->hideif('jwt_audience', 'auth_type', 'neq', 'jwt');
 
         // Group information.
-        $groupinfo = [external_server::NO_GROUPINFO => get_string('server:groupinfo_not_needed', 'assignsubmission_external_server'),
-                      external_server::NEEDS_GROUP_INFO => get_string('server:groupinfo_must_be_sent', 'assignsubmission_external_server'),
+        $groupinfo = [external_server::NO_GROUPINFO
+                        => get_string('server:groupinfo_not_needed', 'assignsubmission_external_server'),
+                      external_server::NEEDS_GROUP_INFO
+                        => get_string('server:groupinfo_must_be_sent', 'assignsubmission_external_server'),
                      ];
         $mform->addElement('select', 'groupinfo', get_string('server:groupinfo', 'assignsubmission_external_server'), $groupinfo);
         $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_external_server');
@@ -128,7 +132,8 @@ class editserver_form extends moodleform {
         // Hash algorithm.
         $hashalgorithms = hash_algos();
         $hashalgorithms = array_combine($hashalgorithms, $hashalgorithms);
-        $mform->addElement('select', 'hash', get_string('server:hashalgorithm', 'assignsubmission_external_server'), $hashalgorithms);
+        $mform->addElement('select', 'hash',
+            get_string('server:hashalgorithm', 'assignsubmission_external_server'), $hashalgorithms);
         $mform->addHelpButton('hash', 'server:hashalgorithm', 'assignsubmission_external_server');
         $mform->setAdvanced('hash');
         $mform->setDefault('hash', 'sha256');

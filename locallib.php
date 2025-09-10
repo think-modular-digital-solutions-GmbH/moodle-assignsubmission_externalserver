@@ -32,7 +32,7 @@ define('ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS', ['server', 'maxbytes', 'file
 use assignsubmission_external_server\helper;
 use assignsubmission_external_server\external_server;
 use assignsubmission_external_server\quick_grading_form;
-use \core\output\notification;
+use core\output\notification;
 
 /**
  * Library class for external server submission plugin
@@ -639,7 +639,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      *
      * @return int The max number of upload attempts for a submissions.
      */
-    public function get_max_submissions() : int {
+    public function get_max_submissions(): int {
         global $DB;
 
         if (!$this->assignment->get_context()) {
@@ -723,7 +723,8 @@ class assign_submission_external_server extends assign_submission_plugin {
                 // Grading.
                 if (isset($data->gradebutton)) {
                     $url = new moodle_url('/mod/assign/submission/external_server/grade.php', [
-                        'status' => $data->status, 'cmid' => $cmid
+                        'status' => $data->status,
+                        'cmid' => $cmid,
                     ]);
                     redirect($url);
                 }
@@ -743,7 +744,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         ];
         $html .= html_writer::table($table);
 
-        // iFrame.
+        // IFrame.
         $PAGE->requires->js(new moodle_url('/mod/assign/submission/external_server/js/save_toggle_state.js'));
         if ($ext) {
             $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_external_server'),
@@ -751,13 +752,13 @@ class assign_submission_external_server extends assign_submission_plugin {
             $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
             // Get open state for collapsible from user preferences.
-            $is_open = get_user_preferences('assignsubmission_external_server_expanded', 0); // default: closed
-            $details_attributes = ['id' => 'external-server-details'];
-            if ($is_open) {
-                $details_attributes['open'] = 'open';
+            $isopen = get_user_preferences('assignsubmission_external_server_expanded', 0);
+            $detailsattributes = ['id' => 'external-server-details'];
+            if ($isopen) {
+                $detailsattributes['open'] = 'open';
             }
 
-            $html .= html_writer::tag('details', $summary . $content, $details_attributes);
+            $html .= html_writer::tag('details', $summary . $content, $detailsattributes);
         }
 
         $html .= '<hr>';
@@ -780,7 +781,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         $uploads = 0;
         if ($submission) {
             $uploads = $DB->get_field('assignsubmission_external_server', 'uploads',
-                array('submission' => $submission->id));
+                ['submission' => $submission->id]);
         }
         if (!$uploads) {
             $uploads = 0; // Default to 0 if no uploads found.
@@ -793,8 +794,8 @@ class assign_submission_external_server extends assign_submission_plugin {
             $type = 'success';
             $uploadstring = get_string('unlimiteduploads', 'assignsubmission_external_server');
 
-        // Show attempts.
         } else {
+            // Show attempts.
             $uploadstring = "$uploads/$maxuploads";
 
             // See if we still have uploads left.

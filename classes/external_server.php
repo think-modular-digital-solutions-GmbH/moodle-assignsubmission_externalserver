@@ -435,6 +435,8 @@ class external_server {
      *
      * @param stored_file $file The file to upload.
      * @param stdClass $assignment The assignment object.
+     * @param bool $notify Whether or not to notify the user of success/failure
+     *
      * @return bool true if everything went right
      * @throws coding_exception
      * @throws dml_exception
@@ -603,7 +605,8 @@ class external_server {
                 : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
         }
 
-        $summary = html_writer::tag('summary', $title . $symbol, ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i",]);
+        $summary = html_writer::tag('summary', $title . $symbol,
+            ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i"]);
         $content = html_writer::div($content, 'mb-3');
         echo html_writer::tag('details', $summary . "<pre>$content</pre>", ['class' => 'moodle-collapsible extserver-result ml-4']);
     }
@@ -635,6 +638,7 @@ class external_server {
      * Get grades and grade submissions automatically
      *
      * @param assign $assign The assignment instance
+     * @param context_module $context The context of the assignment
      * @param int $filter (all, submitted, ungraded)
      * @param int $userid if no filter is given, only grade this user
      *
@@ -675,8 +679,9 @@ class external_server {
                 }
             }
 
-        // Only submitted users.
         } else if ($filter == 'submitted') {
+
+            // Only submitted users.
             foreach ($users as $key => $user) {
                 $submission = $assignment->get_user_submission($user->id, false);
                 if (!$submission || $submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
@@ -728,7 +733,7 @@ class external_server {
                     $grade = new stdClass();
                     $grade->userid = $userid;
                     $grade->grade  = $extgrade['grade'];
-                    $grade->attemptnumber = -1;        // -1 = latest attempt
+                    $grade->attemptnumber = -1;
                     $grade->addattempt = false;
 
                     // Comment.
@@ -736,7 +741,7 @@ class external_server {
                         $grade->assignfeedbackcomments_editor = [
                             'text' => $comment,
                             'format' => FORMAT_PLAIN,
-                            'itemid' => 0, // Required if files are uploaded, but 0 is OK for plain text
+                            'itemid' => 0,
                         ];
                     }
 
@@ -763,6 +768,8 @@ class external_server {
 
     /**
      * Get common parameters for external server requests.
+     *
+     * @param stdClass $assignment The assignment object.
      *
      * @return array
      */
@@ -796,17 +803,15 @@ class external_server {
      */
     public function get_headers() {
 
-        $auth_type = $this->obj->auth_type;
+        $authtype = $this->obj->auth_type;
         $headers = [
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ];
 
-        // API key only.
-        if ($auth_type == 'api_key') {
-
-        } else if ($auth_type == 'oauth2') {
+        // Headers for authentication.
+        if ($authtype == 'oauth2') {
             $headers['Authorization'] = 'Bearer ' . $this->get_oauth2_token();
-        } else if ($auth_type == 'jwt') {
+        } else if ($authtype == 'jwt') {
             $headers['Authorization'] = 'Bearer ' . $this->get_jwt_token();
         }
 
@@ -828,13 +833,13 @@ class external_server {
         // Build the token request.
         $response = $this->httpclient->post($tokenurl, [
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
                 'client_id' => $clientid,
-                'client_secret' => $secret
-            ]
+                'client_secret' => $secret,
+            ],
         ]);
 
         // Get the token from the response.
@@ -872,8 +877,8 @@ class external_server {
                 'client_id' => $clientid,
                 'client_secret' => $secret,
                 'audience' => $jwtaudience,
-                'issuer' => $jwtissuer
-            ]
+                'issuer' => $jwtissuer,
+            ],
         ]);
 
         // Get the token from the response.
@@ -901,7 +906,7 @@ class external_server {
 
             $payload = [
                 'headers' => $this->get_headers(),
-                'http_errors' => false, // allow access to non-2xx responses
+                'http_errors' => false,
             ];
 
             // GET.
@@ -917,10 +922,9 @@ class external_server {
 
                 $response = $this->httpclient->get($url, $payload);
 
-            // POST.
             } else {
 
-                // Convert file uploads to multipart/form-data.
+                // POST - convert file uploads to multipart/form-data.
                 if (!empty($params['file'])) {
                     unset($payload['headers']['Content-Type']); // Guzzle will set the correct Content-Type for multipart requests.
                     $payload['multipart'] = $this->convert_to_multipart($params);
@@ -958,7 +962,7 @@ class external_server {
         $reason = $response->getReasonPhrase();
         $headers = $response->getHeaders();
 
-        // Reconstruct headers
+        // Reconstruct headers.
         $headerstring = "HTTP/1.1 {$status} {$reason}\n";
         foreach ($headers as $name => $values) {
             foreach ($values as $value) {
@@ -985,13 +989,13 @@ class external_server {
                     'contents' => fopen($value['path'], 'r'),
                     'filename' => $value['filename'],
                     'headers'  => [
-                        'Content-Type' => $value['mime']
-                    ]
+                        'Content-Type' => $value['mime'],
+                    ],
                 ];
             } else {
                 $multipart[] = [
                     'name'     => $key,
-                    'contents' => $value
+                    'contents' => $value,
                 ];
             }
         }

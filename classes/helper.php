@@ -60,7 +60,7 @@ class helper {
                 ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/hide', get_string('hide')));
         } else {
-            $url =  new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
                 ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/show', get_string('show')));
         }
