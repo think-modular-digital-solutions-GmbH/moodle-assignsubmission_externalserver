@@ -65,8 +65,7 @@ class quick_grading_form extends moodleform {
      * @param array $customdata Custom data for the form
      */
     public function __construct(assign_submission_external_server
-        $extserver, $assignment, $submission, $actionurl, $customdata = null)
-    {
+        $extserver, $assignment, $submission, $actionurl, $customdata = null) {
         $this->extserver = $extserver;
         $this->assignment = $assignment;
         $this->submission = $submission;

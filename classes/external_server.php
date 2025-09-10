@@ -79,8 +79,7 @@ class external_server {
      * @param int $id ID of external server to fetch from DB
      * @throws dml_exception
      */
-    public function __construct($id)
-    {
+    public function __construct($id) {
         global $DB;
 
         // Get external server from DB.
@@ -371,8 +370,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function load_grades($assignment, $userlist = false, $responseonly = false)
-    {
+    public function load_grades($assignment, $userlist = false, $responseonly = false): mixed {
         global $USER;
 
         // Common parameters.
