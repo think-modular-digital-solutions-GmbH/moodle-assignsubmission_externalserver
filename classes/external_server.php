@@ -443,7 +443,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($file, $assignment, $notify = true): bool
+    public function upload_file($file, $assignment, $notify = true): bool {
         global $PAGE, $USER;
 
         // Get params.
@@ -491,7 +491,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function build_teacherview($assignment, $studusername = ''): string
+    public function build_teacherview($assignment, $studusername = ''): string {
         global $USER;
 
         // Common parameters.
@@ -523,7 +523,7 @@ class external_server {
      *
      * @return string the debuginfo
      */
-    public function get_debuginfo(): string
+    public function get_debuginfo(): string {
         return $this->debuginfo;
     }
 
@@ -532,7 +532,7 @@ class external_server {
      *
      * @return string http status code
      */
-    public function get_httpcode(): string|bool
+    public function get_httpcode(): string|bool {
         return $this->httpcode;
     }
 
@@ -544,7 +544,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function url_studentview($assignment): string
+    public function url_studentview($assignment): string {
         global $USER;
 
         // Common parameters.
@@ -569,7 +569,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function view_externalframe($assignment): string
+    public function view_externalframe($assignment): string {
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
@@ -587,7 +587,7 @@ class external_server {
      * @param string $content The server response's content
      * @param bool $ok Whether or not the response is ok
      */
-    public function print_response($title, $content, $ok): void
+    public function print_response($title, $content, $ok): void {
 
         static $i = 0;
         $id = 'collapse-section-' . $i++;
@@ -619,7 +619,7 @@ class external_server {
      * @param string $url The URL to send the request to.
      * @return array
      */
-    public function test_api_call($url): array
+    public function test_api_call($url): array {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -646,7 +646,7 @@ class external_server {
      *
      * @return array
      */
-    public function grade_submissions($assignment, $context, $filter, $userid): array
+    public function grade_submissions($assignment, $context, $filter, $userid): array {
 
         global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
         require_once($CFG->libdir.'/gradelib.php');
@@ -775,7 +775,7 @@ class external_server {
      *
      * @return array
      */
-    private function get_common_params($assignment): array
+    private function get_common_params($assignment): array {
         global $USER;
 
         if ($cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false)) {
@@ -803,7 +803,7 @@ class external_server {
      *
      * @return array
      */
-    public function get_headers(): array
+    public function get_headers(): array {
 
         $authtype = $this->obj->auth_type;
         $headers = [
@@ -825,7 +825,7 @@ class external_server {
      *
      * @return string OAuth2 token
      */
-    private function get_oauth2_token(): string
+    private function get_oauth2_token(): string {
 
         // Get params.
         $tokenurl = $this->obj->oauth2_endpoint;
@@ -860,7 +860,7 @@ class external_server {
      *
      * @return string JWT token
      */
-    private function get_jwt_token(): string
+    private function get_jwt_token(): string {
 
         // Get params.
         $tokenurl = $this->obj->oauth2_endpoint;
@@ -903,7 +903,7 @@ class external_server {
      * @return false|mixed The response from the server or false on failure.
      * @throws \GuzzleHttp\Exception\RequestException
      */
-    public function http_request(array $params = [], $type = 'GET', $url = null): mixed
+    public function http_request(array $params = [], $type = 'GET', $url = null): mixed {
         try {
 
             $payload = [
@@ -959,7 +959,7 @@ class external_server {
      * @param \GuzzleHttp\Psr7\Response $response The response object.
      * @return void
      */
-    private function get_debuginfo_from_response($response): string
+    private function get_debuginfo_from_response($response): string {
         $status = $response->getStatusCode();
         $reason = $response->getReasonPhrase();
         $headers = $response->getHeaders();
@@ -981,7 +981,7 @@ class external_server {
      * @param array $params The parameters to convert.
      * @return array The multipart array.
      */
-    private function convert_to_multipart(array $params): array
+    private function convert_to_multipart(array $params): array {
         $multipart = [];
 
         foreach ($params as $key => $value) {

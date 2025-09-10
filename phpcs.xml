@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ruleset name="assignsubmission_external_server">
     <rule ref="moodle"/>
-    <exclude-pattern>tests/demo/**</exclude-pattern>
+    <exclude-pattern>tests/behat/demo/**</exclude-pattern>
 </ruleset>
