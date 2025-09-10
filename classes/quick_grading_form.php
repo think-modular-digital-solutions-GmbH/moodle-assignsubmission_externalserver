@@ -60,7 +60,7 @@ class quick_grading_form extends moodleform {
      *
      * @param assign_submission_external_server $extserver The assignment instance
      * @param stdClass $assignment The assignment
-     * @param stdClass stdClass $submission The submission
+     * @param stdClass $submission The submission
      * @param moodle_url $actionurl The form action URL
      * @param array $customdata Custom data for the form
      */

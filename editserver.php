@@ -111,9 +111,9 @@ if (!empty($hide)) {
             format_string($entry->name)), $confirmurl, $redirecturl);
         die();
 
-    // Delete the server.
     } else {
 
+        // Delete the server.
         echo $OUTPUT->header();
 
         // Deleting not allowed, server already in use.

@@ -637,7 +637,7 @@ class external_server {
     /**
      * Get grades and grade submissions automatically
      *
-     * @param assign $assign The assignment instance
+     * @param assign $assignment The assignment instance
      * @param context_module $context The context of the assignment
      * @param int $filter (all, submitted, ungraded)
      * @param int $userid if no filter is given, only grade this user
@@ -870,7 +870,7 @@ class external_server {
         // Build the token request.
         $response = $this->httpclient->post($tokenurl, [
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
