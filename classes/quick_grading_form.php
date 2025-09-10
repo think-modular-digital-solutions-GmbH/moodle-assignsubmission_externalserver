@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Quick grading form for external server submission plugin.
+ *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
@@ -23,9 +25,9 @@
 
 namespace assignsubmission_external_server;
 
-require_once($CFG->libdir . '/formslib.php');
+defined('MOODLE_INTERNAL') || die();
 
-defined('MOODLE_INTERNAL') || die;
+require_once($CFG->libdir . '/formslib.php');
 
 use moodleform;
 use assignsubmission_external_server\external_server;
@@ -47,7 +49,7 @@ class quick_grading_form extends moodleform {
     /** @var assign_submission_external_server $extserver The assignment instance */
     protected $extserver;
 
-    /** qvar stdClass $assignment The assignment */
+    /** @var stdClass $assignment The assignment */
     protected $assignment;
 
     /** @var stdClass $submission The submission */
@@ -57,15 +59,18 @@ class quick_grading_form extends moodleform {
      * Constructor
      *
      * @param assign_submission_external_server $extserver The assignment instance
-     * @param stdClass stdClass $submission The submission
+     * @param stdClass $assignment The assignment
+     * @param stdClass $submission The submission
+     * @param moodle_url $actionurl The form action URL
      * @param array $customdata Custom data for the form
      */
-    public function __construct(assign_submission_external_server $extserver, $assignment, $submission, $actionurl, $customdata = null) {
+    public function __construct(assign_submission_external_server
+        $extserver, $assignment, $submission, $actionurl, $customdata = null) {
         $this->extserver = $extserver;
         $this->assignment = $assignment;
         $this->submission = $submission;
 
-        // Call parent constructor with correct arguments
+        // Call parent constructor with correct arguments.
         parent::__construct($actionurl, $customdata);
     }
 
@@ -76,11 +81,11 @@ class quick_grading_form extends moodleform {
      * @throws dml_exception
      * @throws HTML_Quickform_error
      */
-    public function definition() {
+    public function definition(): void {
 
         global $USER;
 
-        $mform = $this->_form;        
+        $mform = $this->_form;
 
         // Show error.
         $error = optional_param('error', null, PARAM_TEXT);
@@ -117,8 +122,8 @@ class quick_grading_form extends moodleform {
             $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_external_server'));
 
         }
-        
-        // Preserve values as hidden fields
+
+        // Preserve values as hidden fields.
         $mform->addElement('hidden', 'id', $this->assignment->get_course_module()->id);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'action', 'view');
@@ -130,7 +135,7 @@ class quick_grading_form extends moodleform {
      *
      * @return string
      */
-    private function submission_info() {
+    private function submission_info(): string {
 
         global $CFG, $USER;
 

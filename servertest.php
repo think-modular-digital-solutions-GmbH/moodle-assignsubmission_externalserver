@@ -45,7 +45,8 @@ $extserver = new external_server($id);
 
 // Set up the page.
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/external_server/servertest.php', ['id' => $id, 'sesskey' => sesskey()]));
+$PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/external_server/servertest.php',
+    ['id' => $id, 'sesskey' => sesskey()]));
 $PAGE->set_heading(get_string('testing', 'assignsubmission_external_server',
     ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
 $PAGE->requires->css(new moodle_url('/mod/assign/submission/external_server/styles.css'));

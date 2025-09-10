@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use html_writer;
 use moodle_url;
-use \core\notification;
+use core\notification;
 use context_module;
 use stdClass;
 use GuzzleHttp\Client;
@@ -105,7 +105,7 @@ class external_server {
      * @param int $id ID of the external server in the DB
      * @return stdClass|null DB record or null if not found
      */
-    public static function get_server($id) {
+    public static function get_server($id): ?\stdClass {
         global $DB;
         return $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
     }
@@ -116,7 +116,7 @@ class external_server {
      * @return array DB records
      * @throws dml_exception
      */
-    public static function get_servers() {
+    public static function get_servers(): array {
         global $DB;
         return $DB->get_records('assignsubmission_external_server_servers', ['visible' => '1']);
     }
@@ -127,7 +127,7 @@ class external_server {
      * @return array DB records
      * @throws dml_exception
      */
-    public static function get_all_servers() {
+    public static function get_all_servers(): array {
         global $DB;
         return $DB->get_records('assignsubmission_external_server_servers');
     }
@@ -139,7 +139,7 @@ class external_server {
      * @return true
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
-    public static function delete_server($id) {
+    public static function delete_server($id): bool {
         global $DB;
 
         if (!is_numeric($id)) {
@@ -160,7 +160,7 @@ class external_server {
      * @return string
      * @throws coding_exception
      */
-    public function calc_akey($params, $secret, $hash) {
+    public function calc_akey($params, $secret, $hash): string {
         global $OUTPUT;
 
         $string = $secret;
@@ -221,7 +221,7 @@ class external_server {
      * @param string $hash hashing algorithm to use!
      * @return string
      */
-    public function calc_groups_hash($jsongroupinfo, $secret, $hash) {
+    public function calc_groups_hash($jsongroupinfo, $secret, $hash): string {
         if (empty($jsongroupinfo)) {
             return '';
         }
@@ -246,7 +246,7 @@ class external_server {
      * @return void
      * @throws dml_exception
      */
-    protected function add_group_data(array &$data, $secret, $hash) {
+    protected function add_group_data(array &$data, $secret, $hash): void {
         global $COURSE, $DB;
 
         // Check if this server needs group info.
@@ -297,7 +297,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function create_assignment($assignment) {
+    public function create_assignment($assignment): ?bool {
         global $USER;
 
         // Check prerequisites.
@@ -337,7 +337,7 @@ class external_server {
      *
      * @return bool true if extserver retuns with http OK else it returns false
      */
-    public function check_connection() {
+    public function check_connection(): bool {
 
         // Check prerequisites.
         if ($this->concheck != null) {
@@ -370,7 +370,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function load_grades($assignment, $userlist = false, $responseonly = false) {
+    public function load_grades($assignment, $userlist = false, $responseonly = false): mixed {
         global $USER;
 
         // Common parameters.
@@ -435,11 +435,13 @@ class external_server {
      *
      * @param stored_file $file The file to upload.
      * @param stdClass $assignment The assignment object.
+     * @param bool $notify Whether or not to notify the user of success/failure
+     *
      * @return bool true if everything went right
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function upload_file($file, $assignment, $notify = true) {
+    public function upload_file($file, $assignment, $notify = true): bool {
         global $PAGE, $USER;
 
         // Get params.
@@ -466,13 +468,14 @@ class external_server {
         if ($response) {
             if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
                 if ($notify) {
-                    \core\notification::add(get_string('file_uploaded', 'assignsubmission_external_server'), \core\output\notification::NOTIFY_SUCCESS);
+                    notification::add(get_string('file_uploaded', 'assignsubmission_external_server'),
+                        \core\output\notification::NOTIFY_SUCCESS);
                 }
                 return true;
             }
         }
         if ($notify) {
-            \core\notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
+            notification::add($this->debuginfo, \core\output\notification::NOTIFY_ERROR);
         }
         return false;
     }
@@ -486,7 +489,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function build_teacherview($assignment, $studusername = '') {
+    public function build_teacherview($assignment, $studusername = ''): string {
         global $USER;
 
         // Common parameters.
@@ -518,7 +521,7 @@ class external_server {
      *
      * @return string the debuginfo
      */
-    public function get_debuginfo() {
+    public function get_debuginfo(): string {
         return $this->debuginfo;
     }
 
@@ -527,7 +530,7 @@ class external_server {
      *
      * @return string http status code
      */
-    public function get_httpcode() {
+    public function get_httpcode(): string|bool {
         return $this->httpcode;
     }
 
@@ -539,7 +542,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function url_studentview($assignment) {
+    public function url_studentview($assignment): string {
         global $USER;
 
         // Common parameters.
@@ -564,7 +567,7 @@ class external_server {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function view_externalframe($assignment) {
+    public function view_externalframe($assignment): string {
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
@@ -582,10 +585,10 @@ class external_server {
      * @param string $content The server response's content
      * @param bool $ok Whether or not the response is ok
      */
-    public function print_response($title, $content, $ok) {       
-        
+    public function print_response($title, $content, $ok): void {
+
         static $i = 0;
-        $id = 'collapse-section-' . $i++;        
+        $id = 'collapse-section-' . $i++;
 
         if ($ok) {
             $textclass = 'success';
@@ -600,9 +603,10 @@ class external_server {
             $content = ($httpcode === 0)
                 ? get_string('sslerror', 'assignsubmission_external_server')
                 : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
-        }        
+        }
 
-        $summary = html_writer::tag('summary', $title . $symbol, ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i",]);
+        $summary = html_writer::tag('summary', $title . $symbol,
+            ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i"]);
         $content = html_writer::div($content, 'mb-3');
         echo html_writer::tag('details', $summary . "<pre>$content</pre>", ['class' => 'moodle-collapsible extserver-result ml-4']);
     }
@@ -613,7 +617,7 @@ class external_server {
      * @param string $url The URL to send the request to.
      * @return array
      */
-    public function test_api_call($url) {
+    public function test_api_call($url): array {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -633,13 +637,14 @@ class external_server {
     /**
      * Get grades and grade submissions automatically
      *
-     * @param assign $assign The assignment instance
+     * @param assign $assignment The assignment instance
+     * @param context_module $context The context of the assignment
      * @param int $filter (all, submitted, ungraded)
      * @param int $userid if no filter is given, only grade this user
      *
      * @return array
      */
-    public function grade_submissions($assignment, $context, $filter, $userid) {
+    public function grade_submissions($assignment, $context, $filter, $userid): array {
 
         global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
         require_once($CFG->libdir.'/gradelib.php');
@@ -674,8 +679,9 @@ class external_server {
                 }
             }
 
-        // Only submitted users.
         } else if ($filter == 'submitted') {
+
+            // Only submitted users.
             foreach ($users as $key => $user) {
                 $submission = $assignment->get_user_submission($user->id, false);
                 if (!$submission || $submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
@@ -727,7 +733,7 @@ class external_server {
                     $grade = new stdClass();
                     $grade->userid = $userid;
                     $grade->grade  = $extgrade['grade'];
-                    $grade->attemptnumber = -1;        // -1 = latest attempt
+                    $grade->attemptnumber = -1;
                     $grade->addattempt = false;
 
                     // Comment.
@@ -735,7 +741,7 @@ class external_server {
                         $grade->assignfeedbackcomments_editor = [
                             'text' => $comment,
                             'format' => FORMAT_PLAIN,
-                            'itemid' => 0, // Required if files are uploaded, but 0 is OK for plain text
+                            'itemid' => 0,
                         ];
                     }
 
@@ -763,9 +769,11 @@ class external_server {
     /**
      * Get common parameters for external server requests.
      *
+     * @param stdClass $assignment The assignment object.
+     *
      * @return array
      */
-    private function get_common_params($assignment) {
+    private function get_common_params($assignment): array {
         global $USER;
 
         if ($cm = get_coursemodule_from_instance('assign', $assignment->id, $assignment->course, false)) {
@@ -793,19 +801,17 @@ class external_server {
      *
      * @return array
      */
-    public function get_headers() {
+    public function get_headers(): array {
 
-        $auth_type = $this->obj->auth_type;
+        $authtype = $this->obj->auth_type;
         $headers = [
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ];
 
-        // API key only.
-        if ($auth_type == 'api_key') {
-
-        } else if ($auth_type == 'oauth2') {
+        // Headers for authentication.
+        if ($authtype == 'oauth2') {
             $headers['Authorization'] = 'Bearer ' . $this->get_oauth2_token();
-        } else if ($auth_type == 'jwt') {
+        } else if ($authtype == 'jwt') {
             $headers['Authorization'] = 'Bearer ' . $this->get_jwt_token();
         }
 
@@ -817,30 +823,30 @@ class external_server {
      *
      * @return string OAuth2 token
      */
-    private function get_oauth2_token() {
+    private function get_oauth2_token(): string {
 
         // Get params.
-        $token_url = $this->obj->oauth2_endpoint;
-        $client_id = $this->obj->oauth2_client_id;
-        $client_secret = $this->obj->auth_secret;
+        $tokenurl = $this->obj->oauth2_endpoint;
+        $clientid = $this->obj->oauth2_client_id;
+        $secret = $this->obj->auth_secret;
 
         // Build the token request.
-        $response = $this->httpclient->post($token_url, [
+        $response = $this->httpclient->post($tokenurl, [
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
-                'client_id' => $client_id,
-                'client_secret' => $client_secret
-            ]
+                'client_id' => $clientid,
+                'client_secret' => $secret,
+            ],
         ]);
 
         // Get the token from the response.
-        $status_code = $response->getStatusCode();
+        $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
-        if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $status_code),
+        if ($statuscode != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -852,34 +858,34 @@ class external_server {
      *
      * @return string JWT token
      */
-    private function get_jwt_token() {
+    private function get_jwt_token(): string {
 
         // Get params.
-        $token_url = $this->obj->oauth2_endpoint;
-        $client_id = $this->obj->oauth2_client_id;
-        $client_secret = $this->obj->auth_secret;
-        $jwt_issuer = $this->obj->jwt_issuer;
-        $jwt_audience = $this->obj->jwt_audience;
+        $tokenurl = $this->obj->oauth2_endpoint;
+        $clientid = $this->obj->oauth2_client_id;
+        $secret = $this->obj->auth_secret;
+        $jwtissuer = $this->obj->jwt_issuer;
+        $jwtaudience = $this->obj->jwt_audience;
 
         // Build the token request.
-        $response = $this->httpclient->post($token_url, [
+        $response = $this->httpclient->post($tokenurl, [
             'headers' => [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ],
             'json' => [
                 'grant_type' => 'client_credentials',
-                'client_id' => $client_id,
-                'client_secret' => $client_secret,
-                'audience' => $jwt_audience,
-                'issuer' => $jwt_issuer
-            ]
+                'client_id' => $clientid,
+                'client_secret' => $secret,
+                'audience' => $jwtaudience,
+                'issuer' => $jwtissuer,
+            ],
         ]);
 
         // Get the token from the response.
-        $status_code = $response->getStatusCode();
+        $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
-        if ($status_code != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $status_code),
+        if ($statuscode != 200 || !isset($body['access_token'])) {
+            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -895,12 +901,12 @@ class external_server {
      * @return false|mixed The response from the server or false on failure.
      * @throws \GuzzleHttp\Exception\RequestException
      */
-    public function http_request(array $params = [], $type = 'GET', $url = null) {
+    public function http_request(array $params = [], $type = 'GET', $url = null): mixed {
         try {
 
             $payload = [
                 'headers' => $this->get_headers(),
-                'http_errors' => false, // allow access to non-2xx responses
+                'http_errors' => false,
             ];
 
             // GET.
@@ -916,10 +922,9 @@ class external_server {
 
                 $response = $this->httpclient->get($url, $payload);
 
-            // POST.
             } else {
 
-                // Convert file uploads to multipart/form-data.
+                // POST - convert file uploads to multipart/form-data.
                 if (!empty($params['file'])) {
                     unset($payload['headers']['Content-Type']); // Guzzle will set the correct Content-Type for multipart requests.
                     $payload['multipart'] = $this->convert_to_multipart($params);
@@ -952,20 +957,20 @@ class external_server {
      * @param \GuzzleHttp\Psr7\Response $response The response object.
      * @return void
      */
-    private function get_debuginfo_from_response($response) {
+    private function get_debuginfo_from_response($response): string {
         $status = $response->getStatusCode();
         $reason = $response->getReasonPhrase();
         $headers = $response->getHeaders();
 
-        // Reconstruct headers
-        $header_string = "HTTP/1.1 {$status} {$reason}\n";
+        // Reconstruct headers.
+        $headerstring = "HTTP/1.1 {$status} {$reason}\n";
         foreach ($headers as $name => $values) {
             foreach ($values as $value) {
-                $header_string .= "{$name}: {$value}\n";
+                $headerstring .= "{$name}: {$value}\n";
             }
         }
 
-        return $header_string;
+        return $headerstring;
     }
 
     /**
@@ -984,13 +989,13 @@ class external_server {
                     'contents' => fopen($value['path'], 'r'),
                     'filename' => $value['filename'],
                     'headers'  => [
-                        'Content-Type' => $value['mime']
-                    ]
+                        'Content-Type' => $value['mime'],
+                    ],
                 ];
             } else {
                 $multipart[] = [
                     'name'     => $key,
-                    'contents' => $value
+                    'contents' => $value,
                 ];
             }
         }

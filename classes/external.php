@@ -32,21 +32,45 @@ use external_function_parameters;
 use external_value;
 use external_single_structure;
 
+/**
+ * External service used by AJAX.
+ *
+ * @package    assignsubmission_external_server
+ * @author     Stefan Weber
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class external extends external_api {
 
-    public static function set_toggle_state_parameters() {
+    /**
+     * Returns the parameters for the set_toggle_state function.
+     *
+     * @return external_function_parameters
+     */
+    public static function set_toggle_state_parameters(): external_function_parameters {
         return new external_function_parameters([
             'state' => new external_value(PARAM_BOOL, 'Expanded state'),
         ]);
     }
 
-    public static function set_toggle_state($state) {
+    /**
+     * Set the expanded/collapsed state of the submission area toggle.
+     *
+     * @param bool $state The new state
+     * @return array status
+     */
+    public static function set_toggle_state($state): array {
         global $USER;
         set_user_preference('assignsubmission_external_server_expanded', $state, $USER);
         return ['status' => true];
     }
 
-    public static function set_toggle_state_returns() {
+    /**
+     * Returns the description of the return value of the set_toggle_state function.
+     *
+     * @return external_description
+     */
+    public static function set_toggle_state_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_BOOL),
         ]);

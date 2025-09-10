@@ -72,45 +72,48 @@ if (!empty($hide)) {
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '0', ['id' => $server->id]);
     redirect($redirecturl);
 
-// Show a server.
-} elseif (!empty($show)) {
+} else if (!empty($show)) {
+
+    // Show a server.
     $DB->set_field('assignsubmission_external_server_servers', 'visible', '1', ['id' => $server->id]);
     redirect($redirecturl);
 
-// Delete a server.
-} elseif (!empty($delete)) {
+} else if (!empty($delete)) {
 
+    // Delete a server.
     $assignments = helper::get_assignments_using_server($delete);
 
     if (!$entry = $DB->get_record('assignsubmission_external_server_servers', ['id' => $delete])) {
         throw new moodle_exception('unknownserver', 'assignsubmission_external_server');
 
-    // Check if server is in use.
     } else if ($assignments) {
+
+        // Server is in use.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('error'));
-        echo $OUTPUT->notification(get_string('cannotdelete', 'assignsubmission_external_server', count($assignments)), 'notifyproblem');
+        echo $OUTPUT->notification(get_string('cannotdelete', 'assignsubmission_external_server',
+            count($assignments)), 'notifyproblem');
         echo $OUTPUT->continue_button($redirecturl);
         die();
 
-    // Delete confirmation modal.
     } else if (!$confirm) {
 
+        // Delete confirmation modal.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('deleteexternalserver', 'assignsubmission_external_server', format_string($server->name)));
 
         $confirmurl = new moodle_url('/mod/assign/submission/external_server/editserver.php', [
             'delete' => $delete,
             'confirm' => 1,
-            'sesskey' => sesskey()
+            'sesskey' => sesskey(),
         ]);
         echo $OUTPUT->confirm(get_string('confirmdeleting', 'assignsubmission_external_server',
             format_string($entry->name)), $confirmurl, $redirecturl);
         die();
 
-    // Delete the server.
     } else {
 
+        // Delete the server.
         echo $OUTPUT->header();
 
         // Deleting not allowed, server already in use.
@@ -120,8 +123,8 @@ if (!empty($hide)) {
 
         // Delete server.
         if ($DB->delete_records('assignsubmission_external_server_servers', ['id' => $delete])) {
-            echo $OUTPUT->notification(get_string('delete:success', 'assignsubmission_external_server', format_string($entry->name)),
-                'notifysuccess');
+            echo $OUTPUT->notification(get_string('delete:success', 'assignsubmission_external_server',
+                format_string($entry->name)), 'notifysuccess');
         } else {
             echo $OUTPUT->notification(get_string('delete:error', 'assignsubmission_external_server', format_string($entry->name)));
         }

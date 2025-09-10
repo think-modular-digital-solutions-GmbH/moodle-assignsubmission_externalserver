@@ -22,10 +22,18 @@
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+/**
+ * Upgrade code for the external server submission plugin.
+ *
+ * @param int $oldversion the version we are upgrading from
+ * @return bool true if success
+ * @throws dml_exception
+ */
 function xmldb_assignsubmission_external_server_upgrade($oldversion) {
     global $DB;
 
-    $dbman = $DB->get_manager();    
+    $dbman = $DB->get_manager();
 
     // Add OAuth2 client ID, endpoint and JWT issuer fields.
     if ($oldversion < 2025072803) {

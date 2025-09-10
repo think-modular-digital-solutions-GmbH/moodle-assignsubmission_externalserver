@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for the external server submission plugin.
+ * Behat tests for the external server submission plugin.
  *
  * @package    assignsubmission_external_server
  * @author     Stefan Weber (stefan.weber@think-modular.com)
@@ -24,6 +24,15 @@
  */
 require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
 
+/**
+ * Behat steps for the external server submission plugin.
+ *
+ * @package    assignsubmission_external_server
+ * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ */
 class behat_assignsubmission_external_server extends behat_base {
 
     /**
@@ -31,12 +40,14 @@ class behat_assignsubmission_external_server extends behat_base {
      *
      * @Given I add an external server pointing to this Moodle site
      */
-    public function i_add_external_server_pointing_to_this_site() {
+    public function i_add_external_server_pointing_to_this_site(): void {
         global $CFG, $DB;
+        $url = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php";
+        $formurl = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php";
         $record = (object)[
             'name' => 'behat_test',
-            'url' => $CFG->wwwroot . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php',
-            'form_url' => $CFG->wwwroot . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php',
+            'url' => $url,
+            'form_url' => $formurl,
             'auth_type' => 'api_key',
             'auth_secret' => '2345678987654',
             'hash' => 'sha256',
@@ -47,5 +58,4 @@ class behat_assignsubmission_external_server extends behat_base {
         ];
         $DB->insert_record('assignsubmission_external_server_servers', $record);
     }
-
 }
