@@ -30,7 +30,7 @@ jobs:
       demo-server:
         image: php:8.3-apache
         volumes:
-          - ./plugin/mod/assign/submission/external_server/tests/demo:/var/www/html
+          - ${{ github.workspace }}/plugin/mod/assign/submission/external_server/tests/demo:/var/www/html:ro
         ports:
           - 8081:80
 
