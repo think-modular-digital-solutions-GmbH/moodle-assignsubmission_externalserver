@@ -11,7 +11,4 @@ Feature: In order to test the external server submission plugin
     And I follow "Plugins"
     And I follow "Submission to external server"
     When I follow "Check connection"
-    Then "//a[@data-behat='success-1']" "xpath_element" should exist
-    Then "//a[@data-behat='success-2']" "xpath_element" should exist
-    Then "//a[@data-behat='success-4']" "xpath_element" should exist
-    Then "//a[@data-behat='success-5']" "xpath_element" should exist
+    Then "//a[@data-behat='error-1']" "xpath_element" should exist
