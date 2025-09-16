@@ -27,15 +27,6 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
 
-      demo-server:
-        image: php:8.3-apache
-        command: >
-          sh -c "cp -r /mnt/demo/* /var/www/html && apache2-foreground"
-        volumes:
-          - ${{ github.workspace }}/plugin/mod/assign/submission/external_server/tests/demo:/mnt/demo:ro
-        ports:
-          - 8081:80
-
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +66,22 @@ jobs:
           IGNORE_PATHS: 'tests/demo'
           # Uncomment this to run Behat tests using the Moodle App.
           # MOODLE_APP: 'true'
+
+      # Start a demo server for external_server behat tests.
+      - name: Start demo server
+        run: |
+          nohup php -S 127.0.0.1:8081 -t plugin/mod/assign/submission/external_server/tests/demo >/dev/null 2>&1 &
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:8081/moodle_external_assignment.php >/dev/null && break
+            sleep 0.25
+          done
+
+      # ENV variable to point to the demo server.
+      - name: Behat features
+        id: behat
+        env:
+          DEMO_SERVER_BASE: "http://127.0.0.1:8081"
+        run: moodle-plugin-ci behat --profile chrome --scss-deprecations
 
       - name: PHP Lint
         if: ${{ !cancelled() }}
