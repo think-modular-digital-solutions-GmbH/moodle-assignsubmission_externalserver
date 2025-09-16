@@ -29,8 +29,10 @@ jobs:
 
       demo-server:
         image: php:8.3-apache
+        command: >
+          sh -c "cp -r /mnt/demo/* /var/www/html && apache2-foreground"
         volumes:
-          - ${{ github.workspace }}/plugin/mod/assign/submission/external_server/tests/demo:/var/www/html:ro
+          - ${{ github.workspace }}/plugin/mod/assign/submission/external_server/tests/demo:/mnt/demo:ro
         ports:
           - 8081:80
 
