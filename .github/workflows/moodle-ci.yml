@@ -72,41 +72,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Try common locations for tests/demo
-          DOCROOT=""
-          if [ -d tests/demo ]; then
-            DOCROOT="tests/demo"
-          elif [ -d external_server/tests/demo ]; then
-            DOCROOT="external_server/tests/demo"
-          elif [ -d mod/assign/submission/external_server/tests/demo ]; then
-            DOCROOT="mod/assign/submission/external_server/tests/demo"
-          else
-            DOCROOT="$(find . -maxdepth 5 -type d -path '*/tests/demo' | head -n1 || true)"
-          fi
-
-          if [ -z "${DOCROOT}" ] || [ ! -d "${DOCROOT}" ]; then
-            echo "tests/demo not found. Repo layout is:"
-            find . -maxdepth 3 -type d -print
-            exit 2
-          fi
+          DOCROOT="./plugin/tests/demo" # or dynamically detect
 
           echo "Serving demo from: ${DOCROOT}"
           php -S 127.0.0.1:8081 -t "${DOCROOT}" >server.log 2>&1 &
           echo $! > server.pid
 
-          # Wait up to 10s for readiness
+          echo "⏳ Waiting for server to come online..."
           for i in {1..40}; do
-            if curl -fsS http://127.0.0.1:8081/moodle_external_assignment.php >/dev/null; then
+            if curl -fsS http://127.0.0.1:8081/moodle_external_assignment.php >/dev/null 2>&1; then
               echo "✅ Demo server is up"
               exit 0
             fi
             sleep 0.25
           done
 
-          echo "❌ Demo server failed to start; server.log follows:"
+          echo "❌ Demo server failed to start; log follows:"
           sed -n '1,200p' server.log
           exit 1
-
 
       # ENV variable to point to the demo server.
       - name: Behat features
