@@ -70,14 +70,31 @@ jobs:
       # Start a demo server for external_server behat tests.
       - name: Start demo server
         run: |
-          # Check that the folder exists
-          ls -la mod/assign/submission/external_server/tests/demo
+          set -euo pipefail
 
-          # Start PHP server in background and capture output
-          php -S 127.0.0.1:8081 -t mod/assign/submission/external_server/tests/demo >server.log 2>&1 &
+          # Try common locations for tests/demo
+          DOCROOT=""
+          if [ -d tests/demo ]; then
+            DOCROOT="tests/demo"
+          elif [ -d external_server/tests/demo ]; then
+            DOCROOT="external_server/tests/demo"
+          elif [ -d mod/assign/submission/external_server/tests/demo ]; then
+            DOCROOT="mod/assign/submission/external_server/tests/demo"
+          else
+            DOCROOT="$(find . -maxdepth 5 -type d -path '*/tests/demo' | head -n1 || true)"
+          fi
+
+          if [ -z "${DOCROOT}" ] || [ ! -d "${DOCROOT}" ]; then
+            echo "tests/demo not found. Repo layout is:"
+            find . -maxdepth 3 -type d -print
+            exit 2
+          fi
+
+          echo "Serving demo from: ${DOCROOT}"
+          php -S 127.0.0.1:8081 -t "${DOCROOT}" >server.log 2>&1 &
           echo $! > server.pid
 
-          # Wait up to 10s for it to be ready
+          # Wait up to 10s for readiness
           for i in {1..40}; do
             if curl -fsS http://127.0.0.1:8081/moodle_external_assignment.php >/dev/null; then
               echo "✅ Demo server is up"
@@ -86,9 +103,10 @@ jobs:
             sleep 0.25
           done
 
-          echo "❌ Demo server failed to start, here is server.log:"
-          cat server.log
+          echo "❌ Demo server failed to start; server.log follows:"
+          sed -n '1,200p' server.log
           exit 1
+
 
       # ENV variable to point to the demo server.
       - name: Behat features
