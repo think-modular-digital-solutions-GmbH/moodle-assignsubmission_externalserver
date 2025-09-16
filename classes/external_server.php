@@ -517,7 +517,7 @@ class external_server {
     }
 
     /**
-     * returns the debug info
+     * Returns the debug info.
      *
      * @return string the debuginfo
      */
@@ -526,12 +526,22 @@ class external_server {
     }
 
     /**
-     * returns the http status code
+     * Returns the http status code.
      *
      * @return string http status code
      */
     public function get_httpcode(): string|bool {
         return $this->httpcode;
+    }
+
+    /**
+     * Returns success of last request.
+     *
+     * @return string the debuginfo
+     */
+    public function get_success(): string {
+        $code = (int)$this->httpcode;
+        return $code >= 200 && $code < 300;
     }
 
     /**

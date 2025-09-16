@@ -43,6 +43,8 @@ class behat_assignsubmission_external_server extends behat_base {
     public function i_add_external_server_pointing_to_this_site(): void {
         global $CFG, $DB;
 
+        $base = getenv('DEMO_SERVER_BASE') ?: $CFG->wwwroot;
+
         if (getenv('DEMO_SERVER_BASE')) {
 
             // We’re serving tests/demo as root in CI.
