@@ -78,7 +78,6 @@ jobs:
 
       # ENV variable to point to the demo server.
       - name: Behat features
-        id: behat
         env:
           DEMO_SERVER_BASE: "http://127.0.0.1:8081"
         run: moodle-plugin-ci behat --profile chrome --scss-deprecations
