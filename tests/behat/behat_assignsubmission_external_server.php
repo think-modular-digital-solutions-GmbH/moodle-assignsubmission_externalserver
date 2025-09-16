@@ -42,8 +42,21 @@ class behat_assignsubmission_external_server extends behat_base {
      */
     public function i_add_external_server_pointing_to_this_site(): void {
         global $CFG, $DB;
-        $url = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php";
-        $formurl = "{$CFG->wwwroot}/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php";
+
+        $base = getenv('DEMO_SERVER_BASE') ?: $CFG->wwwroot;
+
+        if (getenv('DEMO_SERVER_BASE')) {
+
+            // We’re serving tests/demo as root in CI.
+            $url = $base . '/moodle_external_assignment.php';
+            $formurl = $base . '/moodle_external_assignment_upload.php';
+
+        } else {
+            // Local dev fallback – files under normal plugin path.
+            $url = $base . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php';
+            $formurl = $base . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php';
+        }
+
         $record = (object)[
             'name' => 'behat_test',
             'url' => $url,

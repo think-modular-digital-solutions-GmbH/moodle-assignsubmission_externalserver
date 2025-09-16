@@ -72,7 +72,7 @@ $assignment->course = '0';
 $extviewurl = $extserver->url_studentview($assignment);
 $result = $extserver->http_request([], 'GET', $extviewurl);
 $extserver->print_response(get_string('studentview', 'assignsubmission_external_server'),
-    $result, $extserver->get_httpcode(), $extserver);
+    $result, $extserver->get_success(), $extserver);
 
 // Submit file.
 $tmpfilename = 'uploadtest.zip';
@@ -104,8 +104,8 @@ $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 // Teacher View.
 $extviewurl = $extserver->build_teacherview($assignment, '');
 $result = $extserver->http_request([], 'GET', $extviewurl);
-$extserver->print_response(get_string('studentview', 'assignsubmission_external_server'),
-    $result, $extserver->get_httpcode(), $extserver);
+$extserver->print_response(get_string('teacherview', 'assignsubmission_external_server'),
+    $result, $extserver->get_success(), $extserver);
 
 // Get grades.
 list($testuser, $params) = $DB->get_in_or_equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
