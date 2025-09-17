@@ -25,8 +25,6 @@
 
 namespace assignsubmission_external_server\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The assignsubmission_external_server submission_created event class.
  *
@@ -80,10 +78,5 @@ class submission_created extends \mod_assign\event\submission_created {
         if (!isset($this->other['filesubmissioncount'])) {
             throw new \coding_exception('The \'filesubmissioncount\' value must be set in other.');
         }
-    }
-
-    public static function get_objectid_mapping() {
-        // No mapping available for 'assignsubmission_external_server'.
-        return array('db' => 'assignsubmission_external_server', 'restore' => \core\event\base::NOT_MAPPED);
     }
 }
