@@ -484,8 +484,9 @@ class assign_submission_external_server extends assign_submission_plugin {
         $context = $this->assignment->get_context();
         if (has_capability('mod/assign:grade', $context)) {
 
-            // Link to view the full submission.
             if ($user) {
+
+                // Teacher view.
                 $ext = $this->get_external_server();
                 $url = $ext->build_teacherview($this->assignment->get_instance(), $user->username);
                 $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',

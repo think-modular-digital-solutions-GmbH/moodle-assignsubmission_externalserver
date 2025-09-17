@@ -76,7 +76,7 @@ if ($groupinfo !== false) {
     if ($groupinfo === null) {
         $groupinfo = json_last_error_message();
     }
-    $groupinfotxt = "<br />Groupinfo:<pre>".print_r($groupinfo, true)."</pre>";
+    $groupinfotxt = "<br />group info:<pre>".print_r($groupinfo, true)."</pre>";
 }
 
 if(!assignment_exists($aid) && $role == "teacher"){

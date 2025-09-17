@@ -47,7 +47,7 @@ class behat_assignsubmission_external_server extends behat_base {
 
         if (getenv('DEMO_SERVER_BASE')) {
 
-            // We’re serving tests/demo as root in CI.
+            // We are serving tests/demo as root in CI.
             $url = $base . '/moodle_external_assignment.php';
             $formurl = $base . '/moodle_external_assignment_upload.php';
 
