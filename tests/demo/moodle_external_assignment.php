@@ -67,16 +67,7 @@ if (!check_akey($values, $akey)) {
 }
 
 if ($groupinfo !== false) {
-    if (!check_groupinfo($groupinfo, $groupinfohash)) {
-        header("HTTP/1.0 418 I'm a teapot! (Somebody tried to alter the submitted groupinfos!");
-        echo "Submitted groupinfos invalid, due to hash mismatch!";
-        die;
-    }
-    $groupinfo = json_decode($groupinfo);
-    if ($groupinfo === null) {
-        $groupinfo = json_last_error_message();
-    }
-    $groupinfotxt = "<br />group info:<pre>".print_r($groupinfo, true)."</pre>";
+    $groupinfotxt = get_groupinfo_txt($user, $groupinfo, $groupinfohash);
 }
 
 if(!assignment_exists($aid) && $role == "teacher"){
@@ -90,7 +81,6 @@ if(!assignment_exists($aid)){
 
     // create assignment
 }
-
 
 switch($action) {
   case 'view':

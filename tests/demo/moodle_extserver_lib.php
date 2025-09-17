@@ -138,4 +138,48 @@ function assignment_exists($aid): bool {
 
   return true;
 }
-?>
+
+/**
+ * Get group info text.
+ *
+ * @param string $username
+ * @param string $groupinfo
+ * @param string $groupinfohash
+ * @return string
+ */
+function get_groupinfo_txt($username, $groupinfo, $groupinfohash): string {
+    if (!check_groupinfo($groupinfo, $groupinfohash)) {
+        header("HTTP/1.0 418 I'm a teapot! (Somebody tried to alter the submitted groupinfos!");
+        echo "Submitted groupinfos invalid, due to hash mismatch!";
+        die;
+    }
+    $groups = json_decode($groupinfo);
+    if ($groups === null) {
+        $groups = json_last_error_message();
+    }
+
+    echo "<pre>";
+    var_dump($groups);
+    die();
+
+    // Determine group of the student.
+    $groupid = 'n/a';
+    $groupname = 'no group found for student';
+    foreach ($groups as $group) {
+        if (in_array($username, $group->members)) {
+
+            // Return group info.
+
+        }
+    }
+
+    return '';
+
+    echo "<pre>";
+    var_dump($groupinfo);
+    die();
+
+    $html = "<br />group id: $groupid";
+
+    return $html;
+}
