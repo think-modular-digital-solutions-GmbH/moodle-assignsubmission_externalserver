@@ -25,8 +25,6 @@
 
 namespace assignsubmission_external_server\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The assignsubmission_external_server assessable uploaded event class.
  *
@@ -90,9 +88,5 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
     protected function init() {
         parent::init();
         $this->data['objecttable'] = 'assign_submission';
-    }
-
-    public static function get_objectid_mapping() {
-        return array('db' => 'assign_submission', 'restore' => 'submission');
     }
 }
