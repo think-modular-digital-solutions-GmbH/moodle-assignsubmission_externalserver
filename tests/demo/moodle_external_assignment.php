@@ -76,7 +76,7 @@ if ($groupinfo !== false) {
     if ($groupinfo === null) {
         $groupinfo = json_last_error_message();
     }
-    $groupinfotxt = "<br />group info:<pre>".print_r($groupinfo, true)."</pre>";
+    $groupinfotxt = get_groupinfo_txt($user, $groupinfo, $groupinfohash);
 }
 
 if(!assignment_exists($aid) && $role == "teacher"){
@@ -90,7 +90,6 @@ if(!assignment_exists($aid)){
 
     // create assignment
 }
-
 
 switch($action) {
   case 'view':
