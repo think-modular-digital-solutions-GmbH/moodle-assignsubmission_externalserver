@@ -158,28 +158,22 @@ function get_groupinfo_txt($username, $groupinfo, $groupinfohash): string {
         $groups = json_last_error_message();
     }
 
-    echo "<pre>";
-    var_dump($groups);
-    die();
-
     // Determine group of the student.
-    $groupid = 'n/a';
-    $groupname = 'no group found for student';
+    $groupids = [];
+    $groupnames = [];
     foreach ($groups as $group) {
-        if (in_array($username, $group->members)) {
-
-            // Return group info.
-
+        $groupmembers = $group->members;
+        if (is_array($groupmembers) && in_array($username, $groupmembers)) {
+            $groupids[] = $group->id;
+            $groupnames[] = $group->name;
         }
     }
 
-    return '';
+    $groupids = implode(', ', $groupids);
+    $groupnames = implode(', ', $groupnames);
 
-    echo "<pre>";
-    var_dump($groupinfo);
-    die();
-
-    $html = "<br />group id: $groupid";
+    $html = "<br />group id(s): $groupids";
+    $html .= "<br />group name(s): $groupnames";
 
     return $html;
 }
