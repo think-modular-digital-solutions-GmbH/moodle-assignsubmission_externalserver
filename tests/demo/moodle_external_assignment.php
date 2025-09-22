@@ -111,10 +111,10 @@ switch($action) {
                 echo $groupinfotxt;
             }
         } else {
-          header("HTTP/1.0 400 Bad Request");
+            header("HTTP/1.0 400 Bad Request");
             echo "wrong params";
             die();
-    }
+        }
     break;
   case 'getgrades':
     if ($role == "teacher") {
