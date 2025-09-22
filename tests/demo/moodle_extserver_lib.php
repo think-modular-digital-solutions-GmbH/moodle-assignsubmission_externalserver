@@ -172,7 +172,7 @@ function get_groupinfo_txt($username, $groupinfo, $groupinfohash): string {
     $groupids = implode(', ', $groupids);
     $groupnames = implode(', ', $groupnames);
 
-    $html = "<br />group id(s): $groupids";
+    $html = "<br />group ID(s): $groupids";
     $html .= "<br />group name(s): $groupnames";
 
     return $html;
