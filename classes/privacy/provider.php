@@ -17,18 +17,18 @@
 /**
  * Privacy classfor the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server\privacy;
+namespace assignsubmission_externalserver\privacy;
 
 /**
  * Privacy class for requesting user data.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

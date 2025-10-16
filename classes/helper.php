@@ -17,13 +17,13 @@
 /**
  * Helper methods for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server;
+namespace assignsubmission_externalserver;
 
 use html_writer;
 use moodle_url;
@@ -31,7 +31,7 @@ use moodle_url;
 /**
  * This class contains helper methods for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -51,16 +51,16 @@ class helper {
         $icons = [];
 
         // Edit.
-        $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php', ['id' => $id, 'sesskey' => sesskey()]);
+        $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php', ['id' => $id, 'sesskey' => sesskey()]);
         $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/edit', get_string('edit')));
 
         // Show/hide.
         if ($server->visible) {
-            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
                 ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/hide', get_string('hide')));
         } else {
-            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
                 ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/show', get_string('show')));
         }
@@ -70,19 +70,19 @@ class helper {
 
         // Delete.
         if ($assignments) {
-            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_external_server',
+            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_externalserver',
                 count($assignments)), '', ['class' => 'iconsmall icon-disabled']);
         } else {
-            $url = new \moodle_url('/mod/assign/submission/external_server/editserver.php',
+            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
                 ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/delete', get_string('delete')));
         }
 
         // Test.
-        $url = new \moodle_url('/mod/assign/submission/external_server/servertest.php', ['id' => $id, 'sesskey' => sesskey()]);
+        $url = new \moodle_url('/mod/assign/submission/externalserver/servertest.php', ['id' => $id, 'sesskey' => sesskey()]);
         $icons[] = html_writer::link(
             $url,
-            get_string('checkconnection', 'assignsubmission_external_server')
+            get_string('checkconnection', 'assignsubmission_externalserver')
         );
 
         $html = implode('&nbsp;', $icons);
@@ -98,8 +98,8 @@ class helper {
      */
     public static function get_upload_options(int $submissioncount = 0): array {
         $maxuploads = [];
-        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_external_server');
-        $maxuploads[ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_external_server');
+        $maxuploads[ASSIGNSUBMISSION_externalserver_NOUPLOADS] = get_string('nouploads', 'assignsubmission_externalserver');
+        $maxuploads[ASSIGNSUBMISSION_externalserver_UNLIMITED] = get_string('unlimited', 'assignsubmission_externalserver');
         for ($i = $submissioncount; $i <= 100; $i++) {
             $maxuploads[$i] = $i;
         }
@@ -122,7 +122,7 @@ class helper {
                 AND name = :name
                 AND " . $DB->sql_compare_text('value') . " = :value";
         $params = [
-            'plugin' => 'external_server',
+            'plugin' => 'externalserver',
             'subtype' => 'assignsubmission',
             'name' => 'server',
             'value' => (string) $id,

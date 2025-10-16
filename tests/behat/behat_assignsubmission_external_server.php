@@ -17,7 +17,7 @@
 /**
  * Behat tests for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,20 +27,20 @@ require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
 /**
  * Behat steps for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
-class behat_assignsubmission_external_server extends behat_base {
+class behat_assignsubmission_externalserver extends behat_base {
 
     /**
      * Adds an external server entry pointing to the demopackage.
      *
      * @Given I add an external server pointing to this Moodle site
      */
-    public function i_add_external_server_pointing_to_this_site(): void {
+    public function i_add_externalserver_pointing_to_this_site(): void {
         global $CFG, $DB;
 
         $base = getenv('DEMO_SERVER_BASE') ?: $CFG->wwwroot;
@@ -53,8 +53,8 @@ class behat_assignsubmission_external_server extends behat_base {
 
         } else {
             // Local dev fallback – files under normal plugin path.
-            $url = $base . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment.php';
-            $formurl = $base . '/mod/assign/submission/external_server/tests/demo/moodle_external_assignment_upload.php';
+            $url = $base . '/mod/assign/submission/externalserver/tests/demo/moodle_external_assignment.php';
+            $formurl = $base . '/mod/assign/submission/externalserver/tests/demo/moodle_external_assignment_upload.php';
         }
 
         $record = (object)[
@@ -69,6 +69,6 @@ class behat_assignsubmission_external_server extends behat_base {
             'timecreated' => time(),
             'usercreated' => 1,
         ];
-        $DB->insert_record('assignsubmission_external_server_servers', $record);
+        $DB->insert_record('assignsubmission_externalserver_servers', $record);
     }
 }

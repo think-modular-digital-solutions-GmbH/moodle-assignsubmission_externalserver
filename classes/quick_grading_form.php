@@ -17,21 +17,21 @@
 /**
  * Quick grading form for external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server;
+namespace assignsubmission_externalserver;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
 use moodleform;
-use assignsubmission_external_server\external_server;
-use assign_submission_external_server;
+use assignsubmission_externalserver\externalserver;
+use assign_submission_externalserver;
 use context_module;
 use moodle_url;
 use html_writer;
@@ -39,14 +39,14 @@ use html_writer;
 /**
  * Quick submission edit form to save one click.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quick_grading_form extends moodleform {
 
-    /** @var assign_submission_external_server $extserver The assignment instance */
+    /** @var assign_submission_externalserver $extserver The assignment instance */
     protected $extserver;
 
     /** @var stdClass $assignment The assignment */
@@ -58,13 +58,13 @@ class quick_grading_form extends moodleform {
     /**
      * Constructor
      *
-     * @param assign_submission_external_server $extserver The assignment instance
+     * @param assign_submission_externalserver $extserver The assignment instance
      * @param stdClass $assignment The assignment
      * @param stdClass $submission The submission
      * @param moodle_url $actionurl The form action URL
      * @param array $customdata Custom data for the form
      */
-    public function __construct(assign_submission_external_server
+    public function __construct(assign_submission_externalserver
         $extserver, $assignment, $submission, $actionurl, $customdata = null) {
         $this->extserver = $extserver;
         $this->assignment = $assignment;
@@ -92,7 +92,7 @@ class quick_grading_form extends moodleform {
         $debug = optional_param('debug', null, PARAM_TEXT);
         if ($error) {
             $mform->addElement('html', '<div class="alert alert-danger">' .
-                get_string($error, 'assignsubmission_external_server') . "<code>$debug</code></div>");
+                get_string($error, 'assignsubmission_externalserver') . "<code>$debug</code></div>");
         }
 
         // Grading.
@@ -101,25 +101,25 @@ class quick_grading_form extends moodleform {
         if (has_capability('mod/assign:grade', $context)) {
 
             // Header.
-            $mform->addElement('header', 'quickgradingheader', get_string('getgrades', 'assignsubmission_external_server'));
+            $mform->addElement('header', 'quickgradingheader', get_string('getgrades', 'assignsubmission_externalserver'));
 
             // Info text.
             $url = new moodle_url('/mod/assign/view.php',
                 ['id' => $cm->id, 'action' => 'grading']);
             $link = html_writer::link($url, get_string('gradeitem:submissions', 'assign'));
-            $text = get_string('quickgradinginfo', 'assignsubmission_external_server', $link);
+            $text = get_string('quickgradinginfo', 'assignsubmission_externalserver', $link);
             $mform->addElement('html', html_writer::div($text));
 
             // Status selection.
             $options = [
-                'all' => get_string('all', 'assignsubmission_external_server'),
-                'submitted' => get_string('submitted', 'assignsubmission_external_server'),
-                'ungraded' => get_string('ungraded', 'assignsubmission_external_server'),
+                'all' => get_string('all', 'assignsubmission_externalserver'),
+                'submitted' => get_string('submitted', 'assignsubmission_externalserver'),
+                'ungraded' => get_string('ungraded', 'assignsubmission_externalserver'),
             ];
-            $mform->addElement('select', 'status', get_string('downloadgradesfor', 'assignsubmission_external_server'), $options);
+            $mform->addElement('select', 'status', get_string('downloadgradesfor', 'assignsubmission_externalserver'), $options);
 
             // Start grading button.
-            $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_external_server'));
+            $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_externalserver'));
 
         }
 

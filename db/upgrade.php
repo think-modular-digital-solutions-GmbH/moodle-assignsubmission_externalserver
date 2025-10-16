@@ -17,7 +17,7 @@
 /**
  * Upgrade hooks for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,7 +30,7 @@
  * @return bool true if success
  * @throws dml_exception
  */
-function xmldb_assignsubmission_external_server_upgrade($oldversion) {
+function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
@@ -38,7 +38,7 @@ function xmldb_assignsubmission_external_server_upgrade($oldversion) {
     // Add OAuth2 client ID, endpoint and JWT issuer fields.
     if ($oldversion < 2025072803) {
 
-        $table = new xmldb_table('assignsubmission_external_server_servers');
+        $table = new xmldb_table('assignsubmission_externalserver_servers');
 
         $field = new xmldb_field('oauth2_client_id', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'auth_secret');
         if (!$dbman->field_exists($table, $field)) {
@@ -55,20 +55,20 @@ function xmldb_assignsubmission_external_server_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025072803, 'assignsubmission', 'external_server');
+        upgrade_plugin_savepoint(true, 2025072803, 'assignsubmission', 'externalserver');
     }
 
     // Add JWT audience field.
     if ($oldversion < 2025072804) {
 
-        $table = new xmldb_table('assignsubmission_external_server_servers');
+        $table = new xmldb_table('assignsubmission_externalserver_servers');
 
         $field = new xmldb_field('jwt_audience', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'jwt_issuer');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025072804, 'assignsubmission', 'external_server');
+        upgrade_plugin_savepoint(true, 2025072804, 'assignsubmission', 'externalserver');
     }
 
     return true;

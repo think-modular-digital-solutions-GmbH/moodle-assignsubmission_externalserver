@@ -17,7 +17,7 @@
 /**
  * Global logic for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -35,7 +35,7 @@
  * @param array $options - List of options affecting file serving.
  * @return bool false if file not found, does not return if found - just send the file
  */
-function assignsubmission_external_server_pluginfile($course,
+function assignsubmission_externalserver_pluginfile($course,
                                           $cm,
                                           context $context,
                                           $filearea,
@@ -77,7 +77,7 @@ function assignsubmission_external_server_pluginfile($course,
 
     $relativepath = implode('/', $args);
 
-    $fullpath = "/{$context->id}/assignsubmission_external_server/$filearea/$itemid/$relativepath";
+    $fullpath = "/{$context->id}/assignsubmission_externalserver/$filearea/$itemid/$relativepath";
 
     $fs = get_file_storage();
     if (!($file = $fs->get_file_by_hash(sha1($fullpath))) || $file->is_directory()) {

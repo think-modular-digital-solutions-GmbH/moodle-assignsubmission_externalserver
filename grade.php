@@ -17,7 +17,7 @@
 /**
  * Grade submissions from external server.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,7 +28,7 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-use assignsubmission_external_server\external_server;
+use assignsubmission_externalserver\externalserver;
 use core_user;
 
 // Params.
@@ -42,7 +42,7 @@ $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $context = context_module::instance($cmid);
 $assignment = new assign($context, $cm, $course);
-$ext = $assignment->get_plugin_by_type('assignsubmission', 'external_server')->get_external_server();
+$ext = $assignment->get_plugin_by_type('assignsubmission', 'externalserver')->get_externalserver();
 
 // Permission check.
 require_login();
@@ -51,7 +51,7 @@ require_capability('mod/assign:grade', context_module::instance($cmid));
 // Setup page.
 $PAGE->set_cm($cm, $course);
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/mod/assign/submission/external_server/grade.php', ['status' => $status]));
+$PAGE->set_url(new moodle_url('/mod/assign/submission/externalserver/grade.php', ['status' => $status]));
 $PAGE->set_title('Confirm grading');
 $PAGE->set_heading('Confirm grading');
 echo $OUTPUT->header();
@@ -68,7 +68,7 @@ if ($confirm) {
 
 } else {
     // Confirmation urls.
-    $yesurl = new moodle_url('/mod/assign/submission/external_server/grade.php', [
+    $yesurl = new moodle_url('/mod/assign/submission/externalserver/grade.php', [
         'cmid' => $cmid,
         'userid' => $userid,
         'status' => $status,
@@ -79,7 +79,7 @@ if ($confirm) {
 
     // Get string for whom the action will be performed.
     if ($status) {
-        $for = get_string($status, 'assignsubmission_external_server');
+        $for = get_string($status, 'assignsubmission_externalserver');
     } else {
         $user = core_user::get_user($userid);
         $for = fullname($user);
@@ -87,7 +87,7 @@ if ($confirm) {
 
     // Show confirmation dialog.
     echo $OUTPUT->confirm(
-        get_string('confirmgrading', 'assignsubmission_external_server', ['for' => $for, 'server' => $ext->obj->name]),
+        get_string('confirmgrading', 'assignsubmission_externalserver', ['for' => $for, 'server' => $ext->obj->name]),
         $yesurl,
         $nourl
     );

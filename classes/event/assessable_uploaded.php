@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The assignsubmission_external_server assessable uploaded event.
+ * The assignsubmission_externalserver assessable uploaded event.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server\event;
+namespace assignsubmission_externalserver\event;
 
 /**
- * The assignsubmission_external_server assessable uploaded event class.
+ * The assignsubmission_externalserver assessable uploaded event class.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -58,7 +58,7 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventassessableuploaded', 'assignsubmission_external_server');
+        return get_string('eventassessableuploaded', 'assignsubmission_externalserver');
     }
 
     /**

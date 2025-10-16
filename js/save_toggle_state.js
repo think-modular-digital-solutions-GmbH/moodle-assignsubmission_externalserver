@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const details = document.getElementById('external-server-details');
+    const details = document.getElementById('externalserver-details');
     if (!details) return;
 
     const prefKey = details.dataset.prefkey;
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify([{
-                methodname: 'assignsubmission_external_server_set_toggle_state',
+                methodname: 'assignsubmission_externalserver_set_toggle_state',
                 args: {
                     state: open,
                     key: prefKey

@@ -17,39 +17,39 @@
 /**
  * Library file for external server submission plugin
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 // Constants.
-define('ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA', 'submission_external_server');
-define('ASSIGNSUBMISSION_EXTERNAL_SERVER_UNLIMITED', '0');
-define('ASSIGNSUBMISSION_EXTERNAL_SERVER_NOUPLOADS', -1);
-define('ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS', ['server', 'maxbytes', 'filetypes', 'uploads']);
+define('ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA', 'submission_externalserver');
+define('ASSIGNSUBMISSION_EXTERNALSERVER_UNLIMITED', '0');
+define('ASSIGNSUBMISSION_EXTERNALSERVER_NOUPLOADS', -1);
+define('ASSIGNSUBMISSION_EXTERNALSERVER_SETTINGS', ['server', 'maxbytes', 'filetypes', 'uploads']);
 
-use assignsubmission_external_server\helper;
-use assignsubmission_external_server\external_server;
-use assignsubmission_external_server\quick_grading_form;
+use assignsubmission_externalserver\helper;
+use assignsubmission_externalserver\externalserver;
+use assignsubmission_externalserver\quick_grading_form;
 use core\output\notification;
 
 /**
  * Library class for external server submission plugin
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assign_submission_external_server extends assign_submission_plugin {
+class assign_submission_externalserver extends assign_submission_plugin {
 
     /**
      * Get the name of the submission plugin
      * @return string
      */
     public function get_name(): string {
-        return get_string('pluginname', 'assignsubmission_external_server');
+        return get_string('pluginname', 'assignsubmission_externalserver');
     }
 
     /**
@@ -60,7 +60,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      */
     private function get_file_submission($submissionid): mixed {
         global $DB;
-        return $DB->get_record('assignsubmission_external_server', ['submission' => $submissionid]);
+        return $DB->get_record('assignsubmission_externalserver', ['submission' => $submissionid]);
     }
 
     /**
@@ -73,23 +73,23 @@ class assign_submission_external_server extends assign_submission_plugin {
         global $CFG, $DB, $OUTPUT;
 
         // Get instance settings or default settings.
-        foreach (ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS as $setting) {
+        foreach (ASSIGNSUBMISSION_EXTERNALSERVER_SETTINGS as $setting) {
             if ($this->assignment->has_instance()) {
                 $$setting = $this->get_config($setting);
             } else {
-                $$setting = get_config('assignsubmission_external_server', $setting);
+                $$setting = get_config('assignsubmission_externalserver', $setting);
             }
         }
         $filetypes = (string)$filetypes;
 
         // Add fieldset.
         $mform->addElement('html', html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-external-server-settings-details']));
-        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'),
-            ['class' => 'assignsubmission-external-server-settings-legend']));
+            ['class' => 'assignsubmission-externalserver-settings-details']));
+        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_externalserver'),
+            ['class' => 'assignsubmission-externalserver-settings-legend']));
 
         // External server.
-        $name = get_string('externalserver', 'assignsubmission_external_server');
+        $name = get_string('externalserver', 'assignsubmission_externalserver');
         $submissioncount = $this->get_max_submissions();
         if ($submissioncount > 0) {
             // If there are already submissions, include all the servers, so that now-invisible still show as selected.
@@ -97,50 +97,50 @@ class assign_submission_external_server extends assign_submission_plugin {
         } else {
             $visible = ['visible' => 1];
         }
-        $servers = $DB->get_records('assignsubmission_external_server_servers', $visible,  'name ASC');
+        $servers = $DB->get_records('assignsubmission_externalserver_servers', $visible,  'name ASC');
         foreach ($servers as $ser) {
             $options[$ser->id] = format_string($ser->name);
         }
         if (empty($options)) {
-            $options[''] = get_string('noservers', 'assignsubmission_external_server');
+            $options[''] = get_string('noservers', 'assignsubmission_externalserver');
         } else {
-            $options = ['' => get_string('selectserver', 'assignsubmission_external_server')] + $options;
+            $options = ['' => get_string('selectserver', 'assignsubmission_externalserver')] + $options;
         }
-        $mform->addElement('select', 'assignsubmission_external_server_server', $name, $options);
-        $mform->addHelpButton('assignsubmission_external_server_server', 'externalserver', 'assignsubmission_external_server');
-        $mform->setDefault('assignsubmission_external_server_server', $server);
-        $mform->hideIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'notchecked');
-        $mform->disabledIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'notchecked');
+        $mform->addElement('select', 'assignsubmission_externalserver_server', $name, $options);
+        $mform->addHelpButton('assignsubmission_externalserver_server', 'externalserver', 'assignsubmission_externalserver');
+        $mform->setDefault('assignsubmission_externalserver_server', $server);
+        $mform->hideIf('assignsubmission_externalserver_server', 'assignsubmission_externalserver_enabled', 'notchecked');
+        $mform->disabledIf('assignsubmission_externalserver_server', 'assignsubmission_externalserver_enabled', 'notchecked');
 
         // Maximum file size.
-        $name = get_string('maxbytes', 'assignsubmission_external_server');
+        $name = get_string('maxbytes', 'assignsubmission_externalserver');
         $options = get_max_upload_sizes($CFG->maxbytes);
-        $mform->addElement('select', 'assignsubmission_external_server_maxbytes', $name, $options);
-        $mform->addHelpButton('assignsubmission_external_server_maxbytes', 'maxbytes', 'assignsubmission_external_server');
-        $mform->setDefault('assignsubmission_external_server_maxbytes', $maxbytes);
-        $mform->hideIf('assignsubmission_external_server_maxbytes', 'assignsubmission_external_server_enabled', 'notchecked');
+        $mform->addElement('select', 'assignsubmission_externalserver_maxbytes', $name, $options);
+        $mform->addHelpButton('assignsubmission_externalserver_maxbytes', 'maxbytes', 'assignsubmission_externalserver');
+        $mform->setDefault('assignsubmission_externalserver_maxbytes', $maxbytes);
+        $mform->hideIf('assignsubmission_externalserver_maxbytes', 'assignsubmission_externalserver_enabled', 'notchecked');
 
         // File types.
-        $name = get_string('filetypes', 'assignsubmission_external_server');
-        $mform->addElement('filetypes', 'assignsubmission_external_server_filetypes', $name);
-        $mform->addHelpButton('assignsubmission_external_server_filetypes', 'filetypes', 'assignsubmission_external_server');
-        $mform->setDefault('assignsubmission_external_server_filetypes', $filetypes);
-        $mform->hideIf('assignsubmission_external_server_filetypes', 'assignsubmission_external_server_enabled', 'notchecked');
+        $name = get_string('filetypes', 'assignsubmission_externalserver');
+        $mform->addElement('filetypes', 'assignsubmission_externalserver_filetypes', $name);
+        $mform->addHelpButton('assignsubmission_externalserver_filetypes', 'filetypes', 'assignsubmission_externalserver');
+        $mform->setDefault('assignsubmission_externalserver_filetypes', $filetypes);
+        $mform->hideIf('assignsubmission_externalserver_filetypes', 'assignsubmission_externalserver_enabled', 'notchecked');
 
         // Number of uploads.
-        $name = get_string('uploads', 'assignsubmission_external_server');
+        $name = get_string('uploads', 'assignsubmission_externalserver');
         $options = helper::get_upload_options($submissioncount);
-        $mform->addElement('select', 'assignsubmission_external_server_uploads', $name, $options);
-        $mform->addHelpButton('assignsubmission_external_server_uploads', 'uploads', 'assignsubmission_external_server');
-        $mform->setDefault('assignsubmission_external_server_uploads', $uploads);
-        $mform->hideIf('assignsubmission_external_server_uploads', 'assignsubmission_external_server_enabled', 'notchecked');
+        $mform->addElement('select', 'assignsubmission_externalserver_uploads', $name, $options);
+        $mform->addHelpButton('assignsubmission_externalserver_uploads', 'uploads', 'assignsubmission_externalserver');
+        $mform->setDefault('assignsubmission_externalserver_uploads', $uploads);
+        $mform->hideIf('assignsubmission_externalserver_uploads', 'assignsubmission_externalserver_enabled', 'notchecked');
 
         // Check if the assignment already has submissions.
         if ($submissioncount > 0) {
-            $mform->disabledIf('assignsubmission_external_server_server', 'assignsubmission_external_server_enabled', 'checked');
-            $mform->disabledIf('assignsubmission_external_server_maxbytes', 'assignsubmission_external_server_enabled', 'checked');
-            $mform->disabledIf('assignsubmission_external_server_filetypes', 'assignsubmission_external_server_enabled', 'checked');
-            $message = get_string('submissionswarning', 'assignsubmission_external_server', $submissioncount);
+            $mform->disabledIf('assignsubmission_externalserver_server', 'assignsubmission_externalserver_enabled', 'checked');
+            $mform->disabledIf('assignsubmission_externalserver_maxbytes', 'assignsubmission_externalserver_enabled', 'checked');
+            $mform->disabledIf('assignsubmission_externalserver_filetypes', 'assignsubmission_externalserver_enabled', 'checked');
+            $message = get_string('submissionswarning', 'assignsubmission_externalserver', $submissioncount);
             $warning = $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING);
             $mform->addElement('html', $warning);
         }
@@ -156,8 +156,8 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return bool
      */
     public function save_settings(stdClass $data): bool {
-        foreach (ASSIGNSUBMISSION_EXTERNAL_SERVER_SETTINGS as $setting) {
-            $property = "assignsubmission_external_server_$setting";
+        foreach (ASSIGNSUBMISSION_EXTERNALSERVER_SETTINGS as $setting) {
+            $property = "assignsubmission_externalserver_$setting";
             if (!empty($data->$property)) {
                 $this->set_config($setting, $data->$property);
             } else {
@@ -182,7 +182,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         ];
         // Use module default if nothing is set.
         if ($fileoptions['maxbytes'] == 0) {
-            $fileoptions['maxbytes'] = get_config('assignsubmission_external_server', 'maxbytes');
+            $fileoptions['maxbytes'] = get_config('assignsubmission_externalserver', 'maxbytes');
         }
         return $fileoptions;
     }
@@ -200,9 +200,9 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // Add fieldset.
         $mform->addElement('html', html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-external-server-settings-details']));
-        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_external_server'),
-            ['class' => 'assignsubmission-external-server-settings-legend']));
+            ['class' => 'assignsubmission-externalserver-settings-details']));
+        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_externalserver'),
+            ['class' => 'assignsubmission-externalserver-settings-legend']));
 
         // Check if there are uploads left.
         $uploadattempts = $this->has_uploadattempts($submission);
@@ -215,22 +215,22 @@ class assign_submission_external_server extends assign_submission_plugin {
                                                     'files',
                                                     $fileoptions,
                                                     $this->assignment->get_context(),
-                                                    'assignsubmission_external_server',
-                                                    ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                                                    'assignsubmission_externalserver',
+                                                    ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                                     $submissionid);
-            $mform->addElement('filepicker', 'external_server_filemanager', $this->get_name(), null, $fileoptions);
+            $mform->addElement('filepicker', 'externalserver_filemanager', $this->get_name(), null, $fileoptions);
 
         } else {
 
             // No uploads left, display message.
-            $message = get_string('nouploadsleft', 'assignsubmission_external_server');
+            $message = get_string('nouploadsleft', 'assignsubmission_externalserver');
             $mform->addElement('static', 'no_uploads', '',
                 $OUTPUT->notification($message, notification::NOTIFY_WARNING));
         }
 
         // Upload attempts.
         $html = html_writer::div($uploadattempts['html'], 'float-right pt-1');
-        $mform->addElement('static', 'uploadattempts', get_string('uploadattempts', 'assignsubmission_external_server'),
+        $mform->addElement('static', 'uploadattempts', get_string('uploadattempts', 'assignsubmission_externalserver'),
             $html);
 
         // End fieldset.
@@ -249,7 +249,7 @@ class assign_submission_external_server extends assign_submission_plugin {
     private function count_files($submissionid, $area): int {
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_external_server',
+                                     'assignsubmission_externalserver',
                                      $area,
                                      $submissionid,
                                      'id',
@@ -273,12 +273,12 @@ class assign_submission_external_server extends assign_submission_plugin {
         $fileoptions = $this->get_file_options();
         $fileoptions['maxbytes'] = (int) $fileoptions['maxbytes'];
 
-        $draftitemid = $data->external_server_filemanager;
+        $draftitemid = $data->externalserver_filemanager;
         file_save_draft_area_files(
             $draftitemid,
             $this->assignment->get_context()->id,
-            'assignsubmission_external_server',
-            ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
             $submission->id,
             $fileoptions
         );
@@ -288,8 +288,8 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Plagiarism code event trigger when files are uploaded.
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_external_server',
-                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                                     'assignsubmission_externalserver',
+                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                      $submission->id,
                                      'id',
                                      false
@@ -305,7 +305,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             redirect($url);
         }
 
-        $count = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
+        $count = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
         $params = [
             'context' => context_module::instance($this->assignment->get_course_module()->id),
             'courseid' => $this->assignment->get_course()->id,
@@ -321,7 +321,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         if ($this->assignment->is_blind_marking()) {
             $params['anonymous'] = 1;
         }
-        $event = \assignsubmission_external_server\event\assessable_uploaded::create($params);
+        $event = \assignsubmission_externalserver\event\assessable_uploaded::create($params);
         $event->set_legacy_files($files);
         $event->trigger();
 
@@ -350,23 +350,23 @@ class assign_submission_external_server extends assign_submission_plugin {
         // File was submitted.
         if ($filesubmission && $files) {
 
-            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
+            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
 
             // Increment the number of uploads.
             $filesubmission->uploads++;
 
             // Update filesubmission.
-            $DB->update_record('assignsubmission_external_server', $filesubmission);
+            $DB->update_record('assignsubmission_externalserver', $filesubmission);
 
             // Fire event.
             $params['objectid'] = $filesubmission->id;
-            $event = \assignsubmission_external_server\event\submission_updated::create($params);
+            $event = \assignsubmission_externalserver\event\submission_updated::create($params);
             $event->set_assign($this->assignment);
             $event->trigger();
 
             // Upload the file to the external server.
             $file = reset($files);
-            $externalserver = $this->get_external_server();
+            $externalserver = $this->get_externalserver();
             if ($externalserver) {
                 $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
                 if (!$updatestatus) {
@@ -382,14 +382,14 @@ class assign_submission_external_server extends assign_submission_plugin {
             // No file was submitted - this should not happen, but we handle it gracefully.
             $filesubmission = new stdClass();
             $filesubmission->numfiles = $this->count_files($submission->id,
-                                                           ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA);
+                                                           ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
             $filesubmission->uploads = 1;
-            $filesubmission->id = $DB->insert_record('assignsubmission_external_server', $filesubmission);
+            $filesubmission->id = $DB->insert_record('assignsubmission_externalserver', $filesubmission);
             $params['objectid'] = $filesubmission->id;
 
-            $event = \assignsubmission_external_server\event\submission_created::create($params);
+            $event = \assignsubmission_externalserver\event\submission_created::create($params);
             $event->set_assign($this->assignment);
             $event->trigger();
             return $filesubmission->id > 0;
@@ -407,14 +407,14 @@ class assign_submission_external_server extends assign_submission_plugin {
         $fs = get_file_storage();
 
         $fs->delete_area_files($this->assignment->get_context()->id,
-                               'assignsubmission_external_server',
-                               ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                               'assignsubmission_externalserver',
+                               ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                $submission->id);
 
         $currentsubmission = $this->get_file_submission($submission->id);
         if ($currentsubmission) {
             $currentsubmission->numfiles = 0;
-            $DB->update_record('assignsubmission_external_server', $currentsubmission);
+            $DB->update_record('assignsubmission_externalserver', $currentsubmission);
         }
 
         return true;
@@ -432,8 +432,8 @@ class assign_submission_external_server extends assign_submission_plugin {
         $fs = get_file_storage();
 
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_external_server',
-                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                                     'assignsubmission_externalserver',
+                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                      $submission->id,
                                      'timemodified, id',
                                      false);
@@ -459,8 +459,8 @@ class assign_submission_external_server extends assign_submission_plugin {
     public function view_summary(stdClass $submission, & $showviewlink): string {
 
         // Uploaded file.
-        $html = $this->assignment->render_area_files('assignsubmission_external_server',
-                                                      ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+        $html = $this->assignment->render_area_files('assignsubmission_externalserver',
+                                                      ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                                       $submission->id
         );
 
@@ -478,7 +478,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // Upload attempts.
         $uploadattempts = $this->has_uploadattempts($submission);
-        $uploads = get_string('uploadattempts', 'assignsubmission_external_server') . ': ' . $uploadattempts['html'];
+        $uploads = get_string('uploadattempts', 'assignsubmission_externalserver') . ': ' . $uploadattempts['html'];
         $html .= html_writer::div($uploads, 'uploadattempts');
 
         $context = $this->assignment->get_context();
@@ -487,7 +487,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             if ($user) {
 
                 // Teacher view.
-                $ext = $this->get_external_server();
+                $ext = $this->get_externalserver();
                 $url = $ext->build_teacherview($this->assignment->get_instance(), $user->username);
                 $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',
                     'target' => '_blank']);
@@ -495,9 +495,9 @@ class assign_submission_external_server extends assign_submission_plugin {
                 // Link to update grade/feedback.
                 $assignmentid = $submission->assignment;
                 $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
-                $url = new moodle_url('/mod/assign/submission/external_server/grade.php',
+                $url = new moodle_url('/mod/assign/submission/externalserver/grade.php',
                     ['cmid' => $cm->id, 'userid' => $userid, 'groupid' => $groupid]);
-                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_external_server'),
+                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_externalserver'),
                     ['class' => 'btn btn-primary mb-1']);
             }
         }
@@ -512,8 +512,8 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return string
      */
     public function view(stdClass $submission): string {
-        return $this->assignment->render_area_files('assignsubmission_external_server',
-                                                    ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+        return $this->assignment->render_area_files('assignsubmission_externalserver',
+                                                    ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                                     $submission->id);
     }
 
@@ -525,7 +525,7 @@ class assign_submission_external_server extends assign_submission_plugin {
     public function delete_instance(): bool {
         global $DB;
         // Will throw exception on failure.
-        $DB->delete_records('assignsubmission_external_server',
+        $DB->delete_records('assignsubmission_externalserver',
             ['assignment' => $this->assignment->get_instance()->id]);
 
         return true;
@@ -536,7 +536,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @param stdClass $submission
      */
     public function is_empty(stdClass $submission): bool {
-        return $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA) == 0;
+        return $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA) == 0;
     }
 
     /**
@@ -555,7 +555,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         $files = $fs->get_area_files(context_user::instance($USER->id)->id,
                                      'user',
                                      'draft',
-                                     $data->external_server_filemanager,
+                                     $data->externalserver_filemanager,
                                      'id',
                                      false);
         return count($files) == 0;
@@ -566,7 +566,7 @@ class assign_submission_external_server extends assign_submission_plugin {
      * @return array - An array of fileareas (keys) and descriptions (values)
      */
     public function get_file_areas(): array {
-        return [ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA => $this->get_name()];
+        return [ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA => $this->get_name()];
     }
 
     /**
@@ -582,8 +582,8 @@ class assign_submission_external_server extends assign_submission_plugin {
         $contextid = $this->assignment->get_context()->id;
         $fs = get_file_storage();
         $files = $fs->get_area_files($contextid,
-                                     'assignsubmission_external_server',
-                                     ASSIGNSUBMISSION_EXTERNAL_SERVER_FILEAREA,
+                                     'assignsubmission_externalserver',
+                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
                                      $sourcesubmission->id,
                                      'id',
                                      false);
@@ -592,11 +592,11 @@ class assign_submission_external_server extends assign_submission_plugin {
             $fs->create_file_from_storedfile($fieldupdates, $file);
         }
 
-        // Copy the assignsubmission_external_server record.
+        // Copy the assignsubmission_externalserver record.
         if ($filesubmission = $this->get_file_submission($sourcesubmission->id)) {
             unset($filesubmission->id);
             $filesubmission->submission = $destsubmission->id;
-            $DB->insert_record('assignsubmission_external_server', $filesubmission);
+            $DB->insert_record('assignsubmission_externalserver', $filesubmission);
         }
         return true;
     }
@@ -615,7 +615,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Get a size in bytes.
         if ($configs->maxsubmissionsizebytes == 0) {
             $configs->maxsubmissionsizebytes = get_max_upload_file_size($CFG->maxbytes, $this->assignment->get_course()->maxbytes,
-                                                                        get_config('assignsubmission_external_server', 'maxbytes'));
+                                                                        get_config('assignsubmission_externalserver', 'maxbytes'));
         }
         return (array) $configs;
     }
@@ -646,7 +646,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         if (!$this->assignment->get_context()) {
             return 0;
         } else {
-            return $DB->get_field('assignsubmission_external_server', 'MAX(uploads)', [
+            return $DB->get_field('assignsubmission_externalserver', 'MAX(uploads)', [
                 'assignment' => $this->assignment->get_instance()->id,
             ]) ?: 0;
         }
@@ -655,7 +655,7 @@ class assign_submission_external_server extends assign_submission_plugin {
     /**
      * Returns external server for this assignment.
      */
-    public function get_external_server(): ?external_server {
+    public function get_externalserver(): ?externalserver {
         global $DB;
 
         $serverid = $this->get_config('server');
@@ -663,7 +663,7 @@ class assign_submission_external_server extends assign_submission_plugin {
             return null;
         }
 
-        return new external_server($serverid);
+        return new externalserver($serverid);
     }
 
     /**
@@ -676,7 +676,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         global $OUTPUT, $PAGE, $USER;
 
-        $ext = $this->get_external_server();
+        $ext = $this->get_externalserver();
         $cmid = $this->assignment->get_course_module()->id;
         $userid = $USER->id;
 
@@ -693,15 +693,15 @@ class assign_submission_external_server extends assign_submission_plugin {
             $extservername = $ext->obj->name;
         } else {
             if (has_capability('mod/assign:grade', $context)) {
-                $message = get_string('noneselected', 'assignsubmission_external_server');
+                $message = get_string('noneselected', 'assignsubmission_externalserver');
             } else {
-                $message = get_string('noneselectedstudent', 'assignsubmission_external_server');
+                $message = get_string('noneselectedstudent', 'assignsubmission_externalserver');
             }
             return $OUTPUT->notification($message, \core\output\notification::NOTIFY_WARNING);
         }
 
         // Header.
-        $title = get_string('externalservertitle', 'assignsubmission_external_server', $extservername);
+        $title = get_string('externalservertitle', 'assignsubmission_externalserver', $extservername);
         $html = html_writer::tag('h2', $title);
 
         // Quick grading form.
@@ -723,7 +723,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
                 // Grading.
                 if (isset($data->gradebutton)) {
-                    $url = new moodle_url('/mod/assign/submission/external_server/grade.php', [
+                    $url = new moodle_url('/mod/assign/submission/externalserver/grade.php', [
                         'status' => $data->status,
                         'cmid' => $cmid,
                     ]);
@@ -738,23 +738,23 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Status table.
         $uploadattempts = $this->has_uploadattempts($submission);
         $table = new html_table();
-        $table->attributes['class'] = 'assignsubmission-external-server-table';
+        $table->attributes['class'] = 'assignsubmission-externalserver-table';
         $table->data = [
-            [get_string('connectionstatus', 'assignsubmission_external_server') . ':', $this->print_server_status($ext)],
-            [get_string('uploadattempts', 'assignsubmission_external_server') . ':', $uploadattempts['html']],
+            [get_string('connectionstatus', 'assignsubmission_externalserver') . ':', $this->print_server_status($ext)],
+            [get_string('uploadattempts', 'assignsubmission_externalserver') . ':', $uploadattempts['html']],
         ];
         $html .= html_writer::table($table);
 
         // IFrame.
-        $PAGE->requires->js(new moodle_url('/mod/assign/submission/external_server/js/save_toggle_state.js'));
+        $PAGE->requires->js(new moodle_url('/mod/assign/submission/externalserver/js/save_toggle_state.js'));
         if ($ext) {
-            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_external_server'),
+            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_externalserver'),
                 ['class' => 'h6 mt-3']);
             $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
             // Get open state for collapsible from user preferences.
-            $isopen = get_user_preferences('assignsubmission_external_server_expanded', 0);
-            $detailsattributes = ['id' => 'external-server-details'];
+            $isopen = get_user_preferences('assignsubmission_externalserver_expanded', 0);
+            $detailsattributes = ['id' => 'externalserver-details'];
             if ($isopen) {
                 $detailsattributes['open'] = 'open';
             }
@@ -781,7 +781,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         // Get the number of uploads and max uploads.
         $uploads = 0;
         if ($submission) {
-            $uploads = $DB->get_field('assignsubmission_external_server', 'uploads',
+            $uploads = $DB->get_field('assignsubmission_externalserver', 'uploads',
                 ['submission' => $submission->id]);
         }
         if (!$uploads) {
@@ -793,7 +793,7 @@ class assign_submission_external_server extends assign_submission_plugin {
         if ($maxuploads < 0) {
             $hasuploads = true;
             $type = 'success';
-            $uploadstring = get_string('unlimiteduploads', 'assignsubmission_external_server');
+            $uploadstring = get_string('unlimiteduploads', 'assignsubmission_externalserver');
 
         } else {
             // Show attempts.
@@ -811,7 +811,7 @@ class assign_submission_external_server extends assign_submission_plugin {
 
         // Render text.
         $html = html_writer::tag('span', $uploadstring, [
-            'title' => get_string('uploadattempts', 'assignsubmission_external_server'), 'class' => "text-$type"]);
+            'title' => get_string('uploadattempts', 'assignsubmission_externalserver'), 'class' => "text-$type"]);
         return ['has_uploads' => $hasuploads, 'html' => $html];
     }
 

@@ -17,13 +17,13 @@
 /**
  * Contains the class representing the external server (not the module instance)
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server;
+namespace assignsubmission_externalserver;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,18 +34,18 @@ use context_module;
 use stdClass;
 use GuzzleHttp\Client;
 
-require_once($CFG->dirroot . '/mod/assign/submission/external_server/lib.php');
+require_once($CFG->dirroot . '/mod/assign/submission/externalserver/lib.php');
 require_once($CFG->libdir . '/pdflib.php');
 
 /**
  * This class represents an external server (not an instance of external server the moodle module)
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class external_server {
+class externalserver {
 
     /** server needs no group info */
     const NO_GROUPINFO = 0;
@@ -85,7 +85,7 @@ class external_server {
         // Get external server from DB.
         if ($id != 0) {
             $id = (string) $id;
-            $this->obj = $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
+            $this->obj = $DB->get_record('assignsubmission_externalserver_servers', ['id' => $id]);
             if ($this->obj->hash == null) {
                 $this->obj->hash = 'sha256';
             }
@@ -107,7 +107,7 @@ class external_server {
      */
     public static function get_server($id): ?\stdClass {
         global $DB;
-        return $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
+        return $DB->get_record('assignsubmission_externalserver_servers', ['id' => $id]);
     }
 
     /**
@@ -118,7 +118,7 @@ class external_server {
      */
     public static function get_servers(): array {
         global $DB;
-        return $DB->get_records('assignsubmission_external_server_servers', ['visible' => '1']);
+        return $DB->get_records('assignsubmission_externalserver_servers', ['visible' => '1']);
     }
 
     /**
@@ -129,7 +129,7 @@ class external_server {
      */
     public static function get_all_servers(): array {
         global $DB;
-        return $DB->get_records('assignsubmission_external_server_servers');
+        return $DB->get_records('assignsubmission_externalserver_servers');
     }
 
     /**
@@ -146,7 +146,7 @@ class external_server {
             return false;
         }
 
-        $ret = $DB->delete_records('assignsubmission_external_server_servers', ['id' => $id]);
+        $ret = $DB->delete_records('assignsubmission_externalserver_servers', ['id' => $id]);
 
         return $ret;
     }
@@ -468,7 +468,7 @@ class external_server {
         if ($response) {
             if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
                 if ($notify) {
-                    notification::add(get_string('file_uploaded', 'assignsubmission_external_server'),
+                    notification::add(get_string('file_uploaded', 'assignsubmission_externalserver'),
                         \core\output\notification::NOTIFY_SUCCESS);
                 }
                 return true;
@@ -581,8 +581,8 @@ class external_server {
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
-        $html = $OUTPUT->box_start('assignsubmission-external-server-iframe-container');
-        $html .= '<iframe src="' . $url . '" class="assignsubmission-external-server-iframe border bg-light"></iframe>';
+        $html = $OUTPUT->box_start('assignsubmission-externalserver-iframe-container');
+        $html .= '<iframe src="' . $url . '" class="assignsubmission-externalserver-iframe border bg-light"></iframe>';
         $html .= $OUTPUT->box_end();
 
         return $html;
@@ -611,8 +611,8 @@ class external_server {
         if (!$ok && empty($content)) {
             $httpcode = $this->get_httpcode();
             $content = ($httpcode === 0)
-                ? get_string('sslerror', 'assignsubmission_external_server')
-                : get_string('unknownerror', 'assignsubmission_external_server', $httpcode);
+                ? get_string('sslerror', 'assignsubmission_externalserver')
+                : get_string('unknownerror', 'assignsubmission_externalserver', $httpcode);
         }
 
         $summary = html_writer::tag('summary', $title . $symbol,
@@ -664,7 +664,7 @@ class external_server {
         $grademax = $assign->grade;
         if (!$grademax > 0) {
             $result['status'] = 'error';
-            $result['message'] = get_string('nonnumericgrade', 'assignsubmission_external_server');
+            $result['message'] = get_string('nonnumericgrade', 'assignsubmission_externalserver');
             return $result;
         }
 
@@ -703,7 +703,7 @@ class external_server {
         // No users found.
         if ($users == null) {
             $result['status'] = 'warning';
-            $result['message'] = get_string('nothingtograde', 'assignsubmission_external_server');
+            $result['message'] = get_string('nothingtograde', 'assignsubmission_externalserver');
             return $result;
 
         } else {
@@ -717,7 +717,7 @@ class external_server {
             // Load grades from external server.
             if (!$extgrades = $this->load_grades($assign, $userlist)) {
                 $result['status'] = 'error';
-                $result['message'] = get_string('couldnotgetgrades', 'assignsubmission_external_server');
+                $result['message'] = get_string('couldnotgetgrades', 'assignsubmission_externalserver');
                 return $result;
             }
 
@@ -771,7 +771,7 @@ class external_server {
 
             // Much success, very wow.
             $result['status'] = 'success';
-            $result['message'] = get_string('gradesupdated', 'assignsubmission_external_server', $updated);
+            $result['message'] = get_string('gradesupdated', 'assignsubmission_externalserver', $updated);
             return $result;
         }
     }
@@ -856,7 +856,7 @@ class external_server {
         $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($statuscode != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_external_server', $statuscode),
+            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_externalserver', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -895,7 +895,7 @@ class external_server {
         $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($statuscode != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_external_server', $statuscode),
+            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_externalserver', $statuscode),
                 \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -955,7 +955,7 @@ class external_server {
         } catch (RequestException $e) {
             $this->debuginfo = $e->getMessage();
             $this->httpcode = 0;
-            $error = get_string('error:requestfailed', 'assignsubmission_external_server', $this->debuginfo);
+            $error = get_string('error:requestfailed', 'assignsubmission_externalserver', $this->debuginfo);
                \core\notification::add($error, \core\output\notification::NOTIFY_ERROR);
             return false;
         }

@@ -15,18 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The assignsubmission_external_server submission_created event.
+ * The assignsubmission_externalserver submission_created event.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_external_server\event;
+namespace assignsubmission_externalserver\event;
 
 /**
- * The assignsubmission_external_server submission_created event class.
+ * The assignsubmission_externalserver submission_created event class.
  *
  * @property-read array $other {
  *      Extra information about the event.
@@ -34,7 +34,7 @@ namespace assignsubmission_external_server\event;
  *      - int filesubmissioncount: The number of files uploaded.
  * }
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,7 +46,7 @@ class submission_created extends \mod_assign\event\submission_created {
      */
     protected function init() {
         parent::init();
-        $this->data['objecttable'] = 'assignsubmission_external_server';
+        $this->data['objecttable'] = 'assignsubmission_externalserver';
     }
 
     /**

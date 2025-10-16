@@ -1,4 +1,4 @@
-@assignsubmission_external_server @assignsubmission
+@assignsubmission_externalserver @assignsubmission
 Feature: In order to test the external server submission plugin
   I will add the external server shipped with the plugin
   and test it.

@@ -17,12 +17,12 @@
 /**
  * External service used by AJAX.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace assignsubmission_external_server;
+namespace assignsubmission_externalserver;
 
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/externallib.php");
@@ -35,7 +35,7 @@ use external_single_structure;
 /**
  * External service used by AJAX.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -61,7 +61,7 @@ class external extends external_api {
      */
     public static function set_toggle_state($state): array {
         global $USER;
-        set_user_preference('assignsubmission_external_server_expanded', $state, $USER);
+        set_user_preference('assignsubmission_externalserver_expanded', $state, $USER);
         return ['status' => true];
     }
 

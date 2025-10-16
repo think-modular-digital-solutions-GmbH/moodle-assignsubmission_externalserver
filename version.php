@@ -17,7 +17,7 @@
 /**
  * Version information for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 // Basics.
 $plugin->requires  = 2024100100;
-$plugin->component = 'assignsubmission_external_server';
+$plugin->component = 'assignsubmission_externalserver';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [];
 

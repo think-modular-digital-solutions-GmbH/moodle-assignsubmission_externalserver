@@ -17,7 +17,7 @@
 /**
  * Settings for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ require_once('../../../../config.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-use assignsubmission_external_server\external_server;
+use assignsubmission_externalserver\externalserver;
 
 // Capability check.
 require_login();
@@ -36,20 +36,20 @@ require_sesskey();
 
 // Get server.
 $id = required_param('id', PARAM_INT); // Server ID.
-$server = $DB->get_record('assignsubmission_external_server_servers', ['id' => $id]);
+$server = $DB->get_record('assignsubmission_externalserver_servers', ['id' => $id]);
 if (!$server) {
-    throw new moodle_exception('unknownserver', 'assignsubmission_external_server');
+    throw new moodle_exception('unknownserver', 'assignsubmission_externalserver');
     redirect('servers.php');
 }
-$extserver = new external_server($id);
+$extserver = new externalserver($id);
 
 // Set up the page.
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/external_server/servertest.php',
+$PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/externalserver/servertest.php',
     ['id' => $id, 'sesskey' => sesskey()]));
-$PAGE->set_heading(get_string('testing', 'assignsubmission_external_server',
+$PAGE->set_heading(get_string('testing', 'assignsubmission_externalserver',
     ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
-$PAGE->requires->css(new moodle_url('/mod/assign/submission/external_server/styles.css'));
+$PAGE->requires->css(new moodle_url('/mod/assign/submission/externalserver/styles.css'));
 $PAGE->requires->js_call_amd('core/bootstraptoggle', 'init');
 $PAGE->requires->js_call_amd('core/bootstrap', 'init');
 
@@ -60,7 +60,7 @@ echo $OUTPUT->header();
 // Check Connection.
 $result = $extserver->check_connection();
 $content = $extserver->get_debuginfo();
-$extserver->print_response(get_string('checkconnection', 'assignsubmission_external_server'), $content, $result, $extserver);
+$extserver->print_response(get_string('checkconnection', 'assignsubmission_externalserver'), $content, $result, $extserver);
 
 // Create Assignment.
 $assignment = new stdClass();
@@ -71,12 +71,12 @@ $assignment->course = '0';
 // Student View.
 $extviewurl = $extserver->url_studentview($assignment);
 $result = $extserver->http_request([], 'GET', $extviewurl);
-$extserver->print_response(get_string('studentview', 'assignsubmission_external_server'),
+$extserver->print_response(get_string('studentview', 'assignsubmission_externalserver'),
     $result, $extserver->get_success(), $extserver);
 
 // Submit file.
 $tmpfilename = 'uploadtest.zip';
-$tmpfilepath = $CFG->dirroot . '/mod/assign/submission/external_server/fixtures/'  . $tmpfilename;
+$tmpfilepath = $CFG->dirroot . '/mod/assign/submission/externalserver/fixtures/'  . $tmpfilename;
 $fs = get_file_storage();
 $fileinfo = [
     'contextid' => context_system::instance()->id,
@@ -104,7 +104,7 @@ $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 // Teacher View.
 $extviewurl = $extserver->build_teacherview($assignment, '');
 $result = $extserver->http_request([], 'GET', $extviewurl);
-$extserver->print_response(get_string('teacherview', 'assignsubmission_external_server'),
+$extserver->print_response(get_string('teacherview', 'assignsubmission_externalserver'),
     $result, $extserver->get_success(), $extserver);
 
 // Get grades.
@@ -126,11 +126,11 @@ if ($result && !empty($result)) {
     $pretty->formatOutput = true;
     $content = '<code>' . htmlentities($pretty->saveXML(), ENT_COMPAT) . '</code>';
 }
-$extserver->print_response(get_string('loadgrades', 'assignsubmission_external_server'), $content, $result, $extserver);
+$extserver->print_response(get_string('loadgrades', 'assignsubmission_externalserver'), $content, $result, $extserver);
 
 // Link back.
 echo html_writer::link(
-    new moodle_url('/admin/settings.php', ['section' => 'assignsubmission_external_server']),
+    new moodle_url('/admin/settings.php', ['section' => 'assignsubmission_externalserver']),
     get_string('back'),
     ['class' => 'btn btn-primary']
 );

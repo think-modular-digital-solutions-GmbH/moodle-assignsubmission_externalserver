@@ -17,7 +17,7 @@
 /**
  * Services for the external server submission plugin.
  *
- * @package    assignsubmission_external_server
+ * @package    assignsubmission_externalserver
  * @author     Stefan Weber (stefan.weber@think-modular.com)
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,8 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = [
-    'assignsubmission_external_server_set_toggle_state' => [
-        'classname'   => 'assignsubmission_external_server\external',
+    'assignsubmission_externalserver_set_toggle_state' => [
+        'classname'   => 'assignsubmission_externalserver\external',
         'methodname'  => 'set_toggle_state',
         'type'        => 'write',
         'ajax'        => true,

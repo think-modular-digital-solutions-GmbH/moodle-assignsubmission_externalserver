@@ -69,7 +69,7 @@ jobs:
           # Uncomment this to run Behat tests using the Moodle App.
           # MOODLE_APP: 'true'
 
-      # Start a demo server for external_server behat tests.
+      # Start a demo server for externalserver behat tests.
       - name: Start demo server
         run: |
           set -euo pipefail
