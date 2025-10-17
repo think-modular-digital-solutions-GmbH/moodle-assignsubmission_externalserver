@@ -98,8 +98,8 @@ class helper {
      */
     public static function get_upload_options(int $submissioncount = 0): array {
         $maxuploads = [];
-        $maxuploads[ASSIGNSUBMISSION_externalserver_NOUPLOADS] = get_string('nouploads', 'assignsubmission_externalserver');
-        $maxuploads[ASSIGNSUBMISSION_externalserver_UNLIMITED] = get_string('unlimited', 'assignsubmission_externalserver');
+        $maxuploads[ASSIGNSUBMISSION_EXTERNALSERVER_NOUPLOADS] = get_string('nouploads', 'assignsubmission_externalserver');
+        $maxuploads[ASSIGNSUBMISSION_EXTERNALSERVER_UNLIMITED] = get_string('unlimited', 'assignsubmission_externalserver');
         for ($i = $submissioncount; $i <= 100; $i++) {
             $maxuploads[$i] = $i;
         }

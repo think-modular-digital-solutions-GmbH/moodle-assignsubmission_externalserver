@@ -648,13 +648,11 @@ class externalserver {
      * Get grades and grade submissions automatically
      *
      * @param assign $assignment The assignment instance
-     * @param context_module $context The context of the assignment
-     * @param int $filter (all, submitted, ungraded)
-     * @param int $userid if no filter is given, only grade this user
+     * @param array $userids The list of userids to grade
      *
      * @return array
      */
-    public function grade_submissions($assignment, $context, $filter, $userid): array {
+    public function grade_submissions($assignment, $userids): array {
 
         global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
         require_once($CFG->libdir.'/gradelib.php');
@@ -668,112 +666,81 @@ class externalserver {
             return $result;
         }
 
-        // Get single user.
-        if ($userid) {
-            $users = $DB->get_records('user', ['id' => $userid], 'username ASC', 'id, username');
-        } else {
-
-            // Get all sql condition for users that are allowed to submit assignments.
-            list($esql, $params) = get_enrolled_sql($context, 'mod/assign:submit');
-            $sql = 'SELECT u.id, u.username FROM {user} u '.
-                'LEFT JOIN ('.$esql.') eu ON eu.id=u.id '.
-                'WHERE u.deleted = 0 AND eu.id=u.id ';
-            $users = $DB->get_records_sql($sql, $params);
-        }
-
-        // Only ungraded users.
-        if ($filter == 'ungraded') {
-            foreach ($users as $key => $user) {
-                if ($grade = $assignment->get_user_grade($user->id, false)) {
-                    unset($users[$key]);
-                }
-            }
-
-        } else if ($filter == 'submitted') {
-
-            // Only submitted users.
-            foreach ($users as $key => $user) {
-                $submission = $assignment->get_user_submission($user->id, false);
-                if (!$submission || $submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
-                    unset($users[$key]);
-                }
-            }
-        }
-
         // No users found.
-        if ($users == null) {
+        if (!$userids || empty($userids)) {
             $result['status'] = 'warning';
             $result['message'] = get_string('nothingtograde', 'assignsubmission_externalserver');
             return $result;
+        }
 
-        } else {
+        // Create a list of userids and usernames.
+        $userlist = [];
+        $useridlist = [];
+        foreach ($userids as $userid) {
+            $user = \core_user::get_user($userid);
+            $userlist[$user->id] = $user->username;
+            $useridlist[$user->username] = $user->id;
+        }
 
-            // Create a list of userids and usernames.
-            foreach ($users as $user) {
-                $userlist[$user->id] = $user->username;
-                $useridlist[$user->username] = $user->id;
-            }
-
-            // Load grades from external server.
-            if (!$extgrades = $this->load_grades($assign, $userlist)) {
-                $result['status'] = 'error';
-                $result['message'] = get_string('couldnotgetgrades', 'assignsubmission_externalserver');
-                return $result;
-            }
-
-            // Check if feedback comments are enabled.
-            $feedbackendabled = false;
-            $feedbackplugins = $assignment->get_feedback_plugins();
-            foreach ($feedbackplugins as $plugin) {
-                if ($plugin->get_type() == 'comments' && $plugin->is_enabled() && $plugin->is_visible()) {
-                    $feedbackendabled = true;
-                    break;
-                }
-            }
-
-            // Process grades.
-            $updated = 0;
-            foreach ($extgrades as $extgrade) {
-                $username = $extgrade['username'];
-                $comment = $extgrade['comment'];
-                if (array_key_exists($username, $useridlist)) {
-                    $userid = $useridlist[$username];
-
-                    // Grade.
-                    $grade = new stdClass();
-                    $grade->userid = $userid;
-                    $grade->grade  = $extgrade['grade'];
-                    $grade->attemptnumber = -1;
-                    $grade->addattempt = false;
-
-                    // Comment.
-                    if ($feedbackendabled) {
-                        $grade->assignfeedbackcomments_editor = [
-                            'text' => $comment,
-                            'format' => FORMAT_PLAIN,
-                            'itemid' => 0,
-                        ];
-                    }
-
-                    // Save.
-                    if ($assignment->get_instance()->teamsubmission) {
-                        $group = $assignment->get_submission_group($userid);
-                        $members = $assignment->get_submission_group_members($group->id, true);
-                        foreach ($members as $member) {
-                            $assignment->save_grade($member->id, $grade);
-                        }
-                    } else {
-                        $assignment->save_grade($userid, $grade);
-                    }
-                    $updated++;
-                }
-            }
-
-            // Much success, very wow.
-            $result['status'] = 'success';
-            $result['message'] = get_string('gradesupdated', 'assignsubmission_externalserver', $updated);
+        // Load grades from external server.
+        if (!$extgrades = $this->load_grades($assign, $userlist)) {
+            $result['status'] = 'error';
+            $result['message'] = get_string('couldnotgetgrades', 'assignsubmission_externalserver');
             return $result;
         }
+
+        // Check if feedback comments are enabled.
+        $feedbackendabled = false;
+        $feedbackplugins = $assignment->get_feedback_plugins();
+        foreach ($feedbackplugins as $plugin) {
+            if ($plugin->get_type() == 'comments' && $plugin->is_enabled() && $plugin->is_visible()) {
+                $feedbackendabled = true;
+                break;
+            }
+        }
+
+        // Process grades.
+        $updated = 0;
+        foreach ($extgrades as $extgrade) {
+            $username = $extgrade['username'];
+            $comment = $extgrade['comment'];
+            if (array_key_exists($username, $useridlist)) {
+                $userid = $useridlist[$username];
+
+                // Grade.
+                $grade = new stdClass();
+                $grade->userid = $userid;
+                $grade->grade  = $extgrade['grade'];
+                $grade->attemptnumber = -1;
+                $grade->addattempt = false;
+
+                // Comment.
+                if ($feedbackendabled) {
+                    $grade->assignfeedbackcomments_editor = [
+                        'text' => $comment,
+                        'format' => FORMAT_PLAIN,
+                        'itemid' => 0,
+                    ];
+                }
+
+                // Save.
+                if ($assignment->get_instance()->teamsubmission) {
+                    $group = $assignment->get_submission_group($userid);
+                    $members = $assignment->get_submission_group_members($group->id, true);
+                    foreach ($members as $member) {
+                        $assignment->save_grade($member->id, $grade);
+                    }
+                } else {
+                    $assignment->save_grade($userid, $grade);
+                }
+                $updated++;
+            }
+        }
+
+        // Much success, very wow.
+        $result['status'] = 'success';
+        $result['message'] = get_string('gradesupdated', 'assignsubmission_externalserver', $updated);
+        return $result;
     }
 
     /**

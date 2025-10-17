@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Basics.
-$plugin->requires  = 2024100100;
+$plugin->requires  = 2024101600;
 $plugin->component = 'assignsubmission_externalserver';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [];
@@ -36,4 +36,4 @@ $plugin->version = 2025101401;
 $plugin->release = '1.0.0';
 
 // Supported versions.
-$plugin->supported = [404, 500];
+$plugin->supported = [404, 502];

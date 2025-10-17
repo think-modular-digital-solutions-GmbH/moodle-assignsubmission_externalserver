@@ -33,8 +33,7 @@ use core_user;
 
 // Params.
 $cmid = required_param('cmid', PARAM_INT);
-$status = optional_param('status', null, PARAM_ALPHA);
-$userid = optional_param('userid', null, PARAM_INT);
+$userid = required_param('userid', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 
 // Objects.
@@ -59,7 +58,7 @@ echo $OUTPUT->header();
 // Confirmed - fetch grades from server.
 if ($confirm) {
 
-    $result = $ext->grade_submissions($assignment, $context, $status, $userid);
+    $result = $ext->grade_submissions($assignment, [$userid]);
     echo $OUTPUT->notification($result['message'], $result['status']);
     echo html_writer::link(
         new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'grading']),
@@ -71,23 +70,17 @@ if ($confirm) {
     $yesurl = new moodle_url('/mod/assign/submission/externalserver/grade.php', [
         'cmid' => $cmid,
         'userid' => $userid,
-        'status' => $status,
         'confirm' => 1,
         'sesskey' => sesskey(),
     ]);
     $nourl = new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'view']);
 
     // Get string for whom the action will be performed.
-    if ($status) {
-        $for = get_string($status, 'assignsubmission_externalserver');
-    } else {
-        $user = core_user::get_user($userid);
-        $for = fullname($user);
-    }
+    $user = core_user::get_user($userid);
 
     // Show confirmation dialog.
     echo $OUTPUT->confirm(
-        get_string('confirmgrading', 'assignsubmission_externalserver', ['for' => $for, 'server' => $ext->obj->name]),
+        get_string('confirmgrading', 'assignsubmission_externalserver', ['for' => fullname($user), 'server' => $ext->obj->name]),
         $yesurl,
         $nourl
     );

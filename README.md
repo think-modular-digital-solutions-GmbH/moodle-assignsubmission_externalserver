@@ -11,9 +11,11 @@ administrators in the extserver module, as well as manage and test the available
 
 ## Description
 
-The external server submission type  enables users to submit files to be processed automatically by an external server.
+The external server submission type enables users to submit files to be processed automatically by an external server.
 
 The activity module stores the submitted files and sends it via curl to the chosen server. This server is used to process the files in an automated way (e.g. automatically compile and run a certain source code) and is able to return an automatically calculated grade and feedback afterwards.
+
+Please note that in order for the external server to write back feedback comments, the "Feedback comments" feedback type has to be enabled for the assignment, as this plugin provides no separate feedback column.
 
 ### Usage Example
 
