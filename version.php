@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Basics.
-$plugin->requires  = 2024101600;
+$plugin->requires  = 2024100100;
 $plugin->component = 'assignsubmission_externalserver';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [];
