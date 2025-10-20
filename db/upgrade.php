@@ -37,7 +37,6 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
 
     // Add OAuth2 client ID, endpoint and JWT issuer fields.
     if ($oldversion < 2025072803) {
-
         $table = new xmldb_table('assignsubmission_externalserver_servers');
 
         $field = new xmldb_field('oauth2_client_id', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'auth_secret');
@@ -60,7 +59,6 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
 
     // Add JWT audience field.
     if ($oldversion < 2025072804) {
-
         $table = new xmldb_table('assignsubmission_externalserver_servers');
 
         $field = new xmldb_field('jwt_audience', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'jwt_issuer');

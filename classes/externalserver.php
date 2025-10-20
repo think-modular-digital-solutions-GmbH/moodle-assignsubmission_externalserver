@@ -46,7 +46,6 @@ require_once($CFG->libdir . '/pdflib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class externalserver {
-
     /** server needs no group info */
     const NO_GROUPINFO = 0;
     /** server demands information about user groups */
@@ -168,7 +167,7 @@ class externalserver {
         // Add general parameters!
         foreach (self::AKEY_PARAMS as $param) {
             if (!array_key_exists($param, $params)) {
-                echo $OUTPUT->box_start('generalbox').
+                echo $OUTPUT->box_start('generalbox') .
                      $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem').
                      $OUTPUT->box_end();
             } else {
@@ -188,7 +187,7 @@ class externalserver {
         if (key_exists($action, self::ACTION_PARAMS) && !empty(self::ACTION_PARAMS[$action])) {
             foreach (self::ACTION_PARAMS[$action] as $param) {
                 if (!array_key_exists($param, $params)) {
-                    echo $OUTPUT->box_start('generalbox').
+                    echo $OUTPUT->box_start('generalbox') .
                          $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem').
                          $OUTPUT->box_end();
                 } else {
@@ -226,7 +225,7 @@ class externalserver {
             return '';
         }
 
-        $string = $secret.$jsongroupinfo;
+        $string = $secret . $jsongroupinfo;
 
         if ($hash != null) {
             $hash = hash($hash, $string);
@@ -322,7 +321,6 @@ class externalserver {
 
         // Success.
         if ($result) {
-
             // HTTP/1.0 201 Created.
             if ($this->httpcode == 201) {
                 return true;
@@ -394,13 +392,12 @@ class externalserver {
 
         // Evaluate the result.
         if ($response) {
-
             // HTTP/1.0 200 OK.
             if ($this->httpcode == 200) {
-
                 if ($responseonly) {
                     return $response;
                 }
+
                 // Xml to array.
                 $parser = xml_parser_create('');
                 xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
@@ -468,8 +465,10 @@ class externalserver {
         if ($response) {
             if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
                 if ($notify) {
-                    notification::add(get_string('file_uploaded', 'assignsubmission_externalserver'),
-                        \core\output\notification::NOTIFY_SUCCESS);
+                    notification::add(
+                        get_string('file_uploaded', 'assignsubmission_externalserver'),
+                        \core\output\notification::NOTIFY_SUCCESS
+                    );
                 }
                 return true;
             }
@@ -615,8 +614,11 @@ class externalserver {
                 : get_string('unknownerror', 'assignsubmission_externalserver', $httpcode);
         }
 
-        $summary = html_writer::tag('summary', $title . $symbol,
-            ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i"]);
+        $summary = html_writer::tag(
+            'summary',
+            $title . $symbol,
+            ['class' => "h4 text-$textclass", 'data-behat' => "$textclass-$i"]
+        );
         $content = html_writer::div($content, 'mb-3');
         echo html_writer::tag('details', $summary . "<pre>$content</pre>", ['class' => 'moodle-collapsible extserver-result ml-4']);
     }
@@ -862,8 +864,10 @@ class externalserver {
         $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($statuscode != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetjwttoken', 'assignsubmission_externalserver', $statuscode),
-                \core\output\notification::NOTIFY_ERROR);
+            \core\notification::add(
+                get_string('error:couldnotgetjwttoken', 'assignsubmission_externalserver', $statuscode),
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
 
         return $body['access_token'];
@@ -880,7 +884,6 @@ class externalserver {
      */
     public function http_request(array $params = [], $type = 'GET', $url = null): mixed {
         try {
-
             $payload = [
                 'headers' => $this->get_headers(),
                 'http_errors' => false,
@@ -888,7 +891,6 @@ class externalserver {
 
             // GET.
             if ($type === 'GET') {
-
                 // Either get payload from params or use the given URL.
                 if ($url === null) {
                     $url = $this->obj->url;
@@ -900,7 +902,6 @@ class externalserver {
                 $response = $this->httpclient->get($url, $payload);
 
             } else {
-
                 // POST - convert file uploads to multipart/form-data.
                 if (!empty($params['file'])) {
                     unset($payload['headers']['Content-Type']); // Guzzle will set the correct Content-Type for multipart requests.
@@ -979,6 +980,4 @@ class externalserver {
 
         return $multipart;
     }
-
 }
-

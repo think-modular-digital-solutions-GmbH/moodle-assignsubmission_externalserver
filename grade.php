@@ -57,14 +57,12 @@ echo $OUTPUT->header();
 
 // Confirmed - fetch grades from server.
 if ($confirm) {
-
     $result = $ext->grade_submissions($assignment, [$userid]);
     echo $OUTPUT->notification($result['message'], $result['status']);
     echo html_writer::link(
         new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'grading']),
         get_string('continue'), ['class' => 'btn btn-primary']
     );
-
 } else {
     // Confirmation urls.
     $yesurl = new moodle_url('/mod/assign/submission/externalserver/grade.php', [

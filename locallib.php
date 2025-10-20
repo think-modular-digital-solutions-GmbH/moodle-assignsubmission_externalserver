@@ -43,7 +43,6 @@ use core\output\notification;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_submission_externalserver extends assign_submission_plugin {
-
     /**
      * Get the name of the submission plugin
      * @return string
@@ -83,10 +82,17 @@ class assign_submission_externalserver extends assign_submission_plugin {
         $filetypes = (string)$filetypes;
 
         // Add fieldset.
-        $mform->addElement('html', html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-externalserver-settings-details']));
-        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_externalserver'),
-            ['class' => 'assignsubmission-externalserver-settings-legend']));
+        $mform->addElement(
+            'html',
+            html_writer::start_div('border rounded',
+            ['class' => 'assignsubmission-externalserver-settings-details'])
+        );
+        $mform->addElement(
+            'html',
+            html_writer::tag('legend',
+            get_string('pluginname', 'assignsubmission_externalserver'),
+            ['class' => 'assignsubmission-externalserver-settings-legend'])
+        );
 
         // External server.
         $name = get_string('externalserver', 'assignsubmission_externalserver');
@@ -97,7 +103,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
         } else {
             $visible = ['visible' => 1];
         }
-        $servers = $DB->get_records('assignsubmission_externalserver_servers', $visible,  'name ASC');
+        $servers = $DB->get_records('assignsubmission_externalserver_servers', $visible, 'name ASC');
         foreach ($servers as $ser) {
             $options[$ser->id] = format_string($ser->name);
         }
@@ -199,10 +205,17 @@ class assign_submission_externalserver extends assign_submission_plugin {
         global $OUTPUT;
 
         // Add fieldset.
-        $mform->addElement('html', html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-externalserver-settings-details']));
-        $mform->addElement('html', html_writer::tag('legend', get_string('pluginname', 'assignsubmission_externalserver'),
-            ['class' => 'assignsubmission-externalserver-settings-legend']));
+        $mform->addElement(
+            'html',
+            html_writer::start_div('border rounded',
+            ['class' => 'assignsubmission-externalserver-settings-details'])
+        );
+        $mform->addElement(
+            'html',
+            html_writer::tag('legend',
+            get_string('pluginname', 'assignsubmission_externalserver'),
+            ['class' => 'assignsubmission-externalserver-settings-legend'])
+        );
 
         // Check if there are uploads left.
         $uploadattempts = $this->has_uploadattempts($submission);
@@ -211,13 +224,15 @@ class assign_submission_externalserver extends assign_submission_plugin {
         if ($uploadattempts['has_uploads']) {
             $fileoptions = $this->get_file_options();
             $submissionid = $submission ? $submission->id : 0;
-            $data = file_prepare_standard_filemanager($data,
-                                                    'files',
-                                                    $fileoptions,
-                                                    $this->assignment->get_context(),
-                                                    'assignsubmission_externalserver',
-                                                    ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                                    $submissionid);
+            $data = file_prepare_standard_filemanager(
+                $data,
+                'files',
+                $fileoptions,
+                $this->assignment->get_context(),
+                'assignsubmission_externalserver',
+                ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+                $submissionid
+            );
             $mform->addElement('filepicker', 'externalserver_filemanager', $this->get_name(), null, $fileoptions);
 
         } else {
@@ -230,8 +245,12 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         // Upload attempts.
         $html = html_writer::div($uploadattempts['html'], 'float-right pt-1');
-        $mform->addElement('static', 'uploadattempts', get_string('uploadattempts', 'assignsubmission_externalserver'),
-            $html);
+        $mform->addElement(
+            'static',
+            'uploadattempts',
+            get_string('uploadattempts', 'assignsubmission_externalserver'),
+            $html
+        );
 
         // End fieldset.
         $mform->addElement('html', html_writer::end_div());
@@ -248,12 +267,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
      */
     private function count_files($submissionid, $area): int {
         $fs = get_file_storage();
-        $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_externalserver',
-                                     $area,
-                                     $submissionid,
-                                     'id',
-                                     false);
+        $files = $fs->get_area_files(
+            $this->assignment->get_context()->id,
+            'assignsubmission_externalserver',
+            $area,
+            $submissionid,
+            'id',
+            false
+        );
 
         return count($files);
     }
@@ -287,12 +308,13 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         // Plagiarism code event trigger when files are uploaded.
         $fs = get_file_storage();
-        $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_externalserver',
-                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                     $submission->id,
-                                     'id',
-                                     false
+        $files = $fs->get_area_files(
+            $this->assignment->get_context()->id,
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $submission->id,
+            'id',
+            false
         );
 
         // No files uploaded.
@@ -327,6 +349,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         $groupname = null;
         $groupid = 0;
+
         // Get the group name as other fields are not transcribed in the logs and this information is important.
         if (empty($submission->userid) && !empty($submission->groupid)) {
             $groupname = $DB->get_field('groups', 'name', ['id' => $submission->groupid], MUST_EXIST);
@@ -349,7 +372,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         // File was submitted.
         if ($filesubmission && $files) {
-
             $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
 
             // Increment the number of uploads.
@@ -381,8 +403,10 @@ class assign_submission_externalserver extends assign_submission_plugin {
         } else {
             // No file was submitted - this should not happen, but we handle it gracefully.
             $filesubmission = new stdClass();
-            $filesubmission->numfiles = $this->count_files($submission->id,
-                                                           ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
+            $filesubmission->numfiles = $this->count_files(
+                $submission->id,
+                ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA
+            );
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
             $filesubmission->uploads = 1;
@@ -406,10 +430,12 @@ class assign_submission_externalserver extends assign_submission_plugin {
         global $DB;
         $fs = get_file_storage();
 
-        $fs->delete_area_files($this->assignment->get_context()->id,
-                               'assignsubmission_externalserver',
-                               ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                               $submission->id);
+        $fs->delete_area_files(
+            $this->assignment->get_context()->id,
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $submission->id
+        );
 
         $currentsubmission = $this->get_file_submission($submission->id);
         if ($currentsubmission) {
@@ -431,12 +457,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
         $result = [];
         $fs = get_file_storage();
 
-        $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                     'assignsubmission_externalserver',
-                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                     $submission->id,
-                                     'timemodified, id',
-                                     false);
+        $files = $fs->get_area_files(
+            $this->assignment->get_context()->id,
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $submission->id,
+            'timemodified, id',
+            false
+        );
 
         foreach ($files as $file) {
             // Do we return the full folder path or just the file name?
@@ -459,9 +487,10 @@ class assign_submission_externalserver extends assign_submission_plugin {
     public function view_summary(stdClass $submission, & $showviewlink): string {
 
         // Uploaded file.
-        $html = $this->assignment->render_area_files('assignsubmission_externalserver',
-                                                      ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                                      $submission->id
+        $html = $this->assignment->render_area_files(
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $submission->id
         );
 
         // Get user and group IDs.
@@ -495,10 +524,18 @@ class assign_submission_externalserver extends assign_submission_plugin {
                 // Link to update grade/feedback.
                 $assignmentid = $submission->assignment;
                 $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
-                $url = new moodle_url('/mod/assign/submission/externalserver/grade.php',
-                    ['cmid' => $cm->id, 'userid' => $userid, 'groupid' => $groupid]);
-                $html .= html_writer::link($url, get_string('gradeverb', 'assignsubmission_externalserver'),
-                    ['class' => 'btn btn-primary mb-1']);
+                $url = new moodle_url(
+                    '/mod/assign/submission/externalserver/grade.php',
+                    [
+                        'cmid' => $cm->id,
+                        'userid' => $userid,
+                        'groupid' => $groupid
+                    ]);
+                $html .= html_writer::link(
+                    $url,
+                    get_string('gradeverb', 'assignsubmission_externalserver'),
+                    ['class' => 'btn btn-primary mb-1']
+                );
             }
         }
 
@@ -512,9 +549,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
      * @return string
      */
     public function view(stdClass $submission): string {
-        return $this->assignment->render_area_files('assignsubmission_externalserver',
-                                                    ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                                    $submission->id);
+        return $this->assignment->render_area_files(
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $submission->id
+        );
     }
 
     /**
@@ -525,8 +564,10 @@ class assign_submission_externalserver extends assign_submission_plugin {
     public function delete_instance(): bool {
         global $DB;
         // Will throw exception on failure.
-        $DB->delete_records('assignsubmission_externalserver',
-            ['assignment' => $this->assignment->get_instance()->id]);
+        $DB->delete_records(
+            'assignsubmission_externalserver',
+            ['assignment' => $this->assignment->get_instance()->id]
+        );
 
         return true;
     }
@@ -552,12 +593,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
         global $USER;
         $fs = get_file_storage();
         // Get a count of all the draft files, excluding any directories.
-        $files = $fs->get_area_files(context_user::instance($USER->id)->id,
-                                     'user',
-                                     'draft',
-                                     $data->externalserver_filemanager,
-                                     'id',
-                                     false);
+        $files = $fs->get_area_files(
+            context_user::instance($USER->id)->id,
+            'user',
+            'draft',
+            $data->externalserver_filemanager,
+            'id',
+            false
+        );
         return count($files) == 0;
     }
 
@@ -581,12 +624,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // Copy the files across.
         $contextid = $this->assignment->get_context()->id;
         $fs = get_file_storage();
-        $files = $fs->get_area_files($contextid,
-                                     'assignsubmission_externalserver',
-                                     ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
-                                     $sourcesubmission->id,
-                                     'id',
-                                     false);
+        $files = $fs->get_area_files(
+            $contextid,
+            'assignsubmission_externalserver',
+            ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA,
+            $sourcesubmission->id,
+            'id',
+            false
+        );
         foreach ($files as $file) {
             $fieldupdates = ['itemid' => $destsubmission->id];
             $fs->create_file_from_storedfile($fieldupdates, $file);
@@ -614,8 +659,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         // Get a size in bytes.
         if ($configs->maxsubmissionsizebytes == 0) {
-            $configs->maxsubmissionsizebytes = get_max_upload_file_size($CFG->maxbytes, $this->assignment->get_course()->maxbytes,
-                                                                        get_config('assignsubmission_externalserver', 'maxbytes'));
+            $configs->maxsubmissionsizebytes = get_max_upload_file_size(
+                $CFG->maxbytes,
+                $this->assignment->get_course()->maxbytes,
+                get_config('assignsubmission_externalserver', 'maxbytes')
+            );
         }
         return (array) $configs;
     }
@@ -646,9 +694,13 @@ class assign_submission_externalserver extends assign_submission_plugin {
         if (!$this->assignment->get_context()) {
             return 0;
         } else {
-            return $DB->get_field('assignsubmission_externalserver', 'MAX(uploads)', [
-                'assignment' => $this->assignment->get_instance()->id,
-            ]) ?: 0;
+            return $DB->get_field(
+                'assignsubmission_externalserver',
+                'MAX(uploads)',
+                [
+                    'assignment' => $this->assignment->get_instance()->id,
+                ]
+            ) ?: 0;
         }
     }
 
@@ -723,10 +775,13 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
                 // Grading.
                 if (isset($data->gradebutton)) {
-                    $url = new moodle_url('/mod/assign/submission/externalserver/grade.php', [
-                        'status' => $data->status,
-                        'cmid' => $cmid,
-                    ]);
+                    $url = new moodle_url(
+                        '/mod/assign/submission/externalserver/grade.php',
+                        [
+                            'status' => $data->status,
+                            'cmid' => $cmid,
+                        ]
+                    );
                     redirect($url);
                 }
             }
@@ -810,8 +865,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
         }
 
         // Render text.
-        $html = html_writer::tag('span', $uploadstring, [
-            'title' => get_string('uploadattempts', 'assignsubmission_externalserver'), 'class' => "text-$type"]);
+        $html = html_writer::tag(
+            'span',
+            $uploadstring,
+            [
+                'title' => get_string('uploadattempts', 'assignsubmission_externalserver'),
+                'class' => "text-$type"
+            ]
+        );
         return ['has_uploads' => $hasuploads, 'html' => $html];
     }
 

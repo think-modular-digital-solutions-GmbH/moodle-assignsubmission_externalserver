@@ -37,7 +37,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
-
     /**
      * Returns edit icons for a server in the server list.
      *
@@ -56,12 +55,16 @@ class helper {
 
         // Show/hide.
         if ($server->visible) {
-            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
-                ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]);
+            $url = new \moodle_url(
+                '/mod/assign/submission/externalserver/editserver.php',
+                ['id' => $id, 'hide' => 1, 'sesskey' => sesskey()]
+            );
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/hide', get_string('hide')));
         } else {
-            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
-                ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]);
+            $url = new \moodle_url(
+                '/mod/assign/submission/externalserver/editserver.php',
+                ['id' => $id, 'show' => 1, 'sesskey' => sesskey()]
+            );
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/show', get_string('show')));
         }
 
@@ -70,16 +73,25 @@ class helper {
 
         // Delete.
         if ($assignments) {
-            $icons[] = $OUTPUT->pix_icon('t/delete', get_string('cannotdelete', 'assignsubmission_externalserver',
-                count($assignments)), '', ['class' => 'iconsmall icon-disabled']);
+            $icons[] = $OUTPUT->pix_icon(
+                't/delete',
+                get_string('cannotdelete', 'assignsubmission_externalserver', count($assignments)),
+                '',
+                ['class' => 'iconsmall icon-disabled']
+            );
         } else {
-            $url = new \moodle_url('/mod/assign/submission/externalserver/editserver.php',
-                ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]);
+            $url = new \moodle_url(
+                '/mod/assign/submission/externalserver/editserver.php',
+                ['id' => $id, 'delete' => $id, 'sesskey' => sesskey()]
+            );
             $icons[] = $OUTPUT->action_icon($url, new \pix_icon('t/delete', get_string('delete')));
         }
 
         // Test.
-        $url = new \moodle_url('/mod/assign/submission/externalserver/servertest.php', ['id' => $id, 'sesskey' => sesskey()]);
+        $url = new \moodle_url(
+            '/mod/assign/submission/externalserver/servertest.php',
+            ['id' => $id, 'sesskey' => sesskey()]
+        );
         $icons[] = html_writer::link(
             $url,
             get_string('checkconnection', 'assignsubmission_externalserver')

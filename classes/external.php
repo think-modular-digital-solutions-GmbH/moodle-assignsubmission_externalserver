@@ -41,7 +41,6 @@ use external_single_structure;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class external extends external_api {
-
     /**
      * Returns the parameters for the set_toggle_state function.
      *

@@ -35,13 +35,7 @@
  * @param array $options - List of options affecting file serving.
  * @return bool false if file not found, does not return if found - just send the file
  */
-function assignsubmission_externalserver_pluginfile($course,
-                                          $cm,
-                                          context $context,
-                                          $filearea,
-                                          $args,
-                                          $forcedownload,
-                                          array $options=[]): bool {
+function assignsubmission_externalserver_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options=[]): bool {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -50,10 +44,14 @@ function assignsubmission_externalserver_pluginfile($course,
 
     require_login($course, false, $cm);
     $itemid = (int)array_shift($args);
-    $record = $DB->get_record('assign_submission',
-                              ['id' => $itemid],
-                              'userid, assignment, groupid',
-                              MUST_EXIST);
+    $record = $DB->get_record(
+        'assign_submission',
+        ['id' => $itemid],
+        'userid,
+        assignment,
+        groupid',
+        MUST_EXIST
+    );
     $userid = $record->userid;
     $groupid = $record->groupid;
 
@@ -65,13 +63,11 @@ function assignsubmission_externalserver_pluginfile($course,
         return false;
     }
 
-    if ($assign->get_instance()->teamsubmission &&
-        !$assign->can_view_group_submission($groupid)) {
+    if ($assign->get_instance()->teamsubmission && !$assign->can_view_group_submission($groupid)) {
         return false;
     }
 
-    if (!$assign->get_instance()->teamsubmission &&
-        !$assign->can_view_submission($userid)) {
+    if (!$assign->get_instance()->teamsubmission && !$assign->can_view_submission($userid)) {
         return false;
     }
 
