@@ -68,7 +68,7 @@ if ($groupinfo !== false) {
 }
 
 // Verzeichnis
-$upload_dir = "uploads/";
+$upload_dir = __DIR__ . '/uploads/';
 
 // Wurde wirklich eine Datei hochgeladen?
 if (is_uploaded_file($_FILES["file"]["tmp_name"])) {
