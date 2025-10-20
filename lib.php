@@ -35,7 +35,7 @@
  * @param array $options - List of options affecting file serving.
  * @return bool false if file not found, does not return if found - just send the file
  */
-function assignsubmission_externalserver_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options=[]): bool {
+function assignsubmission_externalserver_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options = []): bool {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {

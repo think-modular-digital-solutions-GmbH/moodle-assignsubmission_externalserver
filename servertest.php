@@ -46,7 +46,8 @@ $extserver = new externalserver($id);
 // Set up the page.
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/mod/assign/submission/externalserver/servertest.php', ['id' => $id, 'sesskey' => sesskey()]));
-$PAGE->set_heading(get_string('testing', 'assignsubmission_externalserver', ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
+$heading = get_string('testing', 'assignsubmission_externalserver', ['name' => $extserver->obj->name, 'site' => $SITE->fullname]);
+$PAGE->set_heading($heading);
 $PAGE->requires->css(new moodle_url('/mod/assign/submission/externalserver/styles.css'));
 $PAGE->requires->js_call_amd('core/bootstraptoggle', 'init');
 $PAGE->requires->js_call_amd('core/bootstrap', 'init');
@@ -113,7 +114,7 @@ $extserver->print_response(
 );
 
 // Get grades.
-[$testuser, $params] = $DB->get_in_or_equal([1,2,3,4,5,6,7,8,9,10]);
+[$testuser, $params] = $DB->get_in_or_equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 $userlist = $DB->get_fieldset_select('user', 'username', " id " . $testuser, $params);
 $res = $extserver->load_grades($assignment, $userlist, true);
 $content = $extserver->get_debuginfo();

@@ -84,8 +84,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // Add fieldset.
         $mform->addElement(
             'html',
-            html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-externalserver-settings-details'])
+            html_writer::start_div('border rounded', ['class' => 'assignsubmission-externalserver-settings-details'])
         );
         $mform->addElement(
             'html',
@@ -236,11 +235,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $mform->addElement('filepicker', 'externalserver_filemanager', $this->get_name(), null, $fileoptions);
 
         } else {
-
             // No uploads left, display message.
             $message = get_string('nouploadsleft', 'assignsubmission_externalserver');
-            $mform->addElement('static', 'no_uploads', '',
-                $OUTPUT->notification($message, notification::NOTIFY_WARNING));
+            $mform->addElement(
+                'static',
+                'no_uploads',
+                '',
+                $OUTPUT->notification($message, notification::NOTIFY_WARNING)
+            );
         }
 
         // Upload attempts.
@@ -399,7 +401,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
             }
 
             return $updatestatus;
-
         } else {
             // No file was submitted - this should not happen, but we handle it gracefully.
             $filesubmission = new stdClass();
@@ -471,7 +472,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
             if (isset($submission->exportfullpath) && $submission->exportfullpath == false) {
                 $result[$file->get_filename()] = $file;
             } else {
-                $result[$file->get_filepath().$file->get_filename()] = $file;
+                $result[$file->get_filepath() . $file->get_filename()] = $file;
             }
         }
         return $result;
@@ -484,7 +485,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
      * @param bool $showviewlink Set this to true if the list of files is long
      * @return string
      */
-    public function view_summary(stdClass $submission, & $showviewlink): string {
+    public function view_summary(stdClass $submission, &$showviewlink): string {
 
         // Uploaded file.
         $html = $this->assignment->render_area_files(
@@ -514,12 +515,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
         if (has_capability('mod/assign:grade', $context)) {
 
             if ($user) {
-
                 // Teacher view.
                 $ext = $this->get_externalserver();
                 $url = $ext->build_teacherview($this->assignment->get_instance(), $user->username);
-                $html .= html_writer::link($url, get_string('view'), ['class' => 'btn btn-secondary mr-1 mb-1',
-                    'target' => '_blank']);
+                $html .= html_writer::link(
+                    $url,
+                    get_string('view'),
+                    ['class' => 'btn btn-secondary mr-1 mb-1', 'target' => '_blank']
+                );
 
                 // Link to update grade/feedback.
                 $assignmentid = $submission->assignment;
@@ -530,7 +533,8 @@ class assign_submission_externalserver extends assign_submission_plugin {
                         'cmid' => $cm->id,
                         'userid' => $userid,
                         'groupid' => $groupid
-                    ]);
+                    ]
+                );
                 $html .= html_writer::link(
                     $url,
                     get_string('gradeverb', 'assignsubmission_externalserver'),
@@ -650,7 +654,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
      * Return the plugin configs for external functions.
      *
      * @return array the list of settings
-     * @since Moodle 3.2
      */
     public function get_config_for_external(): array {
         global $CFG;
@@ -772,7 +775,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
             // Handle submission.
             $data = $mform->get_data();
             if ($data) {
-
                 // Grading.
                 if (isset($data->gradebutton)) {
                     $url = new moodle_url(
@@ -803,8 +805,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // IFrame.
         $PAGE->requires->js(new moodle_url('/mod/assign/submission/externalserver/js/save_toggle_state.js'));
         if ($ext) {
-            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_externalserver'),
-                ['class' => 'h6 mt-3']);
+            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_externalserver'), ['class' => 'h6 mt-3']);
             $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
             // Get open state for collapsible from user preferences.
@@ -836,8 +837,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // Get the number of uploads and max uploads.
         $uploads = 0;
         if ($submission) {
-            $uploads = $DB->get_field('assignsubmission_externalserver', 'uploads',
-                ['submission' => $submission->id]);
+            $uploads = $DB->get_field(
+                'assignsubmission_externalserver',
+                'uploads',
+                ['submission' => $submission->id]
+            );
         }
         if (!$uploads) {
             $uploads = 0; // Default to 0 if no uploads found.
@@ -849,7 +853,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $hasuploads = true;
             $type = 'success';
             $uploadstring = get_string('unlimiteduploads', 'assignsubmission_externalserver');
-
         } else {
             // Show attempts.
             $uploadstring = "$uploads/$maxuploads";
@@ -870,7 +873,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $uploadstring,
             [
                 'title' => get_string('uploadattempts', 'assignsubmission_externalserver'),
-                'class' => "text-$type"
+                'class' => "text-$type",
             ]
         );
         return ['has_uploads' => $hasuploads, 'html' => $html];
@@ -924,7 +927,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
             if ($usersubmission &&
                 $usersubmission->status === ASSIGN_SUBMISSION_STATUS_SUBMITTED &&
                 $usersubmission->attemptnumber == $attempt) {
-
                 // This user likely triggered the group submission.
                 return $member;
             }

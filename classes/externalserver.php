@@ -114,9 +114,9 @@ class externalserver {
         // Add general parameters!
         foreach (self::AKEY_PARAMS as $param) {
             if (!array_key_exists($param, $params)) {
-                echo $OUTPUT->box_start('generalbox') .
-                     $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem').
-                     $OUTPUT->box_end();
+                echo $OUTPUT->box_start('generalbox');
+                echo $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem');
+                echo $OUTPUT->box_end();
             } else {
                 // Add specified params to akey calculation!
                 $string .= $params[$param];
@@ -134,9 +134,9 @@ class externalserver {
         if (key_exists($action, self::ACTION_PARAMS) && !empty(self::ACTION_PARAMS[$action])) {
             foreach (self::ACTION_PARAMS[$action] as $param) {
                 if (!array_key_exists($param, $params)) {
-                    echo $OUTPUT->box_start('generalbox') .
-                         $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem').
-                         $OUTPUT->box_end();
+                    echo $OUTPUT->box_start('generalbox');
+                    echo $OUTPUT->notification(get_string('missing_hash_param', 'extserver', $param), 'notifyproblem');
+                    echo $OUTPUT->box_end();
                 } else {
                     // Add specified params to akey calculation!
                     if (is_array($params[$param])) {
@@ -538,7 +538,7 @@ class externalserver {
     public function grade_submissions($assignment, $userids): array {
 
         global $SESSION, $CFG, $COURSE, $PAGE, $DB, $OUTPUT, $USER;
-        require_once($CFG->libdir.'/gradelib.php');
+        require_once($CFG->libdir . '/gradelib.php');
         $assign = $assignment->get_instance();
 
         // Check if assignment grading is set to numeric.
@@ -706,8 +706,10 @@ class externalserver {
         $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
         if ($statuscode != 200 || !isset($body['access_token'])) {
-            \core\notification::add(get_string('error:couldnotgetoauth2token', 'assignsubmission_externalserver', $statuscode),
-                \core\output\notification::NOTIFY_ERROR);
+            \core\notification::add(
+                get_string('error:couldnotgetoauth2token', 'assignsubmission_externalserver', $statuscode),
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
 
         return $body['access_token'];
@@ -781,7 +783,6 @@ class externalserver {
                 }
 
                 $response = $this->httpclient->get($url, $payload);
-
             } else {
                 // POST - convert file uploads to multipart/form-data.
                 if (!empty($params['file'])) {
@@ -800,7 +801,6 @@ class externalserver {
             $this->httpcode = $response->getStatusCode();
             $this->debuginfo = $this->get_debuginfo_from_response($response) . $resulthtml;
             return $result;
-
         } catch (RequestException $e) {
             $this->debuginfo = $e->getMessage();
             $this->httpcode = 0;

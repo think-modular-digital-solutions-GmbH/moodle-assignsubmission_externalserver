@@ -30,38 +30,46 @@ require_once($CFG->dirroot . '/mod/assign/submission/externalserver/locallib.php
 use assignsubmission_externalserver\helper;
 
 // Default settings header.
-$settings->add(new admin_setting_heading(
-    'default_settings_header',
-    get_string('defaultsettings', 'assignsubmission_externalserver'),
-    get_string('defaultsettings_help', 'assignsubmission_externalserver')
-));
+$settings->add(
+    new admin_setting_heading(
+        'default_settings_header',
+        get_string('defaultsettings', 'assignsubmission_externalserver'),
+        get_string('defaultsettings_help', 'assignsubmission_externalserver')
+    )
+);
 
 // Maximum size setting.
 $settings->add(
-    new admin_setting_configselect('assignsubmission_externalserver/maxbytes',
-    get_string('maxbytes', 'assignsubmission_externalserver'),
-    get_string('maxbytes_help', 'assignsubmission_externalserver'),
-    1048576,
-    get_max_upload_sizes($CFG->maxbytes)
-));
+    new admin_setting_configselect(
+        'assignsubmission_externalserver/maxbytes',
+        get_string('maxbytes', 'assignsubmission_externalserver'),
+        get_string('maxbytes_help', 'assignsubmission_externalserver'),
+        1048576,
+        get_max_upload_sizes($CFG->maxbytes)
+    )
+);
 
 // File types setting.
 $settings->add(
-    new admin_setting_filetypes('assignsubmission_externalserver/filetypes',
-    new lang_string('filetypes', 'assignsubmission_externalserver'),
-    new lang_string('filetypes_help', 'assignsubmission_externalserver'),
-    ''
-));
+    new admin_setting_filetypes(
+        'assignsubmission_externalserver/filetypes',
+        new lang_string('filetypes', 'assignsubmission_externalserver'),
+        new lang_string('filetypes_help', 'assignsubmission_externalserver'),
+        ''
+    )
+);
 
 // Maximum uploads setting.
 $options = helper::get_upload_options();
 $settings->add(
-    new admin_setting_configselect('assignsubmission_externalserver/uploads',
-    get_string('uploads', 'assignsubmission_externalserver'),
-    get_string('uploads_help', 'assignsubmission_externalserver'),
-    100,
-    $options
-));
+    new admin_setting_configselect(
+        'assignsubmission_externalserver/uploads',
+        get_string('uploads', 'assignsubmission_externalserver'),
+        get_string('uploads_help', 'assignsubmission_externalserver'),
+        100,
+        $options
+    )
+);
 
 // Add server button.
 $html = html_writer::link(
@@ -113,7 +121,9 @@ if (!$servers) {
 
 // Servers header including the list.
 $settings->add(
-    new admin_setting_heading('servers_header',
-    get_string('servers', 'assignsubmission_externalserver'),
-    $html
-));
+    new admin_setting_heading(
+        'servers_header',
+        get_string('servers', 'assignsubmission_externalserver'),
+        $html
+    )
+);

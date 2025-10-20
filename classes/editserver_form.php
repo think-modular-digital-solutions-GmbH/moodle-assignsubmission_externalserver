@@ -54,6 +54,9 @@ class editserver_form extends moodleform {
      * @throws HTML_Quickform_error
      */
     public function definition(): void {
+
+        global $DB;
+
         $mform = $this->_form;
         $this->context = \context_system::instance();
         confirm_sesskey();
@@ -103,7 +106,6 @@ class editserver_form extends moodleform {
         $authoptions = [
             'api_key' => get_string('server:auth_api_key', 'assignsubmission_externalserver'),
             'oauth2' => get_string('server:auth_oauth2', 'assignsubmission_externalserver'),
-            'jwt' => get_string('server:auth_jwt', 'assignsubmission_externalserver')
         ];
         $mform->addElement(
             'select',
@@ -123,16 +125,7 @@ class editserver_form extends moodleform {
         );
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_externalserver');
-
-        // OAuth2 token endpoint.
-        $mform->addElement(
-            'text',
-            'oauth2_endpoint',
-            get_string('server:oauth2_endpoint', 'assignsubmission_externalserver'),
-            $textoptions
-        );
-        $mform->setType('oauth2_endpoint', PARAM_URL);
-        $mform->hideif('oauth2_endpoint', 'auth_type', 'eq', 'api_key');
+        $mform->hideif('auth_secret', 'auth_type', 'neq', 'api_key');
 
         // OAuth2 client id.
         $mform->addElement(
@@ -144,15 +137,45 @@ class editserver_form extends moodleform {
         $mform->setType('oauth2_client_id', PARAM_TEXT);
         $mform->hideif('oauth2_client_id', 'auth_type', 'eq', 'api_key');
 
-        // JWT issuer.
+        // OAuth2 client secret.
         $mform->addElement(
             'text',
-            'jwt_issuer',
-            get_string('server:jwt_issuer', 'assignsubmission_externalserver'),
+            'oauth2_client_secret',
+            get_string('server:oauth2_client_secret', 'assignsubmission_externalserver'),
             $textoptions
         );
-        $mform->setType('jwt_issuer', PARAM_TEXT);
-        $mform->hideif('jwt_issuer', 'auth_type', 'neq', 'jwt');
+        $mform->setType('oauth2_client_secret', PARAM_TEXT);
+        $mform->hideif('oauth2_client_secret', 'auth_type', 'eq', 'api_key');
+
+        // OAuth2 auth endpoint.
+        $mform->addElement(
+            'text',
+            'oauth2_auth_endpoint',
+            get_string('server:oauth2_auth_endpoint', 'assignsubmission_externalserver'),
+            $textoptions
+        );
+        $mform->setType('oauth2_auth_endpoint', PARAM_URL);
+        $mform->hideif('oauth2_auth_endpoint', 'auth_type', 'eq', 'api_key');
+
+        // OAuth2 token endpoint.
+        $mform->addElement(
+            'text',
+            'oauth2_token_endpoint',
+            get_string('server:oauth2_token_endpoint', 'assignsubmission_externalserver'),
+            $textoptions
+        );
+        $mform->setType('oauth2_token_endpoint', PARAM_URL);
+        $mform->hideif('oauth2_token_endpoint', 'auth_type', 'eq', 'api_key');
+
+        // OAuth2 token type.
+        $mform->addElement(
+            'select',
+            'oauth2_token_type',
+            get_string('server:auth_type', 'assignsubmission_externalserver'),
+            ['oauth2', 'jwt'],
+        );
+        $mform->setType('oauth2_token_type', PARAM_TEXT);
+        $mform->hideif('oauth2_token_type', 'auth_type', 'neq', 'jwt');
 
         // JWT audience.
         $mform->addElement(
