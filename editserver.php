@@ -67,8 +67,9 @@ if ($id) {
     $server = new stdClass();
 }
 
-// Hide a server.
+// Actions on a server.
 if (!empty($hide)) {
+    // Hide a server.
     $DB->set_field('assignsubmission_externalserver_servers', 'visible', '0', ['id' => $server->id]);
     redirect($redirecturl);
 } else if (!empty($show)) {
@@ -77,11 +78,9 @@ if (!empty($hide)) {
     redirect($redirecturl);
 } else if (!empty($delete)) {
     // Delete a server.
-    $assignments = helper::get_assignments_using_server($delete);
-
     if (!$entry = $DB->get_record('assignsubmission_externalserver_servers', ['id' => $delete])) {
         throw new moodle_exception('unknownserver', 'assignsubmission_externalserver');
-    } else if ($assignments) {
+    } else if ($assignments = helper::get_assignments_using_server($delete)) {
         // Server is in use.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('error'));

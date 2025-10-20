@@ -27,11 +27,11 @@ namespace assignsubmission_externalserver;
 
 defined('MOODLE_INTERNAL') || die();
 
+use context_module;
 use html_writer;
 use moodle_url;
-use core\notification;
-use context_module;
 use stdClass;
+use core\notification;
 use GuzzleHttp\Client;
 
 require_once($CFG->dirroot . '/mod/assign/submission/externalserver/lib.php');
@@ -50,7 +50,6 @@ class externalserver {
     const NO_GROUPINFO = 0;
     /** server demands information about user groups */
     const NEEDS_GROUP_INFO = 1;
-
     /** string[] array of params to include in akey */
     const AKEY_PARAMS = ['timestamp', 'user', 'skey', 'uidnr', 'action', 'cidnr', 'aid', 'aname', 'fname', 'lname', 'role'];
     /** string[][] action-indexed array of array of params to include in akey (depending on action) */
@@ -96,58 +95,6 @@ class externalserver {
             'timeout' => 10,
             'verify' => !empty($this->obj->sslverification),
         ]);
-    }
-
-    /**
-     * Gets a specific server by ID.
-     *
-     * @param int $id ID of the external server in the DB
-     * @return stdClass|null DB record or null if not found
-     */
-    public static function get_server($id): ?\stdClass {
-        global $DB;
-        return $DB->get_record('assignsubmission_externalserver_servers', ['id' => $id]);
-    }
-
-    /**
-     * Retrieves all active/visible external servers from the DB
-     *
-     * @return array DB records
-     * @throws dml_exception
-     */
-    public static function get_servers(): array {
-        global $DB;
-        return $DB->get_records('assignsubmission_externalserver_servers', ['visible' => '1']);
-    }
-
-    /**
-     * Retrieves all external servers from the DB
-     *
-     * @return array DB records
-     * @throws dml_exception
-     */
-    public static function get_all_servers(): array {
-        global $DB;
-        return $DB->get_records('assignsubmission_externalserver_servers');
-    }
-
-    /**
-     * Static method to delete an external server
-     *
-     * @param int $id ID of the external server in the DB
-     * @return true
-     * @throws dml_exception A DML specific exception is thrown for any errors.
-     */
-    public static function delete_server($id): bool {
-        global $DB;
-
-        if (!is_numeric($id)) {
-            return false;
-        }
-
-        $ret = $DB->delete_records('assignsubmission_externalserver_servers', ['id' => $id]);
-
-        return $ret;
     }
 
     /**
@@ -285,49 +232,6 @@ class externalserver {
         // So we get a json-array instead an object!
         $data['groupinfo'] = json_encode(array_values($groups));
         $data['groupinfohash'] = $this->calc_groups_hash($data['groupinfo'], $secret, $hash);
-    }
-
-    /**
-     * Sends the external server a request that a new assignment was created.
-     *
-     * @deprecated this now works implicitly if a teacher views an assignment wich the server didnt know befor
-     * @param stdClass $assignment
-     * @return NULL|boolean
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    public function create_assignment($assignment): ?bool {
-        global $USER;
-
-        // Check prerequisites.
-        if ($this->concheck != null) {
-            return $this->concheck;
-        }
-        if ($this->obj == null) {
-            return $this->concheck = false;
-        }
-
-        // Common parameters.
-        $params = $this->get_common_params($assignment);
-
-        // Additional parameters.
-        $params['action'] = 'create';
-        $params['role'] = 'teacher';
-        $params['akey'] = $this->calc_akey($params, $this->obj->auth_secret, $this->obj->hash);
-        $this->add_group_data($params, $this->obj->auth_secret, $this->obj->hash);
-
-        // Make request.
-        $result = $this->http_request($params, 'POST');
-
-        // Success.
-        if ($result) {
-            // HTTP/1.0 201 Created.
-            if ($this->httpcode == 201) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -624,30 +528,7 @@ class externalserver {
     }
 
     /**
-     * Sends a request to the external server to test its response.
-     *
-     * @param string $url The URL to send the request to.
-     * @return array
-     */
-    public function test_api_call($url): array {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-        curl_exec($ch);
-        $info = curl_getinfo($ch);
-        $content = curl_multi_getcontent($ch);
-        curl_close($ch);
-        $status = ($info['http_code'] == 200) ? true : false;
-        return [
-            'status' => $status,
-            'content' => $content,
-        ];
-    }
-
-    /**
-     * Get grades and grade submissions automatically
+     * Get grades/feedback from external server.
      *
      * @param assign $assignment The assignment instance
      * @param array $userids The list of userids to grade

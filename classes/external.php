@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External service used by AJAX.
+ * External service used by AJAX to save and retrieve the toggle state of the externalserver details.
  *
  * @package    assignsubmission_externalserver
  * @author     Stefan Weber

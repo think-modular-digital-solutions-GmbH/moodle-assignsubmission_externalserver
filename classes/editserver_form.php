@@ -285,7 +285,7 @@ class editserver_form extends moodleform {
 
         // Finally set the current form data.
         if ($id = optional_param('id', 0, PARAM_INT)) {
-            $server = externalserver::get_server($id);
+            $server = $DB->get_record('assignsubmission_externalserver_servers', ['id' => $id]);
             $this->set_data($server);
         }
     }
