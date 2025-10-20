@@ -34,7 +34,6 @@ require_once(__DIR__ . '/../../../../../../lib/behat/behat_base.php');
  *
  */
 class behat_assignsubmission_externalserver extends behat_base {
-
     /**
      * Adds an external server entry pointing to the demopackage.
      *
@@ -46,11 +45,9 @@ class behat_assignsubmission_externalserver extends behat_base {
         $base = getenv('DEMO_SERVER_BASE') ?: $CFG->wwwroot;
 
         if (getenv('DEMO_SERVER_BASE')) {
-
             // We are serving tests/demo as root in CI.
             $url = $base . '/moodle_external_assignment.php';
             $formurl = $base . '/moodle_external_assignment_upload.php';
-
         } else {
             // Local dev fallback – files under normal plugin path.
             $url = $base . '/mod/assign/submission/externalserver/tests/demo/moodle_external_assignment.php';

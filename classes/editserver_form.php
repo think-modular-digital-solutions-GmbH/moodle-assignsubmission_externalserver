@@ -58,92 +58,150 @@ class editserver_form extends moodleform {
         $this->context = \context_system::instance();
         confirm_sesskey();
 
+        // Make all our text inputs a little wider.
+        $textoptions = 'maxlength="254" size="50"';
+
         // Form definition with new server defaults.
-        $mform->addElement('header', 'general', get_string('general', 'form'));
+        $mform->addElement(
+            'header',
+            'general',
+            get_string('general', 'form')
+        );
 
         // Name.
-        $mform->addElement('text', 'name',
-            get_string('server:name', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'name',
+            get_string('server:name', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('name', PARAM_TEXT);
         $mform->addHelpButton('name', 'server:name', 'assignsubmission_externalserver');
         $mform->addRule('name', get_string('server:name_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Url.
-        $mform->addElement('text', 'url',
-            get_string('server:url', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'url',
+            get_string('server:url', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('url', PARAM_URL);
         $mform->addHelpButton('url', 'server:url', 'assignsubmission_externalserver');
 
         // Form URL.
-        $mform->addElement('text', 'form_url',
-            get_string('server:form_url', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'form_url',
+            get_string('server:form_url', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('form_url', PARAM_URL);
         $mform->addHelpButton('form_url', 'server:form_url', 'assignsubmission_externalserver');
 
         // Authentification type.
-        $authoptions = ['api_key' => get_string('server:auth_api_key', 'assignsubmission_externalserver'),
-                        'oauth2' => get_string('server:auth_oauth2', 'assignsubmission_externalserver'),
-                        'jwt' => get_string('server:auth_jwt', 'assignsubmission_externalserver')];
-        $mform->addElement('select', 'auth_type',
-            get_string('server:auth_type', 'assignsubmission_externalserver'), $authoptions);
+        $authoptions = [
+            'api_key' => get_string('server:auth_api_key', 'assignsubmission_externalserver'),
+            'oauth2' => get_string('server:auth_oauth2', 'assignsubmission_externalserver'),
+            'jwt' => get_string('server:auth_jwt', 'assignsubmission_externalserver')
+        ];
+        $mform->addElement(
+            'select',
+            'auth_type',
+            get_string('server:auth_type', 'assignsubmission_externalserver'),
+            $authoptions
+        );
         $mform->addHelpButton('auth_type', 'server:auth_type', 'assignsubmission_externalserver');
         $mform->setDefault('auth_type', 'api_key');
 
         // Authentification secret.
-        $mform->addElement('passwordunmask', 'auth_secret',
-            get_string('server:auth_secret', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'passwordunmask',
+            'auth_secret',
+            get_string('server:auth_secret', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_externalserver');
 
         // OAuth2 token endpoint.
-        $mform->addElement('text', 'oauth2_endpoint',
-            get_string('server:oauth2_endpoint', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'oauth2_endpoint',
+            get_string('server:oauth2_endpoint', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('oauth2_endpoint', PARAM_URL);
         $mform->hideif('oauth2_endpoint', 'auth_type', 'eq', 'api_key');
 
         // OAuth2 client id.
-        $mform->addElement('text', 'oauth2_client_id',
-            get_string('server:oauth2_client_id', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'oauth2_client_id',
+            get_string('server:oauth2_client_id', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('oauth2_client_id', PARAM_TEXT);
         $mform->hideif('oauth2_client_id', 'auth_type', 'eq', 'api_key');
 
         // JWT issuer.
-        $mform->addElement('text', 'jwt_issuer',
-            get_string('server:jwt_issuer', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'jwt_issuer',
+            get_string('server:jwt_issuer', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('jwt_issuer', PARAM_TEXT);
         $mform->hideif('jwt_issuer', 'auth_type', 'neq', 'jwt');
 
         // JWT audience.
-        $mform->addElement('text', 'jwt_audience',
-            get_string('server:jwt_audience', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'jwt_audience',
+            get_string('server:jwt_audience', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('jwt_audience', PARAM_TEXT);
         $mform->hideif('jwt_audience', 'auth_type', 'neq', 'jwt');
 
         // Group information.
-        $groupinfo = [externalserver::NO_GROUPINFO
-                        => get_string('server:groupinfo_not_needed', 'assignsubmission_externalserver'),
-                      externalserver::NEEDS_GROUP_INFO
-                        => get_string('server:groupinfo_must_be_sent', 'assignsubmission_externalserver'),
-                     ];
-        $mform->addElement('select', 'groupinfo', get_string('server:groupinfo', 'assignsubmission_externalserver'), $groupinfo);
+        $groupinfo = [
+            externalserver::NO_GROUPINFO => get_string('server:groupinfo_not_needed', 'assignsubmission_externalserver'),
+            externalserver::NEEDS_GROUP_INFO => get_string('server:groupinfo_must_be_sent', 'assignsubmission_externalserver'),
+        ];
+        $mform->addElement(
+            'select',
+            'groupinfo',
+            get_string('server:groupinfo', 'assignsubmission_externalserver'),
+            $groupinfo
+        );
         $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_externalserver');
         $mform->setDefault('groupinfo', externalserver::NO_GROUPINFO);
 
         // Hash algorithm.
         $hashalgorithms = hash_algos();
         $hashalgorithms = array_combine($hashalgorithms, $hashalgorithms);
-        $mform->addElement('select', 'hash',
-            get_string('server:hashalgorithm', 'assignsubmission_externalserver'), $hashalgorithms);
+        $mform->addElement(
+            'select',
+            'hash',
+            get_string('server:hashalgorithm', 'assignsubmission_externalserver'),
+            $hashalgorithms
+        );
         $mform->addHelpButton('hash', 'server:hashalgorithm', 'assignsubmission_externalserver');
         $mform->setAdvanced('hash');
         $mform->setDefault('hash', 'sha256');
 
         // SSL verification.
-        $sslverificationoptions = [0 => get_string('server:sslverification_none', 'assignsubmission_externalserver'),
-                                   2 => get_string('server:sslverification_identity', 'assignsubmission_externalserver'),
-                                ];
-        $mform->addElement('select', 'sslverification',
-            get_string('server:sslverification', 'assignsubmission_externalserver'), $sslverificationoptions);
+        $sslverificationoptions = [
+            0 => get_string('server:sslverification_none', 'assignsubmission_externalserver'),
+            2 => get_string('server:sslverification_identity', 'assignsubmission_externalserver'),
+        ];
+        $mform->addElement(
+            'select',
+            'sslverification',
+            get_string('server:sslverification', 'assignsubmission_externalserver'),
+            $sslverificationoptions
+        );
         $mform->addHelpButton('sslverification', 'server:sslverification', 'assignsubmission_externalserver');
         $mform->setAdvanced('sslverification');
         $mform->setDefault('sslverification', 2);
@@ -155,8 +213,12 @@ class editserver_form extends moodleform {
         $mform->addElement('header', 'contact', get_string('server:contact', 'assignsubmission_externalserver'));
 
         // Contact name.
-        $mform->addElement('text', 'contact_name',
-            get_string('server:contact_name', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'contact_name',
+            get_string('server:contact_name', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('contact_name', PARAM_TEXT);
         $mform->addHelpButton('contact_name', 'server:contact_name', 'assignsubmission_externalserver');
         if (isset($server->contact_name)) {
@@ -164,8 +226,13 @@ class editserver_form extends moodleform {
         }
 
         // Contact email.
-        $mform->addElement('text', 'contact_email',
-            get_string('server:contact_email', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'contact_email',
+            get_string('server:contact_email',
+            'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('contact_email', PARAM_EMAIL);
         $mform->addHelpButton('contact_email', 'server:contact_email', 'assignsubmission_externalserver');
         if (isset($server->contact_email)) {
@@ -173,8 +240,12 @@ class editserver_form extends moodleform {
         }
 
         // Contact phone.
-        $mform->addElement('text', 'contact_phone',
-            get_string('server:contact_phone', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'contact_phone',
+            get_string('server:contact_phone', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('contact_phone', PARAM_TEXT);
         $mform->addHelpButton('contact_phone', 'server:contact_phone', 'assignsubmission_externalserver');
         if (isset($server->contact_phone)) {
@@ -182,8 +253,12 @@ class editserver_form extends moodleform {
         }
 
         // Contact organization.
-        $mform->addElement('text', 'contact_org',
-        get_string('server:contact_org', 'assignsubmission_externalserver'), 'maxlength="254" size="50"');
+        $mform->addElement(
+            'text',
+            'contact_org',
+            get_string('server:contact_org', 'assignsubmission_externalserver'),
+            $textoptions
+        );
         $mform->setType('contact_org', PARAM_TEXT);
         $mform->addHelpButton('contact_org', 'server:contact_org', 'assignsubmission_externalserver');
         if (isset($server->contact_org)) {
@@ -191,7 +266,11 @@ class editserver_form extends moodleform {
         }
 
         // Comments.
-        $mform->addElement('textarea', 'info', get_string('server:info', 'assignsubmission_externalserver'));
+        $mform->addElement(
+            'textarea',
+            'info',
+            get_string('server:info', 'assignsubmission_externalserver')
+        );
         $mform->addHelpButton('info', 'server:info', 'assignsubmission_externalserver');
         $mform->setType('info', PARAM_RAW);
 
@@ -209,7 +288,6 @@ class editserver_form extends moodleform {
             $server = externalserver::get_server($id);
             $this->set_data($server);
         }
-
     }
 
     /**
@@ -229,7 +307,6 @@ class editserver_form extends moodleform {
 
         // Check if the name is a duplicate.
         if (!empty($data['name'])) {
-
             if (!empty($data['id'])) {
                 $serviceid = $data['id'];
             } else {

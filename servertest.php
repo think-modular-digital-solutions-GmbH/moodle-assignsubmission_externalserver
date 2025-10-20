@@ -45,14 +45,11 @@ $extserver = new externalserver($id);
 
 // Set up the page.
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url($CFG->wwwroot.'/mod/assign/submission/externalserver/servertest.php',
-    ['id' => $id, 'sesskey' => sesskey()]));
-$PAGE->set_heading(get_string('testing', 'assignsubmission_externalserver',
-    ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
+$PAGE->set_url(new moodle_url('/mod/assign/submission/externalserver/servertest.php', ['id' => $id, 'sesskey' => sesskey()]));
+$PAGE->set_heading(get_string('testing', 'assignsubmission_externalserver', ['name' => $extserver->obj->name, 'site' => $SITE->fullname]));
 $PAGE->requires->css(new moodle_url('/mod/assign/submission/externalserver/styles.css'));
 $PAGE->requires->js_call_amd('core/bootstraptoggle', 'init');
 $PAGE->requires->js_call_amd('core/bootstrap', 'init');
-
 
 // Start output.
 echo $OUTPUT->header();
@@ -71,8 +68,12 @@ $assignment->course = '0';
 // Student View.
 $extviewurl = $extserver->url_studentview($assignment);
 $result = $extserver->http_request([], 'GET', $extviewurl);
-$extserver->print_response(get_string('studentview', 'assignsubmission_externalserver'),
-    $result, $extserver->get_success(), $extserver);
+$extserver->print_response(
+    get_string('studentview', 'assignsubmission_externalserver'),
+    $result,
+    $extserver->get_success(),
+    $extserver
+);
 
 // Submit file.
 $tmpfilename = 'uploadtest.zip';
@@ -104,12 +105,16 @@ $extserver->print_response(get_string('submit'), $content, $result, $extserver);
 // Teacher View.
 $extviewurl = $extserver->build_teacherview($assignment, '');
 $result = $extserver->http_request([], 'GET', $extviewurl);
-$extserver->print_response(get_string('teacherview', 'assignsubmission_externalserver'),
-    $result, $extserver->get_success(), $extserver);
+$extserver->print_response(
+    get_string('teacherview', 'assignsubmission_externalserver'),
+    $result,
+    $extserver->get_success(),
+    $extserver
+);
 
 // Get grades.
-list($testuser, $params) = $DB->get_in_or_equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-$userlist = $DB->get_fieldset_select('user', 'username', " id ".$testuser, $params);
+[$testuser, $params] = $DB->get_in_or_equal([1,2,3,4,5,6,7,8,9,10]);
+$userlist = $DB->get_fieldset_select('user', 'username', " id " . $testuser, $params);
 $res = $extserver->load_grades($assignment, $userlist, true);
 $content = $extserver->get_debuginfo();
 if ($extserver->get_httpcode() == 501) {

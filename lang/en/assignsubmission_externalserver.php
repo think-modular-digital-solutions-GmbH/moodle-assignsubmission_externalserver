@@ -129,4 +129,3 @@ $string['upload'] = 'Upload';
 $string['uploadattempts'] = 'Uploads';
 $string['uploads'] = 'Number of uploads';
 $string['uploads_help'] = 'Defines how many times a student can upload a file. Only the last uploaded file will be saved on the Moodle server';
-

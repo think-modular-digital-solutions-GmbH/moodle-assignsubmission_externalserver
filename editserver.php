@@ -24,7 +24,7 @@
  */
 
 require_once('../../../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -71,33 +71,25 @@ if ($id) {
 if (!empty($hide)) {
     $DB->set_field('assignsubmission_externalserver_servers', 'visible', '0', ['id' => $server->id]);
     redirect($redirecturl);
-
 } else if (!empty($show)) {
-
     // Show a server.
     $DB->set_field('assignsubmission_externalserver_servers', 'visible', '1', ['id' => $server->id]);
     redirect($redirecturl);
-
 } else if (!empty($delete)) {
-
     // Delete a server.
     $assignments = helper::get_assignments_using_server($delete);
 
     if (!$entry = $DB->get_record('assignsubmission_externalserver_servers', ['id' => $delete])) {
         throw new moodle_exception('unknownserver', 'assignsubmission_externalserver');
-
     } else if ($assignments) {
-
         // Server is in use.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('error'));
-        echo $OUTPUT->notification(get_string('cannotdelete', 'assignsubmission_externalserver',
-            count($assignments)), 'notifyproblem');
+        $notification = get_string('cannotdelete', 'assignsubmission_externalserver', count($assignments));
+        echo $OUTPUT->notification($notification, 'notifyproblem');
         echo $OUTPUT->continue_button($redirecturl);
         die();
-
     } else if (!$confirm) {
-
         // Delete confirmation modal.
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('deleteexternalserver', 'assignsubmission_externalserver', format_string($server->name)));
@@ -107,12 +99,10 @@ if (!empty($hide)) {
             'confirm' => 1,
             'sesskey' => sesskey(),
         ]);
-        echo $OUTPUT->confirm(get_string('confirmdeleting', 'assignsubmission_externalserver',
-            format_string($entry->name)), $confirmurl, $redirecturl);
+        $confirmtext = get_string('confirmdeleting', 'assignsubmission_externalserver', format_string($entry->name));
+        echo $OUTPUT->confirm($confirmtext, $confirmurl, $redirecturl);
         die();
-
     } else {
-
         // Delete the server.
         echo $OUTPUT->header();
 
@@ -123,10 +113,11 @@ if (!empty($hide)) {
 
         // Delete server.
         if ($DB->delete_records('assignsubmission_externalserver_servers', ['id' => $delete])) {
-            echo $OUTPUT->notification(get_string('delete:success', 'assignsubmission_externalserver',
-                format_string($entry->name)), 'notifysuccess');
+            $notification = get_string('delete:success', 'assignsubmission_externalserver', format_string($entry->name));
+            echo $OUTPUT->notification($notification, 'notifysuccess');
         } else {
-            echo $OUTPUT->notification(get_string('delete:error', 'assignsubmission_externalserver', format_string($entry->name)));
+            $notification = get_string('delete:error', 'assignsubmission_externalserver', format_string($entry->name));
+            echo $OUTPUT->notification($notification, 'notifyproblem');
         }
         echo $OUTPUT->continue_button($redirecturl);
         die();
@@ -139,9 +130,7 @@ $mform = new editserver_form('editserver.php', $server);
 // Cancelled.
 if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/admin/settings.php?section=assignsubmission_externalserver');
-
 } else if ($data = $mform->get_data()) {
-
     // Submitted and valid.
     $newserver = new stdClass();
     $newserver->name = $data->name;
@@ -167,7 +156,6 @@ if ($mform->is_cancelled()) {
         $newserver->timemodified = time();
         $newserver->id = $id;
         $DB->update_record('assignsubmission_externalserver_servers', $newserver);
-
     } else {
         // Create a new server.
         $newserver->visible = '0';

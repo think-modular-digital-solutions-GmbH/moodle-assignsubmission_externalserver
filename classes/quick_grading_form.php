@@ -45,7 +45,6 @@ use html_writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quick_grading_form extends moodleform {
-
     /** @var assign_submission_externalserver $extserver The assignment instance */
     protected $extserver;
 
@@ -64,8 +63,7 @@ class quick_grading_form extends moodleform {
      * @param moodle_url $actionurl The form action URL
      * @param array $customdata Custom data for the form
      */
-    public function __construct(assign_submission_externalserver
-        $extserver, $assignment, $submission, $actionurl, $customdata = null) {
+    public function __construct($extserver, $assignment, $submission, $actionurl, $customdata = null) {
         $this->extserver = $extserver;
         $this->assignment = $assignment;
         $this->submission = $submission;
@@ -99,13 +97,11 @@ class quick_grading_form extends moodleform {
         $cm = $this->assignment->get_course_module();
         $context = context_module::instance($cm->id);
         if (has_capability('mod/assign:grade', $context)) {
-
             // Header.
             $mform->addElement('header', 'quickgradingheader', get_string('getgrades', 'assignsubmission_externalserver'));
 
             // Info text.
-            $url = new moodle_url('/mod/assign/view.php',
-                ['id' => $cm->id, 'action' => 'grading']);
+            $url = new moodle_url('/mod/assign/view.php', ['id' => $cm->id, 'action' => 'grading']);
             $link = html_writer::link($url, get_string('gradeitem:submissions', 'assign'));
             $text = get_string('quickgradinginfo', 'assignsubmission_externalserver', $link);
             $mform->addElement('html', html_writer::div($text));
@@ -120,7 +116,6 @@ class quick_grading_form extends moodleform {
 
             // Start grading button.
             $mform->addElement('submit', 'gradebutton', get_string('start', 'assignsubmission_externalserver'));
-
         }
 
         // Preserve values as hidden fields.

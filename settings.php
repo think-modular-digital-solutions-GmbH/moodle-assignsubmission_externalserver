@@ -30,13 +30,15 @@ require_once($CFG->dirroot . '/mod/assign/submission/externalserver/locallib.php
 use assignsubmission_externalserver\helper;
 
 // Default settings header.
-$settings->add(new admin_setting_heading('default_settings_header',
+$settings->add(new admin_setting_heading(
+    'default_settings_header',
     get_string('defaultsettings', 'assignsubmission_externalserver'),
     get_string('defaultsettings_help', 'assignsubmission_externalserver')
 ));
 
 // Maximum size setting.
-$settings->add(new admin_setting_configselect('assignsubmission_externalserver/maxbytes',
+$settings->add(
+    new admin_setting_configselect('assignsubmission_externalserver/maxbytes',
     get_string('maxbytes', 'assignsubmission_externalserver'),
     get_string('maxbytes_help', 'assignsubmission_externalserver'),
     1048576,
@@ -44,7 +46,8 @@ $settings->add(new admin_setting_configselect('assignsubmission_externalserver/m
 ));
 
 // File types setting.
-$settings->add(new admin_setting_filetypes('assignsubmission_externalserver/filetypes',
+$settings->add(
+    new admin_setting_filetypes('assignsubmission_externalserver/filetypes',
     new lang_string('filetypes', 'assignsubmission_externalserver'),
     new lang_string('filetypes_help', 'assignsubmission_externalserver'),
     ''
@@ -52,7 +55,8 @@ $settings->add(new admin_setting_filetypes('assignsubmission_externalserver/file
 
 // Maximum uploads setting.
 $options = helper::get_upload_options();
-$settings->add(new admin_setting_configselect('assignsubmission_externalserver/uploads',
+$settings->add(
+    new admin_setting_configselect('assignsubmission_externalserver/uploads',
     get_string('uploads', 'assignsubmission_externalserver'),
     get_string('uploads_help', 'assignsubmission_externalserver'),
     100,
@@ -61,9 +65,10 @@ $settings->add(new admin_setting_configselect('assignsubmission_externalserver/u
 
 // Add server button.
 $html = html_writer::link(
-            new moodle_url('/mod/assign/submission/externalserver/editserver.php', ['sesskey' => sesskey()]),
-            get_string('addserver', 'assignsubmission_externalserver'),
-            ['class' => 'btn btn-primary mt-2']
+    new moodle_url('/mod/assign/submission/externalserver/editserver.php',
+    ['sesskey' => sesskey()]),
+    get_string('addserver', 'assignsubmission_externalserver'),
+    ['class' => 'btn btn-primary mt-2']
 );
 
 // Get the existing servers.
@@ -76,7 +81,6 @@ if (!$servers) {
         'alert alert-info'
     );
 } else {
-
     // Create table.
     $table = new html_table();
     $table->head = [
@@ -108,7 +112,8 @@ if (!$servers) {
 }
 
 // Servers header including the list.
-$settings->add(new admin_setting_heading('servers_header',
+$settings->add(
+    new admin_setting_heading('servers_header',
     get_string('servers', 'assignsubmission_externalserver'),
     $html
 ));
