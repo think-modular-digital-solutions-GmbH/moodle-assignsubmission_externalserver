@@ -305,8 +305,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $fileoptions
         );
 
-        $filesubmission = $this->get_file_submission($submission->id);
-
         // Plagiarism code event trigger when files are uploaded.
         $fs = get_file_storage();
         $files = $fs->get_area_files(
@@ -371,12 +369,13 @@ class assign_submission_externalserver extends assign_submission_plugin {
             'groupname' => $groupname,
         ];
 
-        // File was submitted.
-        if ($filesubmission && $files) {
-            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
-
+        // Create or update filesubmission record.
+        if ($filesubmission = $this->get_file_submission($submission->id)) {
             // Increment the number of uploads.
             $filesubmission->uploads++;
+
+            // Get number of files.
+            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_EXTERNALSERVER_FILEAREA);
 
             // Update filesubmission.
             $DB->update_record('assignsubmission_externalserver', $filesubmission);
@@ -386,22 +385,8 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $event = \assignsubmission_externalserver\event\submission_updated::create($params);
             $event->set_assign($this->assignment);
             $event->trigger();
-
-            // Upload the file to the external server.
-            $file = reset($files);
-            $externalserver = $this->get_externalserver();
-            if ($externalserver) {
-                $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
-                if (!$updatestatus) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-
-            return $updatestatus;
         } else {
-            // No file was submitted - this should not happen, but we handle it gracefully.
+            // Create new filesubmission record.
             $filesubmission = new stdClass();
             $filesubmission->numfiles = $this->count_files(
                 $submission->id,
@@ -416,6 +401,24 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $event = \assignsubmission_externalserver\event\submission_created::create($params);
             $event->set_assign($this->assignment);
             $event->trigger();
+        }
+
+        // File was submitted.
+        if ($files) {
+            // Upload the file to the external server.
+            $file = reset($files);
+            $externalserver = $this->get_externalserver();
+            if ($externalserver) {
+                $updatestatus = $externalserver->upload_file($file, $this->assignment->get_instance());
+                if (!$updatestatus) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+            return $updatestatus;
+        } else {
+            // No file was submitted - this should not happen, but we handle it gracefully.
             return $filesubmission->id > 0;
         }
     }
@@ -807,7 +810,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
                 'summary',
                 get_string('expandresponse', 'assignsubmission_externalserver'), ['class' => 'h6 mt-3']
             );
-            $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
+            $content = html_writer::div($ext->view_studentview($this->assignment->get_instance()), 'mb-3');
 
             // Get open state for collapsible from user preferences.
             $isopen = get_user_preferences('assignsubmission_externalserver_expanded', 0);

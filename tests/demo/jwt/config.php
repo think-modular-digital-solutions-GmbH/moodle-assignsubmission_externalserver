@@ -33,7 +33,7 @@ define('HASH_ALGO', 'sha256');
 
 // Server must be able to write in these directories.
 define('STORE_DIR', __DIR__ . '/auth/_store');  // Storage dir for temp JSON (codes/tokens)
-define('UPLOAD_DIR', __DIR__ . '/upload');      // Directory for uploaded submission files
+define('UPLOAD_DIR', __DIR__ . '/uploads');      // Directory for uploaded submission files
 
 // Standalone demo OAuth2 (opaque tokens) – configure here.
 define('CLIENT_ID', 'demo-client');         // Client ID

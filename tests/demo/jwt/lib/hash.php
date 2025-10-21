@@ -108,24 +108,21 @@ function check_akey($params, $akey): bool {
  * @return bool true if group info hash matches, false otherwise
  */
 function check_groupinfo($groupinfo, $groupinfohash): bool {
-    // common server secret
-    $secret = get_secret();
-    $hash = get_hash_algorithm();
+    $secret = SECRET_KEY;
+    $hash = HASH_ALGO;
 
-    // calculate the session key
-    $string = $secret.$groupinfo;
+    // Calculate the session key.
+    $string = $secret . $groupinfo;
 
     $hash = hash($hash, $string);
 
-    // compare the generated and provided session key
+    // Compare the generated and provided session key
     if ($hash == $groupinfohash) {
         // if the generated hash matches the provided hash, it's valid!
         return true;
     }
 
-    // if we got here, the provided hash for the groupinfos is not valid
-    // and we have to assume, somebody manipulated the traffic!
-
+    // Authentication failed.
     return false;
 }
 
@@ -137,7 +134,7 @@ function check_groupinfo($groupinfo, $groupinfohash): bool {
  * @return bool true if file hash matches, false otherwise
  */
 function check_file_hash($filename, $filehash): bool {
-    $uploadhash = hash_file(get_hash_algorithm(), $filename);
+    $uploadhash = hash_file(HASH_ALGO, $filename);
     if ($uploadhash == $filehash) {
         return true;
     }

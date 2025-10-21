@@ -1,2 +1,2 @@
-/tests/demo/*/uploads/*
-/tests/demo/oauth2/auth/_store/*
+tests/demo/*/uploads/*
+tests/demo/oauth2/auth/_store/*

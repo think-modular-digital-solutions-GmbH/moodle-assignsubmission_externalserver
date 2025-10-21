@@ -367,7 +367,7 @@ class externalserver {
 
         // Evaluate the result.
         if ($response) {
-            if ($this->httpcode == 200) { // HTTP/1.0 200 OK.
+            if ($this->httpcode == 200) {
                 if ($notify) {
                     notification::add(
                         get_string('file_uploaded', 'assignsubmission_externalserver'),
@@ -474,18 +474,20 @@ class externalserver {
     }
 
     /**
-     * Displays the iframe.
+     * Displays student view.
      *
      * @param stdClass $assignment
      * @throws coding_exception
      * @throws dml_exception
      */
-    public function view_externalframe($assignment): string {
+    public function view_studentview($assignment): string {
         global $OUTPUT;
 
         $url = $this->url_studentview($assignment);
-        $html = $OUTPUT->box_start('assignsubmission-externalserver-iframe-container');
-        $html .= '<iframe src="' . $url . '" class="assignsubmission-externalserver-iframe border bg-light"></iframe>';
+        $result = $this->http_request([], 'GET', $url);
+
+        $html = $OUTPUT->box_start('bg-light p-3 pre-scrollable');
+        $html .= '<pre>' . $result . '</pre>';
         $html .= $OUTPUT->box_end();
 
         return $html;

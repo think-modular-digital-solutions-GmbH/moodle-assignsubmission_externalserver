@@ -79,14 +79,14 @@ if (is_uploaded_file($_FILES["file"]["tmp_name"])) {
     }
 
     // Copy the uploaded file to its destination.
-    if (move_uploaded_file($_FILES["file"]["tmp_name"], UPLOAD_DIR . $filename)) {
+    if (move_uploaded_file($_FILES["file"]["tmp_name"], UPLOAD_DIR . '/' . $filename)) {
         header("HTTP/1.0 200 OK");
         echo "File uploaded successfully!";
         die();
 
     } else {
       header("HTTP/1.0 500 Internal Server Error");
-      echo "File could not be uploaded.\n" . UPLOAD_DIR . $filename . "\nend";
+      echo "File could not be uploaded.\n" . UPLOAD_DIR . '/' . $filename . "\nend";
       die();
     }
 } else {
