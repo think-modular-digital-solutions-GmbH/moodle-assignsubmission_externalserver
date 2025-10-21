@@ -60,11 +60,8 @@ if ($confirm) {
     $result = $ext->grade_submissions($assignment, [$userid]);
     echo $OUTPUT->notification($result['message'], $result['status']);
     echo html_writer::link(
-        new moodle_url(
-            '/mod/assign/view.php',
-            ['id' => $cmid, 'action' => 'grading']),
-            get_string('continue'),
-            ['class' => 'btn btn-primary']
+        new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'grading']),
+        get_string('continue'), ['class' => 'btn btn-primary']
     );
 } else {
     // Confirmation urls.

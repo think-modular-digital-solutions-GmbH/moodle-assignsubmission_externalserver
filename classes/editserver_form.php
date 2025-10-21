@@ -80,7 +80,13 @@ class editserver_form extends moodleform {
         );
         $mform->setType('name', PARAM_TEXT);
         $mform->addHelpButton('name', 'server:name', 'assignsubmission_externalserver');
-        $mform->addRule('name', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'name',
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // Url.
         $mform->addElement(
@@ -91,7 +97,13 @@ class editserver_form extends moodleform {
         );
         $mform->setType('url', PARAM_URL);
         $mform->addHelpButton('url', 'server:url', 'assignsubmission_externalserver');
-        $mform->addRule('url', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'url',
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // Form URL.
         $mform->addElement(
@@ -102,7 +114,13 @@ class editserver_form extends moodleform {
         );
         $mform->setType('form_url', PARAM_URL);
         $mform->addHelpButton('form_url', 'server:form_url', 'assignsubmission_externalserver');
-        $mform->addRule('form_url', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'form_url',
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // Authentification type.
         $authoptions = [
@@ -118,7 +136,13 @@ class editserver_form extends moodleform {
         );
         $mform->addHelpButton('auth_type', 'server:auth_type', 'assignsubmission_externalserver');
         $mform->setDefault('auth_type', 'api_key');
-        $mform->addRule('auth_type', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'auth_type',
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // Authentification secret.
         $mform->addElement(
@@ -129,7 +153,13 @@ class editserver_form extends moodleform {
         );
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_externalserver');
-        $mform->addRule('auth_secret', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'auth_secret',
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // OAuth2 client id.
         $mform->addElement(

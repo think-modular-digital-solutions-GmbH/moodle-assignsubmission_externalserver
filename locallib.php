@@ -88,9 +88,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
         );
         $mform->addElement(
             'html',
-            html_writer::tag('legend',
-            get_string('pluginname', 'assignsubmission_externalserver'),
-            ['class' => 'assignsubmission-externalserver-settings-legend'])
+            html_writer::tag(
+                'legend',
+                get_string('pluginname', 'assignsubmission_externalserver'),
+                ['class' => 'assignsubmission-externalserver-settings-legend']
+            )
         );
 
         // External server.
@@ -206,14 +208,12 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // Add fieldset.
         $mform->addElement(
             'html',
-            html_writer::start_div('border rounded',
-            ['class' => 'assignsubmission-externalserver-settings-details'])
+            html_writer::start_div('border rounded', ['class' => 'assignsubmission-externalserver-settings-details'])
         );
         $mform->addElement(
             'html',
             html_writer::tag('legend',
-            get_string('pluginname', 'assignsubmission_externalserver'),
-            ['class' => 'assignsubmission-externalserver-settings-legend'])
+            get_string('pluginname', 'assignsubmission_externalserver'),['class' => 'assignsubmission-externalserver-settings-legend'])
         );
 
         // Check if there are uploads left.
@@ -233,7 +233,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
                 $submissionid
             );
             $mform->addElement('filepicker', 'externalserver_filemanager', $this->get_name(), null, $fileoptions);
-
         } else {
             // No uploads left, display message.
             $message = get_string('nouploadsleft', 'assignsubmission_externalserver');
@@ -513,7 +512,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
 
         $context = $this->assignment->get_context();
         if (has_capability('mod/assign:grade', $context)) {
-
             if ($user) {
                 // Teacher view.
                 $ext = $this->get_externalserver();
@@ -532,7 +530,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
                     [
                         'cmid' => $cm->id,
                         'userid' => $userid,
-                        'groupid' => $groupid
+                        'groupid' => $groupid,
                     ]
                 );
                 $html .= html_writer::link(
@@ -805,7 +803,10 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // IFrame.
         $PAGE->requires->js(new moodle_url('/mod/assign/submission/externalserver/js/save_toggle_state.js'));
         if ($ext) {
-            $summary = html_writer::tag('summary', get_string('expandresponse', 'assignsubmission_externalserver'), ['class' => 'h6 mt-3']);
+            $summary = html_writer::tag(
+                'summary',
+                get_string('expandresponse', 'assignsubmission_externalserver'), ['class' => 'h6 mt-3']
+            );
             $content = html_writer::div($ext->view_externalframe($this->assignment->get_instance()), 'mb-3');
 
             // Get open state for collapsible from user preferences.
@@ -924,9 +925,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
         $groupmembers = groups_get_members($groupid);
         foreach ($groupmembers as $member) {
             $usersubmission = $this->assignment->get_user_submission($member->id, false);
-            if ($usersubmission &&
+            if (
+                $usersubmission &&
                 $usersubmission->status === ASSIGN_SUBMISSION_STATUS_SUBMITTED &&
-                $usersubmission->attemptnumber == $attempt) {
+                $usersubmission->attemptnumber == $attempt
+            ) {
                 // This user likely triggered the group submission.
                 return $member;
             }

@@ -734,10 +734,16 @@ class externalserver {
      */
     private function get_cached_token(string $key): ?string {
         $rec = get_config('assignsubmission_externalserver', 'tok_' . $key);
-        if (!$rec) return null;
+        if (!$rec) {
+            return null;
+        }
         $data = json_decode($rec, true);
-        if (!$data) return null;
-        if (time() >= (int)$data['exp']) return null;
+        if (!$data) {
+            return null;
+        }
+        if (time() >= (int)$data['exp']) {
+            return null;
+        }
         return $data['val'];
     }
 
@@ -750,8 +756,8 @@ class externalserver {
      * @return void
      */
     private function cache_token(string $key, string $token, int $ttl): void {
-        $exp = time() + max(60, $ttl - 60); // safety skew
-        set_config('tok_' . $key, json_encode(['val'=>$token, 'exp'=>$exp]), 'assignsubmission_externalserver');
+        $exp = time() + max(60, $ttl - 60);
+        set_config('tok_' . $key, json_encode(['val' => $token, 'exp' => $exp]), 'assignsubmission_externalserver');
     }
 
     /**

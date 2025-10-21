@@ -46,12 +46,12 @@ class behat_assignsubmission_externalserver extends behat_base {
 
         if (getenv('DEMO_SERVER_BASE')) {
             // We are serving tests/demo as root in CI.
-            $url = $base . '/moodle_external_assignment.php';
-            $formurl = $base . '/moodle_external_assignment_upload.php';
+            $url = $base . '/apikey/assignment.php';
+            $formurl = $base . '/apikey/upload.php';
         } else {
             // Local dev fallback – files under normal plugin path.
-            $url = $base . '/mod/assign/submission/externalserver/tests/demo/moodle_external_assignment.php';
-            $formurl = $base . '/mod/assign/submission/externalserver/tests/demo/moodle_external_assignment_upload.php';
+            $url = $base . '/mod/assign/submission/externalserver/tests/demo/apikey/assignment.php';
+            $formurl = $base . '/mod/assign/submission/externalserver/tests/demo/apikey/upload.php';
         }
 
         $record = (object)[

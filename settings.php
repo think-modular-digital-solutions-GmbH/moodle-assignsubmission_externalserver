@@ -73,8 +73,7 @@ $settings->add(
 
 // Add server button.
 $html = html_writer::link(
-    new moodle_url('/mod/assign/submission/externalserver/editserver.php',
-    ['sesskey' => sesskey()]),
+    new moodle_url('/mod/assign/submission/externalserver/editserver.php', ['sesskey' => sesskey()]),
     get_string('addserver', 'assignsubmission_externalserver'),
     ['class' => 'btn btn-primary mt-2']
 );

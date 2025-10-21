@@ -38,7 +38,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
-
     /**
      * Returns html for the table of servers in the settings.
      *
@@ -69,7 +68,7 @@ class helper {
             $row = [];
             $row[] = '<span class="' . $rowclass . '">' . format_string($server->name) . '</span>';
             $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
-            $row[] = helper::edit_icons($server);
+            $row[] = self::edit_icons($server);
             $table->data[] = $row;
         }
 
