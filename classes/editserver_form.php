@@ -214,7 +214,14 @@ class editserver_form extends moodleform {
         );
         $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_externalserver');
         $mform->setDefault('groupinfo', externalserver::NO_GROUPINFO);
-        $mform->addRule('groupinfo', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule(
+            'groupinfo',
+            get_string('server:info_missing',
+            'assignsubmission_externalserver'),
+            'required',
+            null,
+            'client'
+        );
 
         // Hash algorithm.
         $hashalgorithms = hash_algos();
@@ -267,8 +274,7 @@ class editserver_form extends moodleform {
         $mform->addElement(
             'text',
             'contact_email',
-            get_string('server:contact_email',
-            'assignsubmission_externalserver'),
+            get_string('server:contact_email', 'assignsubmission_externalserver'),
             $textoptions
         );
         $mform->setType('contact_email', PARAM_EMAIL);

@@ -61,7 +61,8 @@ if ($confirm) {
     echo $OUTPUT->notification($result['message'], $result['status']);
     echo html_writer::link(
         new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'grading']),
-        get_string('continue'), ['class' => 'btn btn-primary']
+        get_string('continue'),
+        ['class' => 'btn btn-primary']
     );
 } else {
     // Confirmation urls.

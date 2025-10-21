@@ -64,7 +64,8 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
             $dbman->drop_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025102001, 'assignsubmission', 'externalserver');    }
+        upgrade_plugin_savepoint(true, 2025102001, 'assignsubmission', 'externalserver');
+    }
 
     if ($oldversion < 2025102101) {
         // Remove obsolete fields for oauth2_auth_endpoint and oauth2_endpoint.
@@ -77,6 +78,8 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
+
+        upgrade_plugin_savepoint(true, 2025102101, 'assignsubmission', 'externalserver');
     }
 
     return true;

@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          DOCROOT="./plugin/tests/demo" # or dynamically detect
+          DOCROOT="./plugin/tests/demo/apikey"
 
           echo "Serving demo from: ${DOCROOT}"
           php -S 127.0.0.1:8081 -t "${DOCROOT}" >server.log 2>&1 &
@@ -82,7 +82,7 @@ jobs:
 
           echo "⏳ Waiting for server to come online..."
           for i in {1..40}; do
-            if curl -fsS http://127.0.0.1:8081/moodle_external_assignment.php >/dev/null 2>&1; then
+            if curl -fsS http://127.0.0.1:8081/assignment.php >/dev/null 2>&1; then
               echo "✅ Demo server is up"
               exit 0
             fi
