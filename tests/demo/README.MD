@@ -42,6 +42,10 @@ upload.php              - endpoint called from Moodle to upload a file
 /lib/server.php         - additional functions needed for your server can go here
 /auth                   - code needed for OAuth2/JWT
 
+Note: the JWT package contains both the private key and the public key in /auth/keys.
+
+On a real server, the private key should never be put somewhere that is accessible from the web!
+
 ## Installation & configuration
 
 - Put on any webserver that runs PHP

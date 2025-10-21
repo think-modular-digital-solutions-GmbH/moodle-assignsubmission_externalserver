@@ -45,9 +45,11 @@ define('DEFAULT_SCOPES', ['openid','profile','email','demo.read']);
 define('OAUTH_ISSUER',        'https://ext.example.com');   // your server
 define('OAUTH_AUDIENCE',      'moodle-plugin');             // who the token is for (optional but good)
 define('JWT_KID',             'key-2025-10');               // rotate periodically
-define('PRIVATE_KEY_PATH',    __DIR__ . '/auth/keys/oauth_private.pem');
-define('PUBLIC_KEY_PATH',     __DIR__ . '/auth/keys/oauth_public.pem');
 define('JWT_LEEWAY',          60);
+define('PUBLIC_KEY_PATH',     __DIR__ . '/auth/keys/oauth_public.pem');
+
+// On a real server, the private key should never be put somewhere that is accessible from the web!
+define('PRIVATE_KEY_PATH',    __DIR__ . '/auth/keys/oauth_private.pem');
 
 // Requirements and common functions.
 require_once __DIR__ . '/lib/hash.php';

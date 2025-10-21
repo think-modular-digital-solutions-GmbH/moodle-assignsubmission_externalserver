@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/externalserver/db" VERSION="20230301" COMMENT="XMLDB file for Moodle mod/extserver"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
->
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="mod/assign/submission/externalserver/db" VERSION="20230301" COMMENT="XMLDB file for Moodle mod/extserver" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="assignsubmission_externalserver" COMMENT="Info about external server submission">
       <FIELDS>
@@ -48,4 +45,4 @@
       </KEYS>
     </TABLE>
   </TABLES>
-</XMLDB>
+  </XMLDB>
