@@ -688,12 +688,6 @@ class externalserver {
         $clientid = $this->obj->oauth2_client_id;
         $secret = $this->obj->oauth2_client_secret;
 
-        // Check cache.
-        $cachename = 'assignsubmission_externalserver_' . $this->obj->id . '_' . $this->obj->auth_type;
-        if ($cached = $this->get_cached_token($cachename)) {
-            return $cached;
-        }
-
         // Build the token request.
         $response = $this->httpclient->post($tokenurl, [
             'headers' => [
@@ -722,29 +716,7 @@ class externalserver {
         // Get token and cache it.
         $token = $body['access_token'];
         $ttl   = isset($body['expires_in']) ? (int)$body['expires_in'] : 3600;
-        $this->cache_token($cachename, $token, $ttl);
         return $token;
-    }
-
-    /**
-     * Get cached token.
-     *
-     * @param string $key Token key
-     * @return string|null Token value or null if not found/expired
-     */
-    private function get_cached_token(string $key): ?string {
-        $rec = get_config('assignsubmission_externalserver', 'tok_' . $key);
-        if (!$rec) {
-            return null;
-        }
-        $data = json_decode($rec, true);
-        if (!$data) {
-            return null;
-        }
-        if (time() >= (int)$data['exp']) {
-            return null;
-        }
-        return $data['val'];
     }
 
     /**
