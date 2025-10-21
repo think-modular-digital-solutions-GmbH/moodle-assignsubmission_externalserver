@@ -1,54 +1,57 @@
 <?php
-# This software is provided under the GNU General Public License # http://www.gnu.org/licenses/gpl.html with Copyright &copy; 2009 onwards
-#
-# Philipp Hager
-#
-# Dipl.-Ing. Andreas Hruska
-# andreas.hruska@elearning.tuwien.ac.at
-#
-# Dipl.-Ing. Mag. rer.soc.oec. Katarzyna Potocka
-# katarzyna.potocka@elearning.tuwien.ac.at
-#
-# Vienna University of Technology
-# E-Learning Center
-# Gußhausstraße 28/E015
-# 1040 Wien
-# http://elearning.tuwien.ac.at/
-# ---------------------------------------------------------------
-# FOR Moodle 3.1+
-# ---------------------------------------------------------------
+// This file is part of mod_extserver for Moodle - http://moodle.org/
+//
+// It is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Demo package using OAuth2: hash functions to verify requests.
+ *
+ * This was mostly re-used from the old external server demo package.
+ *
+ * @package    assignsubmission_externalserver
+ * @author     Andreas Hruska <andreas.hruska@elearning.tuwien.ac.at>
+ * @author     Katarzyna Potocka <katarzyna.potocka@elearning.tuwien.ac.at>
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 /** @const string[] array of params to include in akey */
-$akeyparams = array('timestamp', 'user', 'skey', 'uidnr', 'action', 'cidnr',
+$AKEYPARAMS = array('timestamp', 'user', 'skey', 'uidnr', 'action', 'cidnr',
                     'aid', 'aname', 'fname', 'lname', 'role');
 
 // Params from actionparams can be arrays too (for example unames), these are handled separately!
-$actionparams = array('submit'      => array('filename', 'filehash'),
+$ACTIONPARAMS = array('submit'      => array('filename', 'filehash'),
                       'teacherview' => array('studusername'),
                       'getgrades'   => array('unames'));
 
-function get_secret(): string {
-    $secret = '2345678987654';
-    return $secret;
-}
 
-function get_hash_algorithm(): string {
-    $hash = 'sha256'; // TODO: change this to your actual hash algorithm!
-    return $hash;
-}
-
-// function to check the akey
+/**
+ * Check payload integrity by verifying the akey.
+ *
+ * @param array $params parameters received from the client
+ * @param string $akey akey received from the client
+ * @return bool true if akey is valid, false otherwise
+ */
 function check_akey($params, $akey): bool {
-    global $akeyparams, $actionparams;
+    global $AKEYPARAMS, $ACTIONPARAMS;
 
-    // common server secret
-    $secret = get_secret();
-    $hash = get_hash_algorithm();
+    $hash = HASH_ALGO;
+    $string = SECRET_KEY;
 
-    // calculate the session key
-    $string = $secret;
-
-    // Add general parameters!
-    foreach ($akeyparams as $param) {
+    // Add general parameters.
+    foreach ($AKEYPARAMS as $param) {
         if (!array_key_exists($param, $params)) {
             header("HTTP/1.0 400 Bad Request");
             echo "missing params";
@@ -59,7 +62,7 @@ function check_akey($params, $akey): bool {
         }
     }
 
-    // Add action specific params!
+    // Add action specific params.
     $action = $params['action'];
     if ($action == 'view' && $params['role'] == 'teacher') {
         $action = 'teacherview';
@@ -67,8 +70,8 @@ function check_akey($params, $akey): bool {
         // We don't need studusername in student view!
         $action = 'studentview';
     }
-    if (key_exists($action, $actionparams) && !empty($actionparams[$action])) {
-        foreach ($actionparams[$action] as $param) {
+    if (key_exists($action, $ACTIONPARAMS) && !empty($ACTIONPARAMS[$action])) {
+        foreach ($ACTIONPARAMS[$action] as $param) {
             if (!array_key_exists($param, $params)) {
                 header("HTTP/1.0 400 Bad Request");
                 echo "missing params";
@@ -88,18 +91,22 @@ function check_akey($params, $akey): bool {
 
     $hash = hash($hash, $string);
 
-    // compare the generated and provided session key
-    if ($hash == $akey) {  // if the generated session key matches the provided key is valid
+    // Compare the generated and provided session key.
+    if ($hash == $akey) {
         return true;
     }
 
-    // if we got here, the provided session key for the user is not valid
-    // and the authentication procedure result is negative
-
+    // Authentication failed.
     return false;
 }
 
-// function to check the groupinfo's integrity
+/**
+ * Check group info integrity.
+ *
+ * @param string $groupinfo group info json string
+ * @param string $groupinfohash expected group info hash
+ * @return bool true if group info hash matches, false otherwise
+ */
 function check_groupinfo($groupinfo, $groupinfohash): bool {
     // common server secret
     $secret = get_secret();
@@ -122,21 +129,19 @@ function check_groupinfo($groupinfo, $groupinfohash): bool {
     return false;
 }
 
-// function to check the file hash
+/**
+ * Check file hash integrity.
+ *
+ * @param string $filename path to the file to check
+ * @param string $filehash expected file hash
+ * @return bool true if file hash matches, false otherwise
+ */
 function check_file_hash($filename, $filehash): bool {
     $uploadhash = hash_file(get_hash_algorithm(), $filename);
-
     if ($uploadhash == $filehash) {
         return true;
     }
-
     return false;
-}
-
-function assignment_exists($aid): bool {
-  // Check if an assignment already exists
-
-  return true;
 }
 
 /**

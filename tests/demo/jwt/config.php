@@ -41,11 +41,15 @@ define('CLIENT_SECRET', 'demo-secret');     // Secret key.
 define('ACCESS_TOKEN_TTL', 3600);           // Access token lifetime (seconds)
 define('DEFAULT_SCOPES', ['openid','profile','email','demo.read']);
 
+// JWT configuration.
+define('OAUTH_ISSUER',        'https://ext.example.com');   // your server
+define('OAUTH_AUDIENCE',      'moodle-plugin');             // who the token is for (optional but good)
+define('JWT_KID',             'key-2025-10');               // rotate periodically
+define('PRIVATE_KEY_PATH',    __DIR__ . '/auth/keys/oauth_private.pem');
+define('PUBLIC_KEY_PATH',     __DIR__ . '/auth/keys/oauth_public.pem');
+define('JWT_LEEWAY',          60);
+
 // Requirements and common functions.
 require_once __DIR__ . '/lib/hash.php';
 require_once __DIR__ . '/lib/server.php';
 require_once __DIR__ . '/auth/lib/common.php';
-require_once __DIR__ . '/auth/lib/store.php';
-
-// Garbage collect expired tokens/codes.
-store_gc_opportunistic();

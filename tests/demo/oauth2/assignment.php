@@ -17,7 +17,11 @@
 /**
  * Demo package using OAuth2: assignment endpoint for an external server
  *
+ * This was mostly re-used from the old external server demo package.
+ *
  * @package    assignsubmission_externalserver
+ * @author     Andreas Hruska <andreas.hruska@elearning.tuwien.ac.at>
+ * @author     Katarzyna Potocka <katarzyna.potocka@elearning.tuwien.ac.at>
  * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

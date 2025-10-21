@@ -17,7 +17,11 @@
 /**
  * Demo package using OAuth2: assignment endpoint for an external server.
  *
+ * This was mostly re-used from the old external server demo package.
+ *
  * @package    assignsubmission_externalserver
+ * @author     Andreas Hruska <andreas.hruska@elearning.tuwien.ac.at>
+ * @author     Katarzyna Potocka <katarzyna.potocka@elearning.tuwien.ac.at>
  * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -67,25 +71,22 @@ if ($groupinfo !== false) {
     $groupinfotxt = "<br />Groupinfo:<pre>".print_r($groupinfo, true)."</pre>";
 }
 
-// Verzeichnis
-$upload_dir = __DIR__ . '/uploads/';
-
-// Wurde wirklich eine Datei hochgeladen?
+// Was something uploaded?
 if (is_uploaded_file($_FILES["file"]["tmp_name"])) {
     if (!check_file_hash($_FILES["file"]["tmp_name"], $values["filehash"])) {
         header("HTTP/1.0 400 Bad Request");
         echo "File hashes doesn't match. File has probably been modified!\n";
     }
 
-    // Alles OK -> Datei kopieren
-    if (move_uploaded_file($_FILES["file"]["tmp_name"], $upload_dir.$filename)) {
+    // Copy the uploaded file to its destination.
+    if (move_uploaded_file($_FILES["file"]["tmp_name"], UPLOAD_DIR . $filename)) {
         header("HTTP/1.0 200 OK");
         echo "File uploaded successfully!";
         die();
 
     } else {
       header("HTTP/1.0 500 Internal Server Error");
-      echo "File could not be uploaded.\n" . $upload_dir.$filename . "\nend";
+      echo "File could not be uploaded.\n" . UPLOAD_DIR . $filename . "\nend";
       die();
     }
 } else {
@@ -93,5 +94,3 @@ if (is_uploaded_file($_FILES["file"]["tmp_name"])) {
     echo "No file selected for upload.";
     die();
 }
-
-?>

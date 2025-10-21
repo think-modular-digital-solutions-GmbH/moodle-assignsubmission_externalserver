@@ -15,45 +15,57 @@
 # 1040 Wien
 # http://tsc.tuwien.ac.at/
 # ---------------------------------------------------------------
-# FOR Moodle 3.4
-# ---------------------------------------------------------------
 
-README.txt
-v.2018-01-24
+README.MD
+v.2025-10-21
+Adapted by Stefan Weber <stefan.weber@think-modular.com>
 
 
-Extserver-Module DUMMY PACKAGE
-==============================
+# Extserver-Module DEMO PACKAGE
 
-NOTICE: COURSE ID 0 is used for Testrequests
+## Description
 
-INSTALLATION
-====================================================================================================
-    Enter your secret (in moodle_extserver_lib.php in line 31)
-    Enter your upload directory (in moodle_extserver_upload.php line 71)
-        NOTE: the webserver (php) needs write access in this directory
+Contained are three standalone demo server packages, to be deployed on the server of your choice, and adapted there.
 
-RECOMMENDED CONFIGURATION
-====================================================================================================
-    Allow access from moodle and the web to moodle_extserver.php
-    Allow access from moodle and deny the web to moodle_extserver_upload.php
-    Deny web access to your upload directory
+- /auth uses simple API key authentification
+- /oauth2 uses OAuth2 as authentification
+- /jwt uses OAuth2 with JWT tokens as authentification
 
-INTERFACE // REQUESTS FROM MOODLE PLUGIN TO EXTERNAL SERVER
-====================================================================================================
+The Moodle Plugin assignsubmission_externalserver can then use these servers to send Moodle assignment data that can be automatically graded by server-side code.
+
+### File structure
+
+config.php              - configuration
+assignment.php          - endpoint called from Moodle for most requests
+upload.php              - endpoint called from Moodle to upload a file
+/lib/hash.php           - hashing functions to validate request payloads
+/lib/server.php         - additional functions needed for your server can go here
+/auth                   - code needed for OAuth2/JWT
+
+## Installation & configuration
+
+- Put on any webserver that runs PHP
+- Adjust the values in ~/config.php as needed
+
+### Recommended configuration
+
+- Allow access from moodle and the web to moodle_extserver.php
+- Allow access from moodle and deny the web to moodle_extserver_upload.php
+- Deny web access to your upload directory
+
+## Interface // requests from Moodle plugin to server
+
 External Server communication runs via CURL HTTP requests.
+
 The External Server Module will request
-I) Connection check:
 
-    GET request to
-        ~/moodle_extserver.php
+### Connection check:
 
-without any variables, just to check HTTP Status Code!
+GET request to ~/assignment.php without any variables, just to check HTTP status code.
 
-II) Teacher View:
+### Teacher View:
 
-    GET request to
-        ~/moodle_extserver.php
+GET request to ~/assignment.php
 
 with following variables:
 
@@ -75,12 +87,11 @@ with following variables:
     groupinfo     = (optional) JSON-encoded array of objects containing ID, name and members (=array of usernames)
     groupinfohash = (optional) hashed JSON encoded groupinfo with prepended server secret
 
-Answer will be displayed in iframe!
+The response will be displayed in iframe in Moodle.
 
-III) Student View:
+### Student View:
 
-    GET request to
-        ~/moodle_extserver.php
+GET request to ~/assignment.php
 
 with following variables:
 
@@ -101,12 +112,11 @@ with following variables:
     groupinfo     = (optional) JSON-encoded array of objects containing ID, name and members (=array of usernames)
     groupinfohash = (optional) hashed JSON encoded groupinfo with prepended server secret
 
-Answer will be displayed in iframe!
+The response will be displayed in iframe in Moodle.
 
-IV) Upload file:
+### Upload file:
 
-    POST request to
-        ~/moodle_extserver_upload.php
+POST request to ~/upload.php
 
 with following variables:
 
@@ -130,10 +140,9 @@ with following variables:
     groupinfo     = (optional) JSON-encoded array of objects containing ID, name and members (=array of usernames)
     groupinfohash = (optional) hashed JSON encoded groupinfo with prepended server secret
 
-V) Load Grades:
+### Load Grades:
 
-    GET request to
-        ~/moodle_extserver.php
+GET request to ~/assignment.php
 
 with following variables:
 
@@ -152,11 +161,11 @@ with following variables:
     akey          = Accesskey calculated from server secret, timestamp, acting user's username, moodle sesskey,
                     user's idnumber, action, course id, creation timestamp of extserver, name of extserver module,
                     firstname, lastname, role and all the user names from the array (sorted by array_ksort() and
-                                                                                     imploded with string 'unames' as glue)
+                    imploded with string 'unames' as glue)
     groupinfo     = (optional) JSON-encoded array of objects containing ID, name and members (=array of usernames)
     groupinfohash = (optional) hashed JSON encoded groupinfo with prepended server secret
 
-expects XML of the following format in return:
+Responds with XML of the following format:
 
     <assignment cidnr=\"$cidnr\" aidnr=\"$aid\">
         <submission uname="username1" teacheridnr="0" grade="38" timemodified="1393941008">Only 38%, be better next time!</submission>
@@ -165,6 +174,3 @@ expects XML of the following format in return:
         <submission uname="username4" teacheridnr="0" grade="45" timemodified="1393941008">Improve blablabla to be positive!</submission>
         ...
     </assignment>
-
-CHANGELOG
-====================================================================================================

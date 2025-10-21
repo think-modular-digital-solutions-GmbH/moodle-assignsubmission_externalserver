@@ -108,6 +108,7 @@ class editserver_form extends moodleform {
         $authoptions = [
             'api_key' => get_string('server:auth_api_key', 'assignsubmission_externalserver'),
             'oauth2' => get_string('server:auth_oauth2', 'assignsubmission_externalserver'),
+            'jwt' => get_string('server:auth_jwt', 'assignsubmission_externalserver'),
         ];
         $mform->addElement(
             'select',
@@ -159,16 +160,6 @@ class editserver_form extends moodleform {
         );
         $mform->setType('oauth2_token_endpoint', PARAM_URL);
         $mform->hideif('oauth2_token_endpoint', 'auth_type', 'eq', 'api_key');
-
-        // OAuth2 token type.
-        $mform->addElement(
-            'select',
-            'oauth2_token_type',
-            get_string('server:auth_type', 'assignsubmission_externalserver'),
-            ['oauth2', 'jwt'],
-        );
-        $mform->setType('oauth2_token_type', PARAM_TEXT);
-        $mform->hideif('oauth2_token_type', 'auth_type', 'neq', 'jwt');
 
         // JWT audience.
         $mform->addElement(

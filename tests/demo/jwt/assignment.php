@@ -1,42 +1,45 @@
 <?php
+// This file is part of mod_extserver for Moodle - http://moodle.org/
+//
+// It is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-# This software is provided under the GNU General Public License # http://www.gnu.org/licenses/gpl.html with Copyright &copy; 2009 onwards
-#
-# Philipp Hager
-#
-# Dipl.-Ing. Andreas Hruska
-# andreas.hruska@elearning.tuwien.ac.at
-#
-# Dipl.-Ing. Mag. rer.soc.oec. Katarzyna Potocka
-# katarzyna.potocka@elearning.tuwien.ac.at
-#
-# Vienna University of Technology
-# E-Learning Center
-# Gußhausstraße 28/E015
-# 1040 Wien
-# http://elearning.tuwien.ac.at/
-# ---------------------------------------------------------------
-# FOR Moodle 3.1+
-# ---------------------------------------------------------------
+/**
+ * Demo package using OAuth2: assignment endpoint for an external server
+ *
+ * This was mostly re-used from the old external server demo package.
+ *
+ * @package    assignsubmission_externalserver
+ * @author     Andreas Hruska <andreas.hruska@elearning.tuwien.ac.at>
+ * @author     Katarzyna Potocka <katarzyna.potocka@elearning.tuwien.ac.at>
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-//COURSE ID 0 ist Testrequest
+require_once(__DIR__ . '/config.php');
 
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+// OAuth2 authorization.
+require_bearer_token();
 
-include("moodle_extserver_lib.php");
-
+// No payload - just checking if server is running.
 if (empty($_GET["akey"])) {
     header("HTTP/1.0 200 OK");
     echo "Available";
     die();
 }
 
-// get variables
-if (!empty($_GET["akey"])) {
-    $values = $_GET;
-}
-
+// Get variables.
 $timestamp = $_GET["timestamp"];
 $user = $_GET["user"];
 $skey = $_GET["skey"];
@@ -60,9 +63,10 @@ if (key_exists("groupinfo", $_GET)) {
     $groupinfo = false;
 }
 
-if (!check_akey($values, $akey)) {
+// Check payload integrity.
+if (!check_akey($_GET, $akey)) {
     header("HTTP/1.0 401 Unauthorized");
-    echo "Session could not be verified - wrong akey";
+    echo "Payload could not be verified - hash mismatch";
     die();
 }
 

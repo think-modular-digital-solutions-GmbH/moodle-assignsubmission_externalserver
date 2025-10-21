@@ -669,10 +669,8 @@ class externalserver {
         ];
 
         // Headers for authentication.
-        if ($authtype == 'oauth2') {
+        if ($authtype == 'oauth2' || $authtype == 'jwt') {
             $headers['Authorization'] = 'Bearer ' . $this->get_oauth2_token();
-        } else if ($authtype == 'jwt') {
-            $headers['Authorization'] = 'Bearer ' . $this->get_jwt_token();
         }
 
         return $headers;
@@ -691,7 +689,8 @@ class externalserver {
         $secret = $this->obj->oauth2_client_secret;
 
         // Check cache.
-        if ($cached = $this->get_cached_token('oauth2')) {
+        $cachename = 'assignsubmission_externalserver_' . $this->obj->id . '_' . $this->obj->auth_type;
+        if ($cached = $this->get_cached_token($cachename)) {
             return $cached;
         }
 
@@ -723,7 +722,7 @@ class externalserver {
         // Get token and cache it.
         $token = $body['access_token'];
         $ttl   = isset($body['expires_in']) ? (int)$body['expires_in'] : 3600;
-        $this->cache_token('oauth2', $token, $ttl);
+        $this->cache_token($cachename, $token, $ttl);
         return $token;
     }
 
@@ -753,47 +752,6 @@ class externalserver {
     private function cache_token(string $key, string $token, int $ttl): void {
         $exp = time() + max(60, $ttl - 60); // safety skew
         set_config('tok_' . $key, json_encode(['val'=>$token, 'exp'=>$exp]), 'assignsubmission_externalserver');
-    }
-
-    /**
-     * Get JWT token.
-     *
-     * @return string JWT token
-     */
-    private function get_jwt_token(): string {
-
-        // Get params.
-        $tokenurl = $this->obj->oauth2_endpoint;
-        $clientid = $this->obj->oauth2_client_id;
-        $secret = $this->obj->auth_secret;
-        $jwtissuer = $this->obj->jwt_issuer;
-        $jwtaudience = $this->obj->jwt_audience;
-
-        // Build the token request.
-        $response = $this->httpclient->post($tokenurl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                'grant_type' => 'client_credentials',
-                'client_id' => $clientid,
-                'client_secret' => $secret,
-                'audience' => $jwtaudience,
-                'issuer' => $jwtissuer,
-            ],
-        ]);
-
-        // Get the token from the response.
-        $statuscode = $response->getStatusCode();
-        $body = json_decode($response->getBody()->getContents(), true);
-        if ($statuscode != 200 || !isset($body['access_token'])) {
-            \core\notification::add(
-                get_string('error:couldnotgetjwttoken', 'assignsubmission_externalserver', $statuscode),
-                \core\output\notification::NOTIFY_ERROR
-            );
-        }
-
-        return $body['access_token'];
     }
 
     /**
