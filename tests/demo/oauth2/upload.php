@@ -1,27 +1,34 @@
 <?php
-# This software is provided under the GNU General Public License # http://www.gnu.org/licenses/gpl.html with Copyright &copy; 2009 onwards
-#
-# Dipl.-Ing. Andreas Hruska
-# andreas.hruska@elearning.tuwien.ac.at
-#
-# Dipl.-Ing. Mag. rer.soc.oec. Katarzyna Potocka
-# katarzyna.potocka@elearning.tuwien.ac.at
-#
-# Vienna University of Technology
-# E-Learning Center
-# Gu§hausstra§e 28/E015
-# 1040 Wien
-# http://elearning.tuwien.ac.at/
-# ---------------------------------------------------------------
-# FOR Moodle 2.5.3
-# ---------------------------------------------------------------
+// This file is part of mod_extserver for Moodle - http://moodle.org/
+//
+// It is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// It is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-include("moodle_extserver_lib.php");
+/**
+ * Demo package using OAuth2: assignment endpoint for an external server.
+ *
+ * @package    assignsubmission_externalserver
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
+ * @copyright  2025 think-modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-//COURSE ID 0 ist Testrequest
+require_once(__DIR__ . '/config.php');
 
-// get variables
-// get variables
+// OAuth2 authorization.
+require_valid_access_token();
+
+// Get variables.
 if (!empty($_POST["akey"])) {
     $values = $_POST;
 } else {
@@ -47,13 +54,6 @@ if (key_exists("groupinfo", $_GET)) {
 } else {
     $groupinfo = false;
 }
-
-if (!check_akey($values, $akey)) {
-    header("HTTP/1.0 401 Unauthorized");
-    echo "Session could not be verified - wrong akey";
-    die();
-}
-
 if ($groupinfo !== false) {
     if (!check_groupinfo($groupinfo, $groupinfohash)) {
         header("HTTP/1.0 418 I'm a teapot! (Somebody tried to alter the submitted groupinfos!");

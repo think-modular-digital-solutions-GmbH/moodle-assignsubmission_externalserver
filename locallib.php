@@ -18,7 +18,7 @@
  * Library file for external server submission plugin
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,7 +38,7 @@ use core\output\notification;
  * Library class for external server submission plugin
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

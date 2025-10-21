@@ -18,7 +18,7 @@
  * Upgrade hooks for the external server submission plugin.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,38 +35,39 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    // Add OAuth2 client ID, endpoint and JWT issuer fields.
-    if ($oldversion < 2025072803) {
+
+    if ($oldversion < 2025102001) {
+
+        // Add fields for OAuth2 client secret, auth endpoint and token endpoint.
         $table = new xmldb_table('assignsubmission_externalserver_servers');
 
-        $field = new xmldb_field('oauth2_client_id', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'auth_secret');
+        $field = new xmldb_field('oauth2_client_secret', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'oauth2_client_id');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        $field = new xmldb_field('oauth2_endpoint', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'oauth2_client_id');
+        $field = new xmldb_field('oauth2_auth_endpoint', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'oauth2_client_secret');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        $field = new xmldb_field('jwt_issuer', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'oauth2_endpoint');
+        $field = new xmldb_field('oauth2_token_endpoint', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'oauth2_auth_endpoint');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025072803, 'assignsubmission', 'externalserver');
-    }
-
-    // Add JWT audience field.
-    if ($oldversion < 2025072804) {
-        $table = new xmldb_table('assignsubmission_externalserver_servers');
-
-        $field = new xmldb_field('jwt_audience', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'jwt_issuer');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
+        // Remove obsolete fields for jwt_issuer and jwt_audience.
+        $field = new xmldb_field('jwt_issuer');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('jwt_audience');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025072804, 'assignsubmission', 'externalserver');
+        upgrade_plugin_savepoint(true, 2025102001, 'assignsubmission', 'externalserver');
+
     }
 
     return true;

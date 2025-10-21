@@ -18,7 +18,7 @@
  * Global logic for the external server submission plugin.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -132,23 +132,14 @@ if ($mform->is_cancelled()) {
 } else if ($data = $mform->get_data()) {
     // Submitted and valid.
     $newserver = new stdClass();
-    $newserver->name = $data->name;
-    $newserver->url = $data->url;
-    $newserver->form_url = $data->form_url;
-    $newserver->auth_type = $data->auth_type;
-    $newserver->auth_secret = $data->auth_secret;
-    $newserver->oauth2_client_id = $data->oauth2_client_id ?? '';
-    $newserver->oauth2_endpoint = $data->oauth2_endpoint ?? '';
-    $newserver->jwt_issuer = $data->jwt_issuer ?? '';
-    $newserver->jwt_audience = $data->jwt_audience ?? '';
-    $newserver->hash = $data->hash;
-    $newserver->sslverification = $data->sslverification;
-    $newserver->groupinfo = $data->groupinfo;
-    $newserver->contact_name = $data->contact_name;
-    $newserver->contact_email = $data->contact_email;
-    $newserver->contact_phone = $data->contact_phone;
-    $newserver->contact_org = $data->contact_org;
-    $newserver->info = $data->info;
+
+    // Assign values from form.
+    foreach ($data as $key => $value) {
+        if ($key == 'id' || $key == 'submitbutton' || $key == 'cancel') {
+            break;
+        }
+        $newserver->$key = $data->$key;
+    }
 
     // Update server.
     if ($id) {

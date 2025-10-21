@@ -18,7 +18,7 @@
  * Settings for the external server submission plugin.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -89,34 +89,8 @@ if (!$servers) {
         'alert alert-info'
     );
 } else {
-    // Create table.
-    $table = new html_table();
-    $table->head = [
-        get_string('server:name', 'assignsubmission_externalserver'),
-        get_string('server:contact_name', 'assignsubmission_externalserver'),
-        get_string('actions'),
-    ];
-    $table->attributes['class'] = 'generaltable';
-    $table->id = 'externalserver-list';
-    $table->data = [];
-
-    // Add each server to the table.
-    foreach ($servers as $server) {
-        if (!$server->visible) {
-            $rowclass = 'text-muted';
-        } else {
-            $rowclass = '';
-        }
-
-        $row = [];
-        $row[] = '<span class="' . $rowclass . '">' . format_string($server->name) . '</span>';
-        $row[] = '<span class="' . $rowclass . '">' . format_string($server->contact_name) . '</span>';
-        $row[] = helper::edit_icons($server);
-        $table->data[] = $row;
-    }
-
-    // Add the table to the HTML.
-    $html .= html_writer::table($table);
+    // Print table of servers.
+    $html .= helper::print_table_of_servers($servers);
 }
 
 // Servers header including the list.

@@ -18,7 +18,7 @@
  * Add/edit server form for the external server submission plugin.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,7 +36,7 @@ use assignsubmission_externalserver\externalserver;
  * Add/edit server form for the external server submission plugin.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber (stefan.weber@think-modular.com)
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -80,7 +80,7 @@ class editserver_form extends moodleform {
         );
         $mform->setType('name', PARAM_TEXT);
         $mform->addHelpButton('name', 'server:name', 'assignsubmission_externalserver');
-        $mform->addRule('name', get_string('server:name_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
+        $mform->addRule('name', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Url.
         $mform->addElement(
@@ -91,6 +91,7 @@ class editserver_form extends moodleform {
         );
         $mform->setType('url', PARAM_URL);
         $mform->addHelpButton('url', 'server:url', 'assignsubmission_externalserver');
+        $mform->addRule('url', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Form URL.
         $mform->addElement(
@@ -101,6 +102,7 @@ class editserver_form extends moodleform {
         );
         $mform->setType('form_url', PARAM_URL);
         $mform->addHelpButton('form_url', 'server:form_url', 'assignsubmission_externalserver');
+        $mform->addRule('form_url', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Authentification type.
         $authoptions = [
@@ -115,6 +117,7 @@ class editserver_form extends moodleform {
         );
         $mform->addHelpButton('auth_type', 'server:auth_type', 'assignsubmission_externalserver');
         $mform->setDefault('auth_type', 'api_key');
+        $mform->addRule('auth_type', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Authentification secret.
         $mform->addElement(
@@ -125,7 +128,7 @@ class editserver_form extends moodleform {
         );
         $mform->setType('auth_secret', PARAM_RAW);
         $mform->addHelpButton('auth_secret', 'server:auth_secret', 'assignsubmission_externalserver');
-        $mform->hideif('auth_secret', 'auth_type', 'neq', 'api_key');
+        $mform->addRule('auth_secret', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // OAuth2 client id.
         $mform->addElement(
@@ -146,16 +149,6 @@ class editserver_form extends moodleform {
         );
         $mform->setType('oauth2_client_secret', PARAM_TEXT);
         $mform->hideif('oauth2_client_secret', 'auth_type', 'eq', 'api_key');
-
-        // OAuth2 auth endpoint.
-        $mform->addElement(
-            'text',
-            'oauth2_auth_endpoint',
-            get_string('server:oauth2_auth_endpoint', 'assignsubmission_externalserver'),
-            $textoptions
-        );
-        $mform->setType('oauth2_auth_endpoint', PARAM_URL);
-        $mform->hideif('oauth2_auth_endpoint', 'auth_type', 'eq', 'api_key');
 
         // OAuth2 token endpoint.
         $mform->addElement(
@@ -200,6 +193,7 @@ class editserver_form extends moodleform {
         );
         $mform->addHelpButton('groupinfo', 'server:groupinfo', 'assignsubmission_externalserver');
         $mform->setDefault('groupinfo', externalserver::NO_GROUPINFO);
+        $mform->addRule('groupinfo', get_string('server:info_missing', 'assignsubmission_externalserver'), 'required', null, 'client');
 
         // Hash algorithm.
         $hashalgorithms = hash_algos();

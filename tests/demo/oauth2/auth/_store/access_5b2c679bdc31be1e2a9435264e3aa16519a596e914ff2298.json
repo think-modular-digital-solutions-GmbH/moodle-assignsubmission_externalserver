@@ -1,0 +1,1 @@
+{"user":{"sub":"service-account:demo-client","name":"demo-client (Service Account)","email":""},"scope":"openid profile email demo.read","client_id":"demo-client","expires":1761054157,"_saved_at":1761050557}

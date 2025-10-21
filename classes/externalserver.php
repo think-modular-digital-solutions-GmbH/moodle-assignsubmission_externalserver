@@ -18,7 +18,7 @@
  * Contains the class representing the external server (not the module instance)
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -41,7 +41,7 @@ require_once($CFG->libdir . '/pdflib.php');
  * This class represents an external server (not an instance of external server the moodle module)
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -686,33 +686,73 @@ class externalserver {
     private function get_oauth2_token(): string {
 
         // Get params.
-        $tokenurl = $this->obj->oauth2_endpoint;
+        $tokenurl = $this->obj->oauth2_token_endpoint;
         $clientid = $this->obj->oauth2_client_id;
-        $secret = $this->obj->auth_secret;
+        $secret = $this->obj->oauth2_client_secret;
+
+        // Check cache.
+        if ($cached = $this->get_cached_token('oauth2')) {
+            return $cached;
+        }
 
         // Build the token request.
         $response = $this->httpclient->post($tokenurl, [
             'headers' => [
-                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
             ],
-            'json' => [
-                'grant_type' => 'client_credentials',
-                'client_id' => $clientid,
+            'form_params' => [
+                'grant_type'    => 'client_credentials',
+                'client_id'     => $clientid,
                 'client_secret' => $secret,
             ],
+            'timeout' => 10,
         ]);
 
         // Get the token from the response.
         $statuscode = $response->getStatusCode();
         $body = json_decode($response->getBody()->getContents(), true);
+
         if ($statuscode != 200 || !isset($body['access_token'])) {
             \core\notification::add(
                 get_string('error:couldnotgetoauth2token', 'assignsubmission_externalserver', $statuscode),
                 \core\output\notification::NOTIFY_ERROR
             );
+            return '';
         }
 
-        return $body['access_token'];
+        // Get token and cache it.
+        $token = $body['access_token'];
+        $ttl   = isset($body['expires_in']) ? (int)$body['expires_in'] : 3600;
+        $this->cache_token('oauth2', $token, $ttl);
+        return $token;
+    }
+
+    /**
+     * Get cached token.
+     *
+     * @param string $key Token key
+     * @return string|null Token value or null if not found/expired
+     */
+    private function get_cached_token(string $key): ?string {
+        $rec = get_config('assignsubmission_externalserver', 'tok_' . $key);
+        if (!$rec) return null;
+        $data = json_decode($rec, true);
+        if (!$data) return null;
+        if (time() >= (int)$data['exp']) return null;
+        return $data['val'];
+    }
+
+    /**
+     * Cache token.
+     *
+     * @param string $key Token key
+     * @param string $token Token value
+     * @param int $ttl Time to live in seconds
+     * @return void
+     */
+    private function cache_token(string $key, string $token, int $ttl): void {
+        $exp = time() + max(60, $ttl - 60); // safety skew
+        set_config('tok_' . $key, json_encode(['val'=>$token, 'exp'=>$exp]), 'assignsubmission_externalserver');
     }
 
     /**

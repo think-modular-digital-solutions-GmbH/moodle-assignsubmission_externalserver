@@ -16,7 +16,7 @@
 # FOR Moodle 2.5.3
 # ---------------------------------------------------------------
 
-include("moodle_extserver_lib.php");
+include("lib.php");
 
 //COURSE ID 0 ist Testrequest
 

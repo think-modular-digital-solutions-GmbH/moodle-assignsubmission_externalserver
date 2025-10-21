@@ -18,7 +18,7 @@
  * External service used by AJAX to save and retrieve the toggle state of the externalserver details.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,7 +36,7 @@ use external_single_structure;
  * External service used by AJAX.
  *
  * @package    assignsubmission_externalserver
- * @author     Stefan Weber
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
  * @copyright  2025 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

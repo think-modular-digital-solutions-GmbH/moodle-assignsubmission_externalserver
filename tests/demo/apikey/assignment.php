@@ -24,7 +24,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-include("moodle_extserver_lib.php");
+include("lib.php");
 
 if (empty($_GET["akey"])) {
     header("HTTP/1.0 200 OK");
