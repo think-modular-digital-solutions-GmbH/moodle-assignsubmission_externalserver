@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thirdpartylibs>
+  <library>
+    <name>firebase/php-jwt</name>
+    <version>6.x</version>
+    <license>BSD-3-Clause</license>
+    <repositoryurl>https://github.com/firebase/php-jwt</repositoryurl>
+    <location>tests/demo/jwt/auth/vendor/firebase/php-jwt</location>
+  </library>
+</thirdpartylibs>

@@ -212,9 +212,11 @@ class assign_submission_externalserver extends assign_submission_plugin {
         );
         $mform->addElement(
             'html',
-            html_writer::tag('legend',
-            get_string('pluginname', 'assignsubmission_externalserver'),
-            ['class' => 'assignsubmission-externalserver-settings-legend'])
+            html_writer::tag(
+                'legend',
+                get_string('pluginname', 'assignsubmission_externalserver'),
+                ['class' => 'assignsubmission-externalserver-settings-legend']
+            )
         );
 
         // Check if there are uploads left.

@@ -216,8 +216,7 @@ class editserver_form extends moodleform {
         $mform->setDefault('groupinfo', externalserver::NO_GROUPINFO);
         $mform->addRule(
             'groupinfo',
-            get_string('server:info_missing',
-            'assignsubmission_externalserver'),
+            get_string('server:info_missing', 'assignsubmission_externalserver'),
             'required',
             null,
             'client'
