@@ -31,7 +31,6 @@ define('ASSIGNSUBMISSION_EXTERNALSERVER_SETTINGS', ['server', 'maxbytes', 'filet
 
 use assignsubmission_externalserver\helper;
 use assignsubmission_externalserver\externalserver;
-use assignsubmission_externalserver\quick_grading_form;
 use core\output\notification;
 
 /**
@@ -520,7 +519,9 @@ class assign_submission_externalserver extends assign_submission_plugin {
         if (has_capability('mod/assign:grade', $context)) {
             if ($user) {
                 // Teacher view.
-                $ext = $this->get_externalserver();
+                if (!$ext = $this->get_externalserver()) {
+                    return $html;
+                }
                 $url = $ext->build_teacherview($this->assignment->get_instance(), $user->username);
                 $html .= html_writer::link(
                     $url,
@@ -762,39 +763,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
         // Header.
         $title = get_string('externalservertitle', 'assignsubmission_externalserver', $extservername);
         $html = html_writer::tag('h2', $title);
-
-        // Quick grading form.
-        $context = $this->assignment->get_context();
-        if (has_capability('mod/assign:grade', $context)) {
-            $url = new moodle_url('/mod/assign/view.php', [
-                'id' => $cmid,
-                'action' => 'view',
-            ]);
-            $mform = new quick_grading_form($this, $this->assignment, $submission, $url);
-
-            // Embed form.
-            ob_start();
-            $mform->display();
-
-            // Handle submission.
-            $data = $mform->get_data();
-            if ($data) {
-                // Grading.
-                if (isset($data->gradebutton)) {
-                    $url = new moodle_url(
-                        '/mod/assign/submission/externalserver/grade.php',
-                        [
-                            'status' => $data->status,
-                            'cmid' => $cmid,
-                        ]
-                    );
-                    redirect($url);
-                }
-            }
-
-            // End embedding.
-            $html .= ob_get_clean();
-        }
 
         // Status table.
         $uploadattempts = $this->has_uploadattempts($submission);
