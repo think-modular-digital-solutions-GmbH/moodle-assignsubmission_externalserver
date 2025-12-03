@@ -173,7 +173,7 @@ class editserver_form extends moodleform {
 
         // OAuth2 client secret.
         $mform->addElement(
-            'text',
+            'passwordunmask',
             'oauth2_client_secret',
             get_string('server:oauth2_client_secret', 'assignsubmission_externalserver'),
             $textoptions
@@ -190,16 +190,6 @@ class editserver_form extends moodleform {
         );
         $mform->setType('oauth2_token_endpoint', PARAM_URL);
         $mform->hideif('oauth2_token_endpoint', 'auth_type', 'eq', 'api_key');
-
-        // JWT audience.
-        $mform->addElement(
-            'text',
-            'jwt_audience',
-            get_string('server:jwt_audience', 'assignsubmission_externalserver'),
-            $textoptions
-        );
-        $mform->setType('jwt_audience', PARAM_TEXT);
-        $mform->hideif('jwt_audience', 'auth_type', 'neq', 'jwt');
 
         // Group information.
         $groupinfo = [

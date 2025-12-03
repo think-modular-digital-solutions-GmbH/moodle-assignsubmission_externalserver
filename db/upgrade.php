@@ -35,7 +35,22 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025102001) {
+    if ($oldversion < 2025102101) {
+        // Remove obsolete fields for oauth2_auth_endpoint and oauth2_endpoint.
+        $table = new xmldb_table('assignsubmission_externalserver_servers');
+        $field = new xmldb_field('oauth2_auth_endpoint');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('oauth2_endpoint');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025102101, 'assignsubmission', 'externalserver');
+    }
+
+    if ($oldversion < 2025120301) {
         // Add fields for OAuth2 client secret, auth endpoint and token endpoint.
         $table = new xmldb_table('assignsubmission_externalserver_servers');
 
@@ -63,23 +78,12 @@ function xmldb_assignsubmission_externalserver_upgrade($oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
-
-        upgrade_plugin_savepoint(true, 2025102001, 'assignsubmission', 'externalserver');
-    }
-
-    if ($oldversion < 2025102101) {
-        // Remove obsolete fields for oauth2_auth_endpoint and oauth2_endpoint.
-        $table = new xmldb_table('assignsubmission_externalserver_servers');
-        $field = new xmldb_field('oauth2_auth_endpoint');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
         $field = new xmldb_field('oauth2_endpoint');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025102101, 'assignsubmission', 'externalserver');
+        upgrade_plugin_savepoint(true, 2025120301, 'assignsubmission', 'externalserver');
     }
 
     return true;

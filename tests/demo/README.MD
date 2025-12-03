@@ -31,7 +31,29 @@ Contained are three standalone demo server packages, to be deployed on the serve
 - /oauth2 uses OAuth2 as authentification
 - /jwt uses OAuth2 with JWT tokens as authentification
 
+The necessary configuration in Moodle is as follows:
+- auth
+  - url:                   [wwwroot]/mod/assign/submission/externalserver/tests/demo/apikey/assignment.php
+  - upload url:            [wwwroot]/mod/assign/submission/externalserver/tests/demo/apikey/upload.php
+  - secret key:            2345678987654
+- oauth2
+  - url:                   [wwwroot]/mod/assign/submission/externalserver/tests/demo/oauth2/assignment.php
+  - upload url:            [wwwroot]/mod/assign/submission/externalserver/tests/demo/oauth2/upload.php
+  - secret key:            demo-hash-key
+  - oauth2 client id:      demo-client
+  - oauth2 client secret:  demo-secret
+  - oauth2 token endpoint: [wwwroot]/mod/assign/submission/externalserver/tests/demo/oauth2/auth/token.php
+- jwt
+  - url:                   [wwwroot]/mod/assign/submission/externalserver/tests/demo/jwt/assignment.php
+  - upload url:            [wwwroot]/mod/assign/submission/externalserver/tests/demo/jwt/upload.php
+  - secret key:            demo-hash-key
+  - oauth2 client id:      demo-client
+  - oauth2 client secret:  demo-secret
+  - oauth2 token endpoint: [wwwroot]/mod/assign/submission/externalserver/tests/demo/jwt/auth/token.php
+
 The Moodle Plugin assignsubmission_externalserver can then use these servers to send Moodle assignment data that can be automatically graded by server-side code.
+
+In order for the demo servers to work, www-data needs write permissions for the /upload directories, and in case of oauth2, for the /auth/_store directory.
 
 ### File structure
 
