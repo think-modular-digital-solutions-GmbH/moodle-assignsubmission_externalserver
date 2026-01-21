@@ -94,6 +94,7 @@ class externalserver {
             'base_uri' => $this->obj->url,
             'timeout' => 10,
             'verify' => !empty($this->obj->sslverification),
+            'http_errors' => false,
         ]);
     }
 
@@ -689,9 +690,7 @@ class externalserver {
         $tokenurl = $this->obj->oauth2_token_endpoint;
         $clientid = $this->obj->oauth2_client_id;
         $secret = $this->obj->oauth2_client_secret;
-
-        // Build the token request.
-        $response = $this->httpclient->post($tokenurl, [
+        $params = [
             'headers' => [
                 'Accept' => 'application/json',
             ],
@@ -701,7 +700,10 @@ class externalserver {
                 'client_secret' => $secret,
             ],
             'timeout' => 10,
-        ]);
+        ];
+
+        // Build the token request.
+        $response = $this->httpclient->post($tokenurl, $params);
 
         // Get the token from the response.
         $statuscode = $response->getStatusCode();
