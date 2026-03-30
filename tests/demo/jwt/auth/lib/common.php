@@ -111,6 +111,17 @@ use Firebase\JWT\CachedKeySet;
  */
 function require_bearer_token(): array {
     $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+    // Alternatively, some servers may not pass Authorization header by default.
+    if (!$hdr) {
+        foreach (getallheaders() as $key => $value) {
+            if (strtolower($key) === 'authorization') {
+                $hdr = $value;
+                break;
+            }
+        }
+    }
+
     if (!preg_match('/Bearer\s+(.+)/i', $hdr, $m)) {
         json_out(['error' => 'invalid_token', 'error_description' => 'Missing bearer token'], 401);
     }
