@@ -54,7 +54,6 @@ $string['filetypes'] = 'Erlaubte Dateitypen';
 $string['filetypes_help'] = 'Akzeptierte Dateitypen können durch Eingabe einer Liste von Dateierweiterungen eingeschränkt werden. Wenn das Feld leer gelassen wird, sind alle Dateitypen erlaubt.';
 $string['getgrades'] = 'Bewertungen und Feedback vom externen Server abrufen';
 $string['gradesupdated'] = 'Bewertungen erfolgreich aktualisiert. {$a} Bewertung(en) aktualisiert.';
-$string['gradeverb'] = 'Bewertung vom externen Server abrufen';
 $string['loadgrades'] = 'Bewertungen laden';
 $string['maxbytes'] = 'Maximale Größe';
 $string['maxbytes_help'] = 'Maximale Aufgabengröße für alle Aufgaben auf der Website (vorbehaltlich Kurslimits und anderer lokaler Einstellungen)';

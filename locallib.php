@@ -498,16 +498,14 @@ class assign_submission_externalserver extends assign_submission_plugin {
             $submission->id
         );
 
-        // Get user and group IDs.
+        // Get user.
         $userid = $submission->userid;
         if ($userid == 0) {
-            $groupid = $submission->groupid;
             if ($user = $this->get_group_submission_user($submission)) {
                 $userid = $user->id;
             }
         } else {
             $user = core_user::get_user($userid);
-            $groupid = 0;
         }
 
         // Upload attempts.
@@ -530,23 +528,6 @@ class assign_submission_externalserver extends assign_submission_plugin {
                     $url,
                     get_string('view'),
                     ['class' => 'btn btn-secondary mr-1 mb-1', 'target' => '_blank']
-                );
-
-                // Link to update grade/feedback.
-                $assignmentid = $submission->assignment;
-                $cm = get_coursemodule_from_instance('assign', $assignmentid, 0, false, MUST_EXIST);
-                $url = new moodle_url(
-                    '/mod/assign/submission/externalserver/grade.php',
-                    [
-                        'cmid' => $cm->id,
-                        'userid' => $userid,
-                        'groupid' => $groupid,
-                    ]
-                );
-                $html .= html_writer::link(
-                    $url,
-                    get_string('gradeverb', 'assignsubmission_externalserver'),
-                    ['class' => 'btn btn-primary mb-1']
                 );
             }
         }

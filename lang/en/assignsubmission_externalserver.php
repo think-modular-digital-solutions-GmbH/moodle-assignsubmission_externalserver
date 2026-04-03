@@ -54,7 +54,6 @@ $string['filetypes'] = 'Allowed file types';
 $string['filetypes_help'] = 'Accepted file types can be restricted by entering a list of file extensions. If the field is left empty, then all file types are allowed.';
 $string['getgrades'] = 'Get grades and feedback from external server';
 $string['gradesupdated'] = 'Grades updated successfully. {$a} grade(s) updated.';
-$string['gradeverb'] = 'Get grade from external server';
 $string['loadgrades'] = 'Load grades';
 $string['maxbytes'] = 'Maximum size';
 $string['maxbytes_help'] = 'Maximum assignment size for all assignments on the site (subject to course limits and other local settings)';
