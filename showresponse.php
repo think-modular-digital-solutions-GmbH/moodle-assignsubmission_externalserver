@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Grade submissions from external server.
+ * Show response from external server.
  *
  * @package    assignsubmission_externalserver
  * @author     Stefan Weber <stefan.weber@think-modular.com>
@@ -34,56 +34,36 @@ use core_user;
 // Params.
 $cmid = required_param('cmid', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
-$confirm = optional_param('confirm', 0, PARAM_BOOL);
 
 // Objects.
 $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $context = context_module::instance($cmid);
 $assignment = new assign($context, $cm, $course);
-$ext = $assignment->get_plugin_by_type('assignsubmission', 'externalserver')->get_externalserver();
+$extserver = $assignment->get_plugin_by_type('assignsubmission', 'externalserver')->get_externalserver();
 
 // Permission check.
 require_login();
 require_capability('mod/assign:grade', context_module::instance($cmid));
 
+// Get user.
+$user = core_user::get_user($userid, '*', MUST_EXIST);
+$fullname = fullname($user);
+
 // Setup page.
-$title = get_string('confirmgradingtitle', 'assignsubmission_externalserver');
+$title = get_string('showresponsetitle', 'assignsubmission_externalserver', $fullname);
 $PAGE->set_cm($cm, $course);
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/mod/assign/submission/externalserver/grade.php'));
+$PAGE->set_url(new moodle_url('/mod/assign/submission/externalserver/showresponse.php'));
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
 echo $OUTPUT->header();
+echo $OUTPUT->heading($title);
+echo html_writer::tag('hr', '');
 
-// Confirmed - fetch grades from server.
-if ($confirm) {
-    $result = $ext->grade_submissions($assignment, [$userid]);
-    echo $OUTPUT->notification($result['message'], $result['status']);
-    echo html_writer::link(
-        new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'grading']),
-        get_string('continue'),
-        ['class' => 'btn btn-primary']
-    );
-} else {
-    // Confirmation urls.
-    $yesurl = new moodle_url('/mod/assign/submission/externalserver/grade.php', [
-        'cmid' => $cmid,
-        'userid' => $userid,
-        'confirm' => 1,
-        'sesskey' => sesskey(),
-    ]);
-    $nourl = new moodle_url('/mod/assign/view.php', ['id' => $cmid, 'action' => 'view']);
-
-    // Get string for whom the action will be performed.
-    $user = core_user::get_user($userid);
-
-    // Show confirmation dialog.
-    echo $OUTPUT->confirm(
-        get_string('confirmgrading', 'assignsubmission_externalserver', ['for' => fullname($user), 'server' => $ext->obj->name]),
-        $yesurl,
-        $nourl
-    );
-}
+// Show teacher view.
+$extviewurl = $extserver->build_teacherview($assignment->get_instance(), $user->username);
+$result = $extserver->http_request([], 'GET', $extviewurl);
+echo "<pre>$result</pre>";
 
 echo $OUTPUT->footer();

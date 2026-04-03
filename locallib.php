@@ -522,7 +522,10 @@ class assign_submission_externalserver extends assign_submission_plugin {
                 if (!$ext = $this->get_externalserver()) {
                     return $html;
                 }
-                $url = $ext->build_teacherview($this->assignment->get_instance(), $user->username);
+                $url = new moodle_url('/mod/assign/submission/externalserver/showresponse.php', [
+                    'cmid' => $this->assignment->get_course_module()->id,
+                    'userid' => $userid,
+                ]);
                 $html .= html_writer::link(
                     $url,
                     get_string('view'),
