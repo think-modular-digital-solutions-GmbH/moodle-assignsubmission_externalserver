@@ -41,7 +41,11 @@ $string['deleteexternalserver'] = 'Externen Server "{$a}" löschen';
 $string['downloadgradesfor'] = 'Bewertungen laden für';
 $string['editserver'] = 'Externen Server "{$a}" bearbeiten';
 $string['enabled'] = 'Aktiviert';
-$string['enabled_help'] = 'Teilnehmer/innen können eine Abgabe an einen vorkonfigurierten externen Server senden, der eine Antwort zurücksendet.';
+$string['enabled_help'] = 'Teilnehmer/innen können eine Abgabe an einen vorkonfigurierten externen Server senden, der daraufhin eine Antwort zurücksendet.
+<p><strong>Beachten Sie bitte folgenden Hinweis zur Funktion:</strong></p>
+<ul><li>Im Register "Einreichungen" in der Spalte "Abgabe an externen Server" finden sich Informationen zur studentischen Abgabe</li>
+<li>Diese Spalte ist leer, solange keine Abgabe seitens der Studierenden erfolgt ist</li>
+<li>Nach einer Abgabe lassen sich hier die Anzahl der Uploadversuche sowie die letzte Antwort des externen Servers für die jeweiligen Studierenden einsehen</li></ul>';
 $string['error:couldnotgetjwttoken'] = 'JWT-Token konnte nicht vom externen Server abgerufen werden. HTTP-Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
 $string['error:couldnotgetoauth2token'] = 'OAuth2-Token konnte nicht vom externen Server abgerufen werden. HTTP-Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';
 $string['error:requestfailed'] = 'Anfrage an externen Server fehlgeschlagen. HTTP-Statuscode: {$a}. Bitte überprüfen Sie die Servereinstellungen und versuchen Sie es erneut.';

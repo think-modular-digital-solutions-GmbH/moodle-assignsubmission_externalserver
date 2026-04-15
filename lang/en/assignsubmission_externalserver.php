@@ -41,7 +41,11 @@ $string['deleteexternalserver'] = 'Delete external server "{$a}"';
 $string['downloadgradesfor'] = 'Load grades for';
 $string['editserver'] = 'Edit external server "{$a}"';
 $string['enabled'] = 'Enabled';
-$string['enabled_help'] = 'Participants can send a submission to a preconfigured external server that sends back a response.';
+$string['enabled_help'] = 'Students can submit their work to a preconfigured external server, which then returns a response.
+<p><strong>Please note the following regarding this feature:</strong></p>
+<ul><li>In the “Submissions” tab, the “Submission to external Server” column, contains information about student submissions</li>
+<li>This column remains empty until a student has submitted their work</li>
+<li>After a submission, you can view the number of upload attempts and the last response from the external server for each student there</li></ul>';
 $string['error:couldnotgetjwttoken'] = 'Could not get JWT token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
 $string['error:couldnotgetoauth2token'] = 'Could not get OAuth2 token from external server. HTTP status code: {$a}. Please check the server settings and try again.';
 $string['error:requestfailed'] = 'Request to external server failed. HTTP status code: {$a}. Please check the server settings and try again.';
