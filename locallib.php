@@ -872,9 +872,9 @@ class assign_submission_externalserver extends assign_submission_plugin {
      *
      * @param stdClass $submission The group submission record.
      *
-     * @return stdClass $user.
+     * @return stdClass|null The user that submitted the group submission, or null if not found.
      */
-    public function get_group_submission_user($submission): ?\stdClass {
+    public function get_group_submission_user($submission): ?stdClass {
 
         // Get params.
         $groupid = $submission->groupid;
@@ -893,5 +893,7 @@ class assign_submission_externalserver extends assign_submission_plugin {
                 return $member;
             }
         }
+
+        return null;
     }
 }
